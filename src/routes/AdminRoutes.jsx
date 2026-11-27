@@ -398,9 +398,9 @@ const AdminRoutes = (
     <Route path="/admin/attendance/shiftCreation" element={<ShiftCreationList />} />
     <Route path="/admin/attendance/shiftCreation/add" element={<ShiftCreation />} />
 
-    {/* <Route path="/admin/attendance/shiftGroup" element={<ShiftGroupList />} />
-    <Route path="/admin/attendance/shiftGroup/add" element={<ShiftGroup />} /> */}
-    <Route path="/admin/attendance/shiftGroup" element={<ShiftGroup />} />
+    <Route path="/admin/attendance/shiftGroup" element={<ShiftGroupList />} />
+    <Route path="/admin/attendance/shiftGroup/add" element={<ShiftGroup />} />
+    {/* <Route path="/admin/attendance/shiftGroup" element={<ShiftGroup />} /> */}
 
     <Route path="/admin/attendance/punchMissing" element={<PunchMissing />} />
     <Route path="/admin/attendance/wfh" element={<WFH />} />
