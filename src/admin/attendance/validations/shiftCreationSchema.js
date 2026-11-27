@@ -16,7 +16,9 @@ const timeSchema = z
 const numericSchema = (max = Infinity) =>
   z.preprocess(
     (value) =>
-      value === "" || value === null || value === undefined ? 0 : value,
+      value === "" || value === null || value === undefined
+        ? 0
+        : value,
     z.coerce
       .number()
       .finite()
@@ -37,13 +39,145 @@ const optionalIdSchema = z
   .nullish();
 
 /* =========================================================
+   WEEK OFF CONFIGURATION
+========================================================= */
+
+const MAX_WEEK_OFF_DAYS = 3;
+
+const WEEK_OFF_DAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+const WEEK_OFF_PATTERNS = [
+  "All",
+  "Alternate",
+];
+
+const WEEK_OFF_DAY_TYPES = [
+  "Full Day",
+  "Half Day",
+];
+
+/* =========================================================
+   INDIVIDUAL WEEK OFF VALIDATION
+========================================================= */
+
+const weekOffRowSchema = z
+  .object({
+    day: z
+      .string()
+      .refine(
+        (value) => WEEK_OFF_DAYS.includes(value),
+        "Select a valid week off day",
+      ),
+
+    pattern: z
+      .string()
+      .refine(
+        (value) => WEEK_OFF_PATTERNS.includes(value),
+        "Select a valid week off pattern",
+      ),
+
+    weeks: z
+      .array(
+        z
+          .number()
+          .int("Week number must be an integer")
+          .min(1, "Week number must be between 1 and 5")
+          .max(5, "Week number must be between 1 and 5"),
+      )
+      .max(5, "Maximum five week numbers are allowed")
+      .default([]),
+
+    dayType: z
+      .string()
+      .refine(
+        (value) => WEEK_OFF_DAY_TYPES.includes(value),
+        "Select week off duration",
+      ),
+  })
+
+  .superRefine((row, ctx) => {
+    /* =====================================================
+       ALTERNATE WEEK VALIDATION
+    ===================================================== */
+
+    if (
+      row.pattern === "Alternate" &&
+      row.weeks.length === 0
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["weeks"],
+        message: `Select at least one week number for ${row.day}`,
+      });
+    }
+
+    /* =====================================================
+       DUPLICATE WEEK NUMBER VALIDATION
+    ===================================================== */
+
+    if (
+      new Set(row.weeks).size !== row.weeks.length
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["weeks"],
+        message: `Duplicate week numbers are not allowed for ${row.day}`,
+      });
+    }
+  });
+
+/* =========================================================
+   WEEK OFF DAYS ARRAY VALIDATION
+========================================================= */
+
+const weekOffDaysSchema = z
+  .array(weekOffRowSchema)
+  .max(
+    MAX_WEEK_OFF_DAYS,
+    "Maximum three week off days are allowed",
+  )
+  .default([])
+
+  .superRefine((rows, ctx) => {
+    const selectedDays = new Set();
+
+    rows.forEach((row, index) => {
+      /* ===================================================
+         DUPLICATE WEEK OFF DAY VALIDATION
+      =================================================== */
+
+      if (!row.day) return;
+
+      if (selectedDays.has(row.day)) {
+        ctx.addIssue({
+          code: "custom",
+          path: [index, "day"],
+          message: `${row.day} is already configured as a week off day`,
+        });
+      }
+
+      selectedDays.add(row.day);
+    });
+  });
+
+/* =========================================================
    COFF ROW VALIDATION
 ========================================================= */
 
 const coffRowSchema = z
   .object({
     enabled: z.boolean().default(false),
+
     from: z.unknown().optional(),
+
     to: z.unknown().optional(),
   })
   .superRefine((row, ctx) => {
@@ -51,6 +185,7 @@ const coffRowSchema = z
     if (!row.enabled) return;
 
     const from = numericSchema().safeParse(row.from);
+
     const to = numericSchema().safeParse(row.to);
 
     if (!from.success) {
@@ -69,7 +204,11 @@ const coffRowSchema = z
       });
     }
 
-    if (from.success && to.success && from.data > to.data) {
+    if (
+      from.success &&
+      to.success &&
+      from.data > to.data
+    ) {
       ctx.addIssue({
         code: "custom",
         path: ["to"],
@@ -124,14 +263,21 @@ export const shiftCreationSchema = z
        SHIFT DETAILS - MANDATORY
     ===================================================== */
 
-    shiftName: z.string().trim().min(1, "Enter shift name"),
+    shiftName: z
+      .string()
+      .trim()
+      .min(1, "Enter shift name"),
 
-    shiftCode: z.string().trim().min(1, "Enter shift code"),
+    shiftCode: z
+      .string()
+      .trim()
+      .min(1, "Enter shift code"),
 
     workMode: z
       .string()
       .refine(
-        (value) => ["Office", "Remote", "Hybrid"].includes(value),
+        (value) =>
+          ["Office", "Remote", "Hybrid"].includes(value),
         "Select work mode",
       ),
 
@@ -149,7 +295,10 @@ export const shiftCreationSchema = z
         "Select shift type",
       ),
 
-    timeZone: z.string().trim().min(1, "Select time zone"),
+    timeZone: z
+      .string()
+      .trim()
+      .min(1, "Select time zone"),
 
     /* =====================================================
        REGULAR SCHEDULE - MANDATORY
@@ -160,8 +309,32 @@ export const shiftCreationSchema = z
     endTime: timeSchema,
 
     workingDays: z
-      .array(z.enum(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]))
+      .array(
+        z.enum([
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat",
+          "Sun",
+        ]),
+      )
       .min(1, "Select at least one working day"),
+
+    /* =====================================================
+       WEEK OFF DAYS - OPTIONAL
+
+       Maximum 3 configurations.
+       Supports All and Alternate patterns.
+       Supports Full Day and Half Day.
+    ===================================================== */
+
+    weekOffDays: weekOffDaysSchema,
+
+    /* =====================================================
+       BREAK DURATION
+    ===================================================== */
 
     breakDuration: z
       .string()
@@ -200,9 +373,15 @@ export const shiftCreationSchema = z
 
     coffSchedule: z
       .object({
-        regularDay: z.array(coffRowSchema).length(4).optional(),
+        regularDay: z
+          .array(coffRowSchema)
+          .length(4)
+          .optional(),
 
-        woPh: z.array(coffRowSchema).length(6).optional(),
+        woPh: z
+          .array(coffRowSchema)
+          .length(6)
+          .optional(),
       })
       .optional(),
 
@@ -231,8 +410,15 @@ export const shiftCreationSchema = z
        Overnight shifts are allowed.
     ===================================================== */
 
-    if (form.startTime && form.endTime && form.startTime === form.endTime) {
-      addIssue(["endTime"], "Start and end time cannot be identical");
+    if (
+      form.startTime &&
+      form.endTime &&
+      form.startTime === form.endTime
+    ) {
+      addIssue(
+        ["endTime"],
+        "Start and end time cannot be identical",
+      );
     }
 
     /* =====================================================
@@ -241,8 +427,13 @@ export const shiftCreationSchema = z
     ===================================================== */
 
     if (form.lunchBreak) {
-      if (!timeSchema.safeParse(form.lunchStart).success) {
-        addIssue(["lunchStart"], "Select lunch start time");
+      if (
+        !timeSchema.safeParse(form.lunchStart).success
+      ) {
+        addIssue(
+          ["lunchStart"],
+          "Select lunch start time",
+        );
       }
     }
 
@@ -257,7 +448,9 @@ export const shiftCreationSchema = z
 
       if (
         custom.lateMark &&
-        !numericSchema(120).safeParse(custom.lateMarkGraceTime).success
+        !numericSchema(120).safeParse(
+          custom.lateMarkGraceTime,
+        ).success
       ) {
         addIssue(
           ["customSchedule", "lateMarkGraceTime"],
@@ -269,7 +462,9 @@ export const shiftCreationSchema = z
 
       if (
         custom.earlyExit &&
-        !numericSchema(120).safeParse(custom.earlyExitGraceTime).success
+        !numericSchema(120).safeParse(
+          custom.earlyExitGraceTime,
+        ).success
       ) {
         addIssue(
           ["customSchedule", "earlyExitGraceTime"],
@@ -284,7 +479,8 @@ export const shiftCreationSchema = z
       if (
         custom.minimumWorkingHours > 0 &&
         custom.maximumWorkingHours > 0 &&
-        custom.minimumWorkingHours > custom.maximumWorkingHours
+        custom.minimumWorkingHours >
+          custom.maximumWorkingHours
       ) {
         addIssue(
           ["customSchedule", "minimumWorkingHours"],
@@ -296,7 +492,10 @@ export const shiftCreationSchema = z
          Both fields may remain empty.
       */
 
-      if (custom.runawayStartTime || custom.runAwayEndTime) {
+      if (
+        custom.runawayStartTime ||
+        custom.runAwayEndTime
+      ) {
         const validStartTime = timeSchema.safeParse(
           custom.runawayStartTime,
         ).success;
@@ -322,7 +521,8 @@ export const shiftCreationSchema = z
         if (
           validStartTime &&
           validEndTime &&
-          custom.runawayStartTime === custom.runAwayEndTime
+          custom.runawayStartTime ===
+            custom.runAwayEndTime
         ) {
           addIssue(
             ["customSchedule", "runAwayEndTime"],
@@ -339,7 +539,11 @@ export const shiftCreationSchema = z
 
     const ot = form.otSchedule;
 
-    if (ot && ot.maximumOT > 0 && ot.minimumOT > ot.maximumOT) {
+    if (
+      ot &&
+      ot.maximumOT > 0 &&
+      ot.minimumOT > ot.maximumOT
+    ) {
       addIssue(
         ["otSchedule", "minimumOT"],
         "Minimum OT cannot exceed maximum OT",

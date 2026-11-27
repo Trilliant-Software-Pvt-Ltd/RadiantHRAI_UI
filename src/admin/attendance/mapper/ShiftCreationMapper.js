@@ -1,4 +1,19 @@
 /* =========================================================
+   COMMON FIELD VALUE EXTRACTOR
+   SUPPORTS PASCAL CASE AND CAMEL CASE
+========================================================= */
+
+const getField = (item, ...keys) => {
+  for (const key of keys) {
+    if (item?.[key] !== undefined && item?.[key] !== null) {
+      return item[key];
+    }
+  }
+
+  return null;
+};
+
+/* =========================================================
    COMMON RESPONSE EXTRACTOR
 ========================================================= */
 
@@ -39,14 +54,28 @@ export const extractShiftCreationById = (response) => {
   if (
     record &&
     typeof record === "object" &&
-    (record.RDHR0000LXXXIID != null ||
-      record.RDHR0000LXXXIID_Encrypted)
+    (
+      getField(
+        record,
+        "RDHR0000LXXXIID",
+        "rdhR0000LXXXIID"
+      ) != null ||
+      getField(
+        record,
+        "RDHR0000LXXXIID_Encrypted",
+        "rdhR0000LXXXIID_Encrypted"
+      )
+    )
   ) {
     return record;
   }
 
   return null;
 };
+
+/* =========================================================
+   FORMAT SHIFT TIME
+========================================================= */
 
 export const formatShiftTime = (value) => {
   if (!value) return "-";
@@ -88,15 +117,19 @@ export const createEntityMap = (response) => {
   const entityMap = new Map();
 
   entities.forEach((item) => {
-    const id =
-      item?.RDHR0000IIID ??
-      item?.rdhR0000IIID;
+    const id = getField(
+      item,
+      "RDHR0000IIID",
+      "rdhR0000IIID"
+    );
 
-    const name =
-      item?.RDHR0000IIName ??
-      item?.rdhR0000IIName ??
-      item?.RDHR0000IIIName ??
-      item?.rdhR0000IIIName;
+    const name = getField(
+      item,
+      "RDHR0000IIName",
+      "rdhR0000IIName",
+      "RDHR0000IIIName",
+      "rdhR0000IIIName"
+    );
 
     if (
       id != null &&
@@ -114,6 +147,216 @@ export const createEntityMap = (response) => {
 };
 
 /* =========================================================
+   WORKING DAY CONFIGURATION
+========================================================= */
+
+const workingDayConfig = [
+  { label: "Mon", field: "Monday" },
+  { label: "Tue", field: "Tuesday" },
+  { label: "Wed", field: "Wednesday" },
+  { label: "Thu", field: "Thursday" },
+  { label: "Fri", field: "Friday" },
+  { label: "Sat", field: "Saturday" },
+  { label: "Sun", field: "Sunday" },
+];
+
+/* =========================================================
+   EXTRACT WORKING DAYS
+========================================================= */
+
+export const extractWorkingDays = (item) => {
+  return workingDayConfig
+    .filter(({ field }) => {
+      const value = getField(
+        item,
+        field,
+        field.toLowerCase()
+      );
+
+      return (
+        value === true ||
+        value === 1 ||
+        String(value).toLowerCase() === "true" ||
+        value === "1"
+      );
+    })
+    .map(({ label }) => label);
+};
+
+/* =========================================================
+   WEEK OFF DAY CONFIGURATION
+========================================================= */
+
+const MAX_WEEK_OFF_DAYS = 3;
+
+const ALL_WEEK_NUMBERS = [1, 2, 3, 4, 5];
+
+const weekDayNames = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+/* =========================================================
+   NORMALIZE WEEK OFF DAY NAME
+========================================================= */
+
+const normalizeWeekOffDay = (value) => {
+  const day = String(value ?? "")
+    .trim()
+    .toLowerCase();
+
+  return (
+    weekDayNames.find(
+      (item) =>
+        item.toLowerCase() === day ||
+        item.slice(0, 3).toLowerCase() === day
+    ) ?? ""
+  );
+};
+
+/* =========================================================
+   NORMALIZE WEEK OFF PATTERN
+========================================================= */
+
+const normalizeWeekOffPattern = (value) => {
+  const pattern = String(value ?? "")
+    .trim()
+    .toLowerCase();
+
+  if (pattern === "all") return "All";
+
+  if (pattern === "alternate") return "Alternate";
+
+  return "";
+};
+
+/* =========================================================
+   NORMALIZE WEEK OFF DAY TYPE
+========================================================= */
+
+const normalizeWeekOffDayType = (value) => {
+  const dayType = String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]/g, "");
+
+  if (dayType === "halfday") return "Half Day";
+
+  if (dayType === "fullday") return "Full Day";
+
+  return "";
+};
+
+/* =========================================================
+   EXTRACT WEEK NUMBERS
+========================================================= */
+
+export const extractWeekNumbers = (value) => {
+  if (value == null || value === "") {
+    return [];
+  }
+
+  const values = Array.isArray(value)
+    ? value
+    : String(value).split(",");
+
+  return [
+    ...new Set(
+      values
+        .map((week) => Number(String(week).trim()))
+        .filter(
+          (week) =>
+            Number.isInteger(week) &&
+            week >= 1 &&
+            week <= 5
+        )
+    ),
+  ].sort((a, b) => a - b);
+};
+
+/* =========================================================
+   EXTRACT WEEK OFF FIELD
+   SUPPORTS DIFFERENT API RESPONSE CASING
+========================================================= */
+
+const getWeekOffField = (
+  item,
+  index,
+  suffix = ""
+) => {
+  return getField(
+    item,
+    `WEEKOFF${index}${suffix}`,
+    `weekofF${index}${suffix}`,
+    `weekoff${index}${suffix}`,
+    `WeekOff${index}${suffix}`,
+    `weekOff${index}${suffix}`
+  );
+};
+
+/* =========================================================
+   EXTRACT WEEK OFF DAYS
+========================================================= */
+
+export const extractWeekOffDays = (item) => {
+  const weekOffDays = [];
+
+  for (
+    let index = 1;
+    index <= MAX_WEEK_OFF_DAYS;
+    index++
+  ) {
+    const day = normalizeWeekOffDay(
+      getWeekOffField(item, index)
+    );
+
+    // Ignore empty or invalid week-off configurations.
+    if (!day) continue;
+
+    const pattern = normalizeWeekOffPattern(
+      getWeekOffField(
+        item,
+        index,
+        "_pattern"
+      )
+    );
+
+    const dayType = normalizeWeekOffDayType(
+      getWeekOffField(
+        item,
+        index,
+        "_DayType"
+      )
+    );
+
+    const weeks =
+      pattern === "All"
+        ? [...ALL_WEEK_NUMBERS]
+        : extractWeekNumbers(
+            getWeekOffField(
+              item,
+              index,
+              "_WeekDay"
+            )
+          );
+
+    weekOffDays.push({
+      day,
+      pattern,
+      weeks,
+      dayType,
+    });
+  }
+
+  return weekOffDays;
+};
+
+/* =========================================================
    MAP SHIFT CREATION FOR LIST
 ========================================================= */
 
@@ -121,77 +364,159 @@ export const mapShiftCreation = (
   item,
   entityMap = new Map()
 ) => {
-  const entityId = item?.RDHR0000IIID ?? null;
+  const entityId = getField(
+    item,
+    "RDHR0000IIID",
+    "rdhR0000IIID"
+  );
 
   const entityName =
-    item?.rdhR0000IIName ??
-    item?.rdhR0000IIIName ??
+    getField(
+      item,
+      "RDHR0000IIName",
+      "rdhR0000IIName",
+      "RDHR0000IIIName",
+      "rdhR0000IIIName"
+    ) ??
     entityMap.get(String(entityId));
+
+  const beginTime =
+    getField(
+      item,
+      "BeginTime",
+      "beginTime"
+    ) ?? "";
+
+  const endTime =
+    getField(
+      item,
+      "EndTime",
+      "endTime"
+    ) ?? "";
 
   return {
     /* =====================================================
        PRIMARY IDENTIFIERS
     ===================================================== */
 
-    id: item?.rdhR0000LXXXIID ?? null,
+    id: getField(
+      item,
+      "RDHR0000LXXXIID",
+      "rdhR0000LXXXIID"
+    ),
 
-    encryptedId:
-      item?.RDHR0000LXXXIID_Encrypted ?? null,
+    encryptedId: getField(
+      item,
+      "RDHR0000LXXXIID_Encrypted",
+      "rdhR0000LXXXIID_Encrypted"
+    ),
 
     /* =====================================================
        ORGANIZATION / ENTITY / COUNTRY
     ===================================================== */
 
-    organizationId: item?.RDHR0000IID ?? null,
+    organizationId: getField(
+      item,
+      "RDHR0000IID",
+      "rdhR0000IID"
+    ),
 
     entityId,
 
-    countryId: item?.RDHR0000XID ?? null,
+    countryId: getField(
+      item,
+      "RDHR0000XID",
+      "rdhR0000XID"
+    ),
 
     /* =====================================================
        TABLE DISPLAY FIELDS
     ===================================================== */
 
-    shiftName: item?.ShiftName ?? "-",
+    shiftName:
+      getField(
+        item,
+        "ShiftName",
+        "shiftName"
+      ) ?? "-",
 
-    shiftCode: item?.ShiftCode ?? "-",
+    shiftCode:
+      getField(
+        item,
+        "ShiftCode",
+        "shiftCode"
+      ) ?? "-",
 
     entity:
       entityName ||
-      (entityId != null
-        ? `Entity ID: ${entityId}`
-        : "-"),
+      (
+        entityId != null
+          ? `Entity ID: ${entityId}`
+          : "-"
+      ),
 
-    startTime: formatShiftTime(
-      item?.BeginTime
-    ),
+    startTime: formatShiftTime(beginTime),
 
-    endTime: formatShiftTime(
-      item?.EndTime
-    ),
+    endTime: formatShiftTime(endTime),
 
     /* =====================================================
        ORIGINAL TIME VALUES
     ===================================================== */
 
-    beginTime: item?.BeginTime ?? "",
+    beginTime,
 
-    originalEndTime: item?.EndTime ?? "",
+    originalEndTime: endTime,
 
     /* =====================================================
        ADDITIONAL DETAILS
     ===================================================== */
 
-    shiftType: item?.shiftType ?? "",
+    shiftType:
+      getField(
+        item,
+        "ShiftType",
+        "shiftType"
+      ) ?? "",
 
-    timeZone: item?.shiftTimeZone ?? "",
+    timeZone:
+      getField(
+        item,
+        "ShiftTimeZone",
+        "shiftTimeZone"
+      ) ?? "",
 
-    workMode: item?.workMode ?? "",
+    workMode:
+      getField(
+        item,
+        "WorkMode",
+        "workMode"
+      ) ?? "",
 
-    duration: item?.duration ?? 0,
+    duration:
+      getField(
+        item,
+        "Duration",
+        "duration"
+      ) ?? 0,
 
     isDeactivated:
-      item?.isDeactivated ?? false,
+      getField(
+        item,
+        "IsDeactivated",
+        "isDeactivated"
+      ) ?? false,
+
+    /* =====================================================
+       WORKING DAYS
+    ===================================================== */
+
+    workingDays: extractWorkingDays(item),
+
+    /* =====================================================
+       WEEK OFF DAYS
+    ===================================================== */
+
+    weekOffDays: extractWeekOffDays(item),
 
     /* =====================================================
        RETAIN ORIGINAL API RECORD
