@@ -25,7 +25,6 @@ axiosClient.interceptors.request.use(
     },
     (error) => Promise.reject(error)
 );
-
 /* =========================================================
    RESPONSE INTERCEPTOR
 ========================================================= */
@@ -45,5 +44,4 @@ axiosClient.interceptors.response.use(
         return Promise.reject(error);
     }
 );
-
 export default axiosClient;
