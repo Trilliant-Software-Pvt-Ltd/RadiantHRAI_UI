@@ -1,0 +1,136 @@
+/* =========================================================
+   ADD CANDIDATE FORM
+========================================================= */
+
+.add-candidate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  padding: 4px 0 20px;
+  color: #101828;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   FORM SECTION
+========================================================= */
+
+.candidate-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.candidate-form-section-title {
+  margin: 0;
+  color: #234a75;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   FORM GRID
+========================================================= */
+
+.candidate-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+  row-gap: 12px;
+  width: 100%;
+}
+
+.hrms-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+/* =========================================================
+   PHONE NUMBER
+========================================================= */
+
+.candidate-phone-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 35px;
+  border: 1px solid #d5e2f0;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.candidate-country-code {
+  width: 67px;
+  min-width: 67px;
+  height: 100%;
+  padding: 0 8px 0 11px;
+  border: 0;
+  border-right: 1px solid #d5dce5;
+  outline: none;
+  /* background-color: #f2f4f7; */
+  color: #1671e8;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.candidate-phone-group .candidate-mobile-input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.candidate-phone-group:focus-within {
+  border-color: #2f80ed;
+  box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.08);
+}
+
+.candidate-phone-group .candidate-mobile-input:focus {
+  border: 0;
+  box-shadow: none;
+}
+
+/* =========================================================
+   JOB DETAILS
+========================================================= */
+
+.candidate-job-section {
+  margin-top: 0;
+}
+.candidate-form-footer{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 600px) {
+
+  .candidate-form-grid {
+    column-gap: 14px;
+  }
+
+  
+}
+
+@media (max-width: 420px) {
+  .candidate-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hrms-form-group.full-width {
+    grid-column: auto;
+  }
+}

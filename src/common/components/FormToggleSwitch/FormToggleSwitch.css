@@ -1,0 +1,53 @@
+
+/* ==========================================================
+   HRMS REUSABLE TOGGLE SWITCH
+========================================================== */
+
+.hrms-toggle-switch {
+  width: 40px;
+  height: 22px;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d1dbea;
+  border-radius: 20px;
+  background: #e5eaf1;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.hrms-toggle-switch-thumb {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #94a3b8;
+  font-size: 10px;
+  transform: translateX(0);
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.hrms-toggle-switch.active {
+  background: #5b8def;
+  border-color: #5b8def;
+}
+
+.hrms-toggle-switch.active .hrms-toggle-switch-thumb {
+  color: #5b8def;
+  transform: translateX(18px);
+}
+
+.hrms-toggle-switch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hrms-toggle-switch:focus-visible {
+  outline: 2px solid #93b4f5;
+  outline-offset: 2px;
+}

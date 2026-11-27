@@ -1,0 +1,1089 @@
+
+/* ==========================================================
+   SHIFT GROUP - HRMS DESIGN SYSTEM
+   Scoped under .shift-group-page
+========================================================== */
+
+/* ==========================================================
+   1. MAIN CONTAINER
+========================================================== */
+
+.shift-group-page {
+  --sg-primary: #2168e8;
+  --sg-primary-dark: #173d80;
+  --sg-border: #dce5f7;
+  --sg-soft: #f5f8ff;
+  --sg-text: #24365b;
+  --sg-muted: #78869c;
+
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  color: var(--sg-text);
+  background: #fff;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.shift-group-page *,
+.shift-group-page *::before,
+.shift-group-page *::after {
+  box-sizing: border-box;
+}
+
+/* ==========================================================
+   2. PAGE HEADING
+========================================================== */
+
+.shift-group-page .sg-page-heading {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+}
+
+.shift-group-page .sg-heading-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.shift-group-page .sg-heading-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sg-primary);
+  font-size: 20px;
+}
+
+.shift-group-page .sg-heading-left h1 {
+  margin: 0;
+  color: #19366f;
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.shift-group-page .sg-heading-left p {
+  margin: 3px 0 0;
+  color: var(--sg-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* ==========================================================
+   3. COMMON CARDS
+========================================================== */
+
+.shift-group-page .sg-card,
+.shift-group-page .hrms-form-section-card {
+  min-width: 0;
+  margin-bottom: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--sg-border);
+  border-radius: 7px;
+  box-shadow: none;
+}
+
+/* ==========================================================
+   4. SECTION HEADER
+========================================================== */
+
+.shift-group-page .sg-section-header,
+.shift-group-page .site-section-header {
+  min-height: 35px;
+  height: auto;
+  padding: 5px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  background: #f8fbff;
+  border-bottom: 1px solid #edf1fa;
+}
+
+.shift-group-page .sg-section-title,
+.shift-group-page .site-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.shift-group-page .sg-section-title h2,
+.shift-group-page .site-section-heading h3 {
+  margin: 0;
+  color: #19366f;
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 650;
+}
+
+.shift-group-page .sg-section-number,
+.shift-group-page .site-section-number {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--sg-primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.shift-group-page .sg-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Shared section toggle */
+
+.shift-group-page .hrms-section-toggle-btn {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #34558b;
+  cursor: pointer;
+}
+
+.shift-group-page .hrms-section-toggle-btn:hover {
+  background: #eaf1ff;
+}
+
+/* ==========================================================
+   5. COMMON FORM FIELDS
+========================================================== */
+
+.shift-group-page .sg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  margin: 0;
+  position: relative;
+}
+
+/* Shared HRMS labels */
+
+.shift-group-page .hrms-form-group label,
+.shift-group-page .sg-field > label {
+  margin: 0;
+  color: #293d62;
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+/* Shared inputs and dropdowns */
+
+.shift-group-page .hrms-form-group input,
+.shift-group-page .hrms-form-group select,
+.shift-group-page .hrms-form-group textarea,
+.shift-group-page .sg-field > input,
+.shift-group-page .sg-field > select,
+.shift-group-page .sg-field > textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 32px;
+  padding: 5px 9px;
+  border: 1px solid #d5e0f1;
+  border-radius: 4px;
+  outline: none;
+  background: #fff;
+  color: #293d62;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Focus */
+
+.shift-group-page .hrms-form-group input:focus,
+.shift-group-page .hrms-form-group select:focus,
+.shift-group-page .hrms-form-group textarea:focus,
+.shift-group-page .sg-field > input:focus,
+.shift-group-page .sg-field > select:focus,
+.shift-group-page .sg-field > textarea:focus {
+  border-color: #4382ed;
+  box-shadow: 0 0 0 2px rgba(33, 102, 232, 0.08);
+}
+
+/* Placeholder */
+
+.shift-group-page .hrms-form-group input::placeholder,
+.shift-group-page .hrms-form-group textarea::placeholder,
+.shift-group-page .sg-field input::placeholder,
+.shift-group-page .sg-field textarea::placeholder {
+  color: #9aa8bf;
+  font-size: 12px;
+}
+
+/* Description */
+
+.shift-group-page .sg-description-field textarea {
+  min-height: 60px;
+  height: 60px;
+  resize: vertical;
+  padding: 7px 9px;
+}
+
+.shift-group-page .sg-description-field small {
+  position: absolute;
+  right: 7px;
+  bottom: 5px;
+  padding-left: 4px;
+  color: #8795ac;
+  background: #fff;
+  font-size: 10px;
+}
+
+/* ==========================================================
+   6. BASIC DETAILS
+========================================================== */
+
+.shift-group-page .sg-basic-card {
+  width: 100%;
+  margin-bottom: 9px;
+}
+
+.shift-group-page .sg-basic-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.85fr 1.7fr 0.9fr;
+  gap: 11px;
+  padding: 10px 11px;
+  align-items: start;
+}
+
+.shift-group-page .sg-description-field {
+  position: relative;
+}
+
+/* ==========================================================
+   7. MIDDLE GRID
+========================================================== */
+
+.shift-group-page .sg-middle-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.8fr) minmax(230px, 0.95fr);
+  gap: 9px;
+  align-items: stretch;
+  margin-bottom: 9px;
+}
+
+.shift-group-page .sg-shifts-card,
+.shift-group-page .sg-preview-card {
+  min-width: 0;
+  height: 100%;
+}
+
+/* ==========================================================
+   8. SHIFT TOOLBAR
+========================================================== */
+
+.shift-group-page .sg-shift-toolbar {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 11px;
+  border-bottom: 1px solid #e5ecf8;
+}
+
+.shift-group-page .sg-shift-tabs {
+  height: 31px;
+  display: flex;
+  align-items: stretch;
+}
+
+.shift-group-page .sg-shift-tabs button {
+  padding: 0 12px;
+  border: 1px solid #dce6f7;
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+  color: #2a5ca5;
+  background: #f4f7ff;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shift-group-page .sg-shift-tabs button.active {
+  color: #1d5fc9;
+  background: #fff;
+  border-color: #b9cdf1;
+}
+
+/* Search */
+
+.shift-group-page .sg-search-box {
+  width: 190px;
+  height: 31px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 9px;
+  border: 1px solid #d7e2f3;
+  border-radius: 4px;
+  color: #7183a1;
+  background: #fff;
+}
+
+.shift-group-page .sg-search-box > svg {
+  flex: 0 0 auto;
+  font-size: 13px;
+}
+
+.shift-group-page .sg-search-box input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: none;
+  outline: none;
+  color: #293d62;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  box-shadow: none;
+}
+
+.shift-group-page .sg-search-box input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+.shift-group-page .sg-search-box input::placeholder {
+  color: #9aa8bf;
+  font-size: 11px;
+}
+
+.shift-group-page .sg-search-box button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  color: #8795ac;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* ==========================================================
+   9. SHIFT TABLE
+========================================================== */
+
+.shift-group-page .sg-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.shift-group-page .sg-shift-table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.shift-group-page .sg-shift-table th {
+  height: 34px;
+  padding: 7px 9px;
+  color: #50617e;
+  background: #f5f8fd;
+  border-bottom: 1px solid #e3eaf6;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.shift-group-page .sg-shift-table td {
+  height: 35px;
+  padding: 6px 9px;
+  color: #425573;
+  border-bottom: 1px solid #edf1f8;
+  font-size: 11px;
+  vertical-align: middle;
+}
+
+.shift-group-page .sg-shift-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.shift-group-page .sg-shift-table tbody tr:hover {
+  background: #fafcff;
+}
+
+.shift-group-page .sg-shift-table input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--sg-primary);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.shift-group-page .sg-check-col {
+  width: 34px;
+}
+
+.shift-group-page .sg-shift-name {
+  color: #263b60 !important;
+  font-weight: 650;
+}
+
+/* Shift type badges */
+
+.shift-group-page .sg-type-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 10px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.shift-group-page .sg-type-pill.blue {
+  color: #2364c4;
+  background: #e2edff;
+}
+
+.shift-group-page .sg-type-pill.green {
+  color: #21855d;
+  background: #dcf5e9;
+}
+
+.shift-group-page .sg-type-pill.orange {
+  color: #b66a1e;
+  background: #fff0dc;
+}
+
+.shift-group-page .sg-type-pill.teal {
+  color: #168c91;
+  background: #dcf6f4;
+}
+
+/* View details */
+
+.shift-group-page .sg-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 0;
+  border: none;
+  color: #2768ce;
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shift-group-page .sg-view-btn:hover {
+  color: #174da7;
+}
+
+.shift-group-page .sg-view-btn svg {
+  transition: transform 0.15s ease;
+}
+
+.shift-group-page .sg-view-btn svg.rotated {
+  transform: rotate(180deg);
+}
+
+/* Detail row */
+
+.shift-group-page .sg-detail-row td {
+  height: auto;
+  padding: 9px 11px;
+  color: #657692;
+  background: #f8faff;
+  font-size: 11px;
+  white-space: normal;
+}
+
+.shift-group-page .sg-empty {
+  padding: 22px !important;
+  text-align: center;
+  color: #8492a9 !important;
+}
+
+/* ==========================================================
+   10. GROUP PREVIEW
+========================================================== */
+
+.shift-group-page .sg-preview-content {
+  padding: 11px;
+}
+
+.shift-group-page .sg-preview-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid #d9e6ff;
+  border-radius: 6px;
+  background: #f3f7ff;
+}
+
+.shift-group-page .sg-preview-avatar {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 34px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--sg-primary);
+  font-size: 17px;
+}
+
+.shift-group-page .sg-preview-banner div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.shift-group-page .sg-preview-banner strong {
+  overflow: hidden;
+  color: #203968;
+  font-size: 12px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shift-group-page .sg-preview-banner span:not(.sg-preview-avatar) {
+  color: #71819c;
+  font-size: 11px;
+}
+
+.shift-group-page .sg-preview-content h3 {
+  margin: 13px 0 9px;
+  color: #263b60;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.shift-group-page .sg-included-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shift-group-page .sg-included-list li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  color: #435572;
+  font-size: 11px;
+}
+
+.shift-group-page .sg-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+}
+
+.shift-group-page .sg-dot.blue {
+  background: #54a3fa;
+}
+
+.shift-group-page .sg-dot.green {
+  background: #62cba7;
+}
+
+.shift-group-page .sg-dot.orange {
+  background: #f5b36b;
+}
+
+.shift-group-page .sg-dot.teal {
+  background: #59c8c4;
+}
+
+.shift-group-page .sg-included-name {
+  overflow: hidden;
+  color: #435572;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shift-group-page .sg-included-list small {
+  color: #8390a6;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.shift-group-page .sg-no-shifts {
+  color: #8795ac !important;
+}
+
+/* ==========================================================
+   11. BOTTOM GRID
+========================================================== */
+
+.shift-group-page .sg-bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 9px;
+  align-items: stretch;
+}
+
+/* ==========================================================
+   12. TABS
+========================================================== */
+
+.shift-group-page .sg-tabs {
+  min-height: 34px;
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  padding: 0 10px;
+  border-bottom: 1px solid #e5ecf8;
+  background: #fff;
+  overflow-x: auto;
+}
+
+.shift-group-page .sg-tabs button {
+  min-width: 100px;
+  height: 33px;
+  padding: 0 11px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #657692;
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.shift-group-page .sg-tabs button:hover {
+  color: #2168e8;
+}
+
+.shift-group-page .sg-tabs button.active {
+  color: #1f5fc8;
+  border-bottom-color: #2672ee;
+  font-weight: 650;
+  background: #f8faff;
+}
+
+/* ==========================================================
+   13. GROUP CONFIGURATION
+========================================================== */
+
+.shift-group-page .sg-config-content {
+  min-height: 115px;
+  padding: 11px;
+}
+
+.shift-group-page .sg-config-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: center;
+}
+
+.shift-group-page .sg-workmode-panel {
+  grid-template-columns: minmax(160px, 0.8fr) minmax(0, 1.7fr);
+  align-items: center;
+  min-height: 90px;
+}
+
+.shift-group-page .sg-config-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #75849e;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.shift-group-page .sg-config-note svg {
+  flex: 0 0 auto;
+  color: #3975d4;
+  font-size: 16px;
+}
+
+/* ==========================================================
+   14. TOGGLES
+========================================================== */
+
+.shift-group-page .sg-inline-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 32px;
+  min-width: 0;
+  color: #344b70;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.shift-group-page .sg-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.shift-group-page .sg-toggle-text span {
+  color: #344b70;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.shift-group-page .sg-toggle-text small {
+  color: #8795ac;
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+/* Shared switch style */
+
+.shift-group-page .site-switch {
+  position: relative;
+  display: inline-flex;
+  width: 30px;
+  height: 17px;
+  flex: 0 0 30px;
+  cursor: pointer;
+}
+
+.shift-group-page .site-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.shift-group-page .site-switch-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: #c8d0df;
+  transition: background 0.2s ease;
+}
+
+.shift-group-page .site-switch-slider::before {
+  content: "";
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.shift-group-page .site-switch input:checked + .site-switch-slider {
+  background: #2166ed;
+}
+
+.shift-group-page .site-switch input:checked + .site-switch-slider::before {
+  transform: translateX(13px);
+}
+
+.shift-group-page .site-switch input:disabled + .site-switch-slider {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.shift-group-page .site-switch input:focus-visible + .site-switch-slider {
+  outline: 2px solid #8eb5f6;
+  outline-offset: 2px;
+}
+
+/* ==========================================================
+   15. ASSIGNMENT
+========================================================== */
+
+.shift-group-page .sg-assign-content {
+  min-height: 115px;
+  padding: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shift-group-page .sg-choice-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shift-group-page .sg-choice-label {
+  color: #344967;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.shift-group-page .sg-radio-row,
+.shift-group-page .sg-apply-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px 14px;
+}
+
+.shift-group-page .sg-radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #536582;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.shift-group-page .sg-radio-option input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--sg-primary);
+  cursor: pointer;
+}
+
+/* ==========================================================
+   16. INFORMATION STRIP
+========================================================== */
+
+.shift-group-page .sg-info-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #dce8ff;
+  border-radius: 5px;
+  color: #46628d;
+  background: #f3f7ff;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.shift-group-page .sg-info-strip svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #2168e8;
+  font-size: 14px;
+}
+
+/* ==========================================================
+   17. FOOTER
+========================================================== */
+
+.shift-group-page .sg-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 10px 0 2px;
+  border-top: 1px solid #e3eaf4;
+}
+
+.shift-group-page .sg-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+/* Shared FormButton */
+
+.shift-group-page .sg-footer button,
+.shift-group-page .sg-page-heading button,
+.shift-group-page .sg-header-actions button {
+  font-family: inherit;
+  font-size: 11px;
+}
+
+/* Disabled state */
+
+.shift-group-page button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================================
+   18. RESPONSIVE - TABLET
+========================================================== */
+
+@media (max-width: 1100px) {
+  .shift-group-page .sg-basic-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shift-group-page .sg-middle-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shift-group-page .sg-bottom-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shift-group-page .sg-preview-content {
+    padding: 11px;
+  }
+
+  .shift-group-page .sg-included-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ==========================================================
+   19. RESPONSIVE - MOBILE
+========================================================== */
+
+@media (max-width: 600px) {
+  .shift-group-page {
+    padding: 7px;
+  }
+
+  .shift-group-page .sg-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .shift-group-page .sg-heading-left h1 {
+    font-size: 15px;
+  }
+
+  .shift-group-page .sg-heading-left p {
+    font-size: 11px;
+  }
+
+  .shift-group-page .sg-basic-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .shift-group-page .sg-middle-grid,
+  .shift-group-page .sg-bottom-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shift-group-page .sg-section-header {
+    padding: 7px 9px;
+    flex-wrap: wrap;
+  }
+
+  .shift-group-page .sg-header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .shift-group-page .sg-shift-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 8px;
+  }
+
+  .shift-group-page .sg-search-box {
+    width: 100%;
+  }
+
+  .shift-group-page .sg-config-grid,
+  .shift-group-page .sg-workmode-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shift-group-page .sg-included-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shift-group-page .sg-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .shift-group-page .sg-footer-actions {
+    justify-content: flex-end;
+  }
+
+  .shift-group-page .sg-tabs {
+    padding: 0 6px;
+  }
+
+  .shift-group-page .sg-tabs button {
+    min-width: auto;
+    padding: 0 9px;
+  }
+}
+
+/* ==========================================================
+   20. SMALL MOBILE
+========================================================== */
+
+@media (max-width: 380px) {
+  .shift-group-page .sg-footer-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .shift-group-page .sg-footer-actions button {
+    width: 100%;
+  }
+
+  .shift-group-page .sg-section-title h2 {
+    font-size: 11px;
+  }
+
+  .shift-group-page .sg-header-actions {
+    justify-content: flex-start;
+  }
+}
+
+
+/* Append to existing shiftGroup.css */
+.shift-group-page .sg-rotation-panel { display:grid; gap:12px; min-width:0; }
+.shift-group-page .sg-rotation-toolbar { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.shift-group-page .sg-rotation-block { border:1px solid #dce3ed; border-radius:8px; padding:12px; display:grid; gap:10px; min-width:0; }
+.shift-group-page .sg-week-scroll { overflow-x:auto; min-width:0; }
+.shift-group-page .sg-week-grid { display:grid; grid-template-columns:repeat(7,minmax(105px,1fr)); gap:8px; min-width:780px; }
+.shift-group-page .sg-month-grid,.shift-group-page .sg-custom-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.shift-group-page .sg-assignment-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.shift-group-page .sg-rotation-remove { border:0; background:transparent; color:#b42318; cursor:pointer; font:inherit; }
+.shift-group-page .sg-config-card,.shift-group-page .sg-assign-card,.shift-group-page .sg-config-content { min-width:0; }
+@media(max-width:900px){ .shift-group-page .sg-bottom-grid { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:600px){ .shift-group-page .sg-month-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .shift-group-page .sg-custom-grid { grid-template-columns:minmax(0,1fr); } }

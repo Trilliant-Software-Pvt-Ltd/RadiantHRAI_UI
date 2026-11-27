@@ -1,10 +1,10 @@
-
 import { useMemo, useState } from "react";
 import { FiInfo, FiClock } from "react-icons/fi";
 
 import FormOffcanvas from "../../../../../common/components/offcanvas/FormOffcanvas";
 import FormMultiSelect from "../../../../../common/components/Form/FormMultiSelect";
 import DynamicCalendar from "../../../../../common/components/calendar/DynamicCalendar";
+import FormTime from "../../../../../common/components/Form/FormTime";
 
 import "./WFHRequest.css";
 
@@ -56,24 +56,25 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
   // Calculate hourly duration
   const hourlyMinutes = useMemo(
     () => getTimeDuration(formData.fromTime, formData.toTime),
-    [formData.fromTime, formData.toTime]
+    [formData.fromTime, formData.toTime],
   );
 
-  const hourlyDuration = `${String(
-    Math.floor(hourlyMinutes / 60)
-  ).padStart(2, "0")}:${String(hourlyMinutes % 60).padStart(2, "0")}hrs`;
+  const hourlyDuration = `${String(Math.floor(hourlyMinutes / 60)).padStart(
+    2,
+    "0",
+  )}:${String(hourlyMinutes % 60).padStart(2, "0")}hrs`;
 
   // Use one day as the default display when dates have not yet been selected.
   const durationDays = totalDays > 0 ? totalDays : 1;
 
   // Calculate requested duration based on selected mode
   const requestedDuration = formData.isHourly
-  ? `${hourlyDuration.replace("hrs", "")} hours`
-  : formData.workMode === "full"
-    ? `${durationDays} ${durationDays === 1 ? "day" : "days"}`
-    : `${(durationDays * 0.5).toFixed(1)} day${
-        durationDays * 0.5 === 1 ? "" : "s"
-      }`;
+    ? `${hourlyDuration.replace("hrs", "")} hours`
+    : formData.workMode === "full"
+      ? `${durationDays} ${durationDays === 1 ? "day" : "days"}`
+      : `${(durationDays * 0.5).toFixed(1)} day${
+          durationDays * 0.5 === 1 ? "" : "s"
+        }`;
 
   // Field validation
   const validateField = (name, value, currentData = formData) => {
@@ -123,11 +124,7 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
 
       ...(name === "fromDate"
         ? {
-            toDate: validateField(
-              "toDate",
-              updatedData.toDate,
-              updatedData
-            ),
+            toDate: validateField("toDate", updatedData.toDate, updatedData),
           }
         : {}),
 
@@ -136,13 +133,9 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
             fromTime: validateField(
               "fromTime",
               updatedData.fromTime,
-              updatedData
+              updatedData,
             ),
-            toTime: validateField(
-              "toTime",
-              updatedData.toTime,
-              updatedData
-            ),
+            toTime: validateField("toTime", updatedData.toTime, updatedData),
           }
         : {}),
     }));
@@ -179,11 +172,7 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
 
       ...(name === "fromDate"
         ? {
-            toDate: validateField(
-              "toDate",
-              updatedData.toDate,
-              updatedData
-            ),
+            toDate: validateField("toDate", updatedData.toDate, updatedData),
           }
         : {}),
     }));
@@ -197,15 +186,9 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
     };
 
     if (formData.isHourly) {
-      nextErrors.fromTime = validateField(
-        "fromTime",
-        formData.fromTime
-      );
+      nextErrors.fromTime = validateField("fromTime", formData.fromTime);
 
-      nextErrors.toTime = validateField(
-        "toTime",
-        formData.toTime
-      );
+      nextErrors.toTime = validateField("toTime", formData.toTime);
     }
 
     Object.keys(nextErrors).forEach((key) => {
@@ -241,9 +224,7 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
       to: formData.toDate,
       duration: requestedDuration,
       workMode: formData.isHourly ? "Hourly" : formData.workMode,
-      hours: formData.isHourly
-        ? (hourlyMinutes / 60).toFixed(2)
-        : null,
+      hours: formData.isHourly ? (hourlyMinutes / 60).toFixed(2) : null,
       fromTime: formData.isHourly ? formData.fromTime : null,
       toTime: formData.isHourly ? formData.toTime : null,
       reason: formData.note.trim() || "—",
@@ -292,23 +273,21 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
       >
         {/* DATE RANGE */}
         <div className="wfh-date-range-card">
-          <div className="wfh-date-field">
+          <div className="wfh-date-field wfh-date-field-left">
             <DynamicCalendar
               label="From"
               name="fromDate"
               value={formData.fromDate}
               onChange={handleDateChange}
               mode="dd-mm-yyyy"
-              placeholder="dd/mm/yyyy"
+              placeholder="Select date"
               error={errors.fromDate}
             />
           </div>
 
           <span className="wfh-date-duration">
             {formData.workMode === "full"
-              ? `${durationDays} ${
-                  durationDays === 1 ? "day" : "days"
-                }`
+              ? `${durationDays} ${durationDays === 1 ? "day" : "days"}`
               : `${(durationDays * 0.5).toFixed(1)} day${
                   durationDays * 0.5 === 1 ? "" : "s"
                 }`}
@@ -321,8 +300,8 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
               value={formData.toDate}
               onChange={handleDateChange}
               mode="dd-mm-yyyy"
-              placeholder="dd/mm/yyyy"
-              min={formData.fromDate || undefined}
+              placeholder="Select date"
+              minDate={formData.fromDate || undefined}
               error={errors.toDate}
             />
           </div>
@@ -365,8 +344,8 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
         {/* REQUESTED DURATION */}
         <div className="wfh-duration-info">
           <FiClock size={16} />
-          You are requesting for{" "}
-          <strong>{requestedDuration}</strong> of work from home
+          You are requesting for <strong>{requestedDuration}</strong> of work
+          from home
         </div>
 
         {/* HOURLY REQUEST CHECKBOX */}
@@ -381,9 +360,7 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
               }}
             />
 
-            <span>
-              This is an hourly Work From Home (WFH) request
-            </span>
+            <span>This is an hourly Work From Home (WFH) request</span>
           </label>
 
           <span
@@ -405,29 +382,28 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
               <label className="wfh-timing-label">Timing</label>
 
               <div className="wfh-timing-row">
-                <input
-                  type="time"
-                  aria-label="From time"
+                <FormTime
+                  label=""
+                  name="fromTime"
                   value={formData.fromTime}
-                  onChange={(event) =>
-                    updateField("fromTime", event.target.value)
-                  }
+                  onChange={handleChange}
+                  required
+                  error={errors.fromTime}
                 />
 
                 <span className="wfh-time-separator">-</span>
 
-                <input
-                  type="time"
-                  aria-label="To time"
+                <FormTime
+                  label=""
+                  name="toTime"
                   value={formData.toTime}
-                  onChange={(event) =>
-                    updateField("toTime", event.target.value)
-                  }
+                  onChange={handleChange}
+                  required
+                  min={formData.fromTime || undefined}
+                  error={errors.toTime}
                 />
 
-                <span className="wfh-time-duration">
-                  {hourlyDuration}
-                </span>
+                <span className="wfh-time-duration">{hourlyDuration}</span>
               </div>
 
               {(errors.fromTime || errors.toTime) && (
@@ -448,9 +424,7 @@ function WFHRequest({ show, onClose, onSubmit, employeeOptions = [] }) {
             rows="3"
             placeholder="Enter reason for work from home"
             value={formData.note}
-            onChange={(event) =>
-              updateField("note", event.target.value)
-            }
+            onChange={(event) => updateField("note", event.target.value)}
           />
         </div>
 

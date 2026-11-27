@@ -44,10 +44,10 @@ const Department = ({ onSave }) => {
   const navigate = useNavigate();
 
   const employeeName =
-    localStorage.getItem("employeeName") || "";
+    sessionStorage.getItem("employeeName") || "";
 
   const sourceID =
-    localStorage.getItem("sourceID") || "";
+    sessionStorage.getItem("sourceID") || "";
 
   // =====================================================
   // EDIT MODE

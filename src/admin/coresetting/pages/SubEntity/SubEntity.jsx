@@ -156,10 +156,10 @@ export default function SubEntity({ onSave }) {
   // Logged-in user details
 // Logged-in user details from localStorage
 const employeeName =
-  localStorage.getItem("employeeName") || "";
+  sessionStorage.getItem("employeeName") || "";
 
 const sourceID =
-  localStorage.getItem("sourceID") || "";
+  sessionStorage.getItem("sourceID") || "";
 
   // Edit mode navigation state
   const navigationState = location.state || {};

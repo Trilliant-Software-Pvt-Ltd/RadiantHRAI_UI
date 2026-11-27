@@ -113,9 +113,9 @@ const mapDesignationToForm = (record) => {
 const createDesignationApi = async (data) => {
   const payload = {
     isDeactivated: false,
-    createdByUser: localStorage.getItem("employeeName") || "",
+    createdByUser: sessionStorage.getItem("employeeName") || "",
     createdDate: new Date().toISOString(),
-    sourceID: localStorage.getItem("sourceID") || "",
+    sourceID: sessionStorage.getItem("sourceID") || "",
     rdhR0000XIIName: data.rdhR0000XIIName.trim(),
     recruitmentApplicable: Boolean(data.recruitmentApplicable),
     ...Object.fromEntries(
@@ -142,9 +142,9 @@ const updateDesignationApi = async (encryptedId, data) => {
 
   const dto = {
     isDeactivated: false,
-    createdByUser: localStorage.getItem("employeeName") || "",
+    createdByUser: sessionStorage.getItem("employeeName") || "",
     createdDate: new Date().toISOString(),
-    sourceID: localStorage.getItem("sourceID") || "",
+    sourceID: sessionStorage.getItem("sourceID") || "",
     rdhR0000XIIName: data.rdhR0000XIIName.trim(),
     recruitmentApplicable: Boolean(data.recruitmentApplicable),
     ...Object.fromEntries(

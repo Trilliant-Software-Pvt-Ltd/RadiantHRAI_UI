@@ -2,20 +2,17 @@ import { Route } from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoute";
 import UserLayout from "../layout/user/UserLayout";
+
 import WelcomeBoard from "../user/onboarding/pages/WelcomeBoard/WelcomeBoard";
+
 import AttendanceDashboard from "../user/me/pages/Attendance/AttendanceDashboard";
 import LeaveDashboard from "../user/me/pages/Leave/LeaveDashboard";
+import Dashboard from "../user/dashboard/pages/Dashboard/Dashboard";
+import ESSOnboardingDashboard from "../user/ESSOnboarding/pages/Dashboard/ESSOnboardingDashboard";
 
 // =====================================================
 // USER PAGES
 // =====================================================
-
-const Dashboard = () => (
-  <div>
-    <h1>Dashboard</h1>
-    <p>Dashboard page</p>
-  </div>
-);
 
 const Preboarding = () => (
   <div>
@@ -23,7 +20,6 @@ const Preboarding = () => (
     <p>Preboarding page</p>
   </div>
 );
-
 
 const BlockSuspend = () => (
   <div>
@@ -53,7 +49,6 @@ const ExecutiveOverview = () => (
   </div>
 );
 
-
 const Payroll = () => (
   <div>
     <h1>Payroll</h1>
@@ -73,36 +68,52 @@ const UserRoutes = (
       </ProtectedRoute>
     }
   >
+    {/* GLOBAL DASHBOARD */}
     <Route path="/dashboard" element={<Dashboard />} />
 
+    {/* PREBOARDING */}
     <Route path="/preboarding" element={<Preboarding />} />
 
-    <Route path="/onboarding" element={<WelcomeBoard />} />
+    {/* ONBOARDING / OPERATION */}
+    {/* <Route
+            path="/operation/onboarding"
+            element={<OnboardingDashboard />}
+        /> */}
 
     <Route
-      path="/onboarding/block-suspend"
+      path="/operation/onboarding/welcome-board"
+      element={<WelcomeBoard />}
+    />
+
+    <Route
+      path="/operation/onboarding/block-suspend"
       element={<BlockSuspend />}
     />
 
     <Route
-      path="/onboarding/reassign-leads"
+      path="/operation/onboarding/reassign-leads"
       element={<ReassignLeads />}
     />
 
     <Route
-      path="/onboarding/inactive-employees"
+      path="/operation/onboarding/inactive-employees"
       element={<InactiveEmployees />}
     />
 
+    {/* ME */}
     <Route path="/me" element={<AttendanceDashboard />} />
+
     <Route path="/me/leave" element={<LeaveDashboard />} />
 
-    <Route
-      path="/executive-overview"
-      element={<ExecutiveOverview />}
-    />
+    {/* EXECUTIVE OVERVIEW */}
+    <Route path="/executive-overview" element={<ExecutiveOverview />} />
 
+    {/* PAYROLL */}
     <Route path="/payroll" element={<Payroll />} />
+
+    {/* ESS ONBOARDING */}
+
+    <Route path="/ess-onboarding" element={<ESSOnboardingDashboard />} />
   </Route>
 );
 

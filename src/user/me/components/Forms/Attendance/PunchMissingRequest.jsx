@@ -4,6 +4,7 @@ import { FiClock } from "react-icons/fi";
 
 import FormOffcanvas from "../../../../../common/components/offcanvas/FormOffcanvas";
 import DynamicCalendar from "../../../../../common/components/calendar/DynamicCalendar";
+import FormTime from "../../../../../common/components/Form/FormTime";
 
 import "./PunchMissingRequest.css";
 
@@ -19,6 +20,9 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
   const [formData, setFormData] = useState({ ...INITIAL_FORM });
   const [errors, setErrors] = useState({});
 
+  // ========================================
+  // VALIDATE FIELD
+  // ========================================
   const validateField = (name, value, currentData = formData) => {
     let error = "";
 
@@ -52,6 +56,9 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
     return error;
   };
 
+  // ========================================
+  // UPDATE FIELD
+  // ========================================
   const updateField = (name, value) => {
     const updatedData = {
       ...formData,
@@ -76,6 +83,20 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
     }));
   };
 
+  // ========================================
+  // HANDLE NORMAL INPUT CHANGE
+  // ========================================
+  const handleChange = (event) => {
+    if (!event?.target) return;
+
+    const { name, value } = event.target;
+
+    updateField(name, value);
+  };
+
+  // ========================================
+  // HANDLE DATE CHANGE
+  // ========================================
   const handleDateChange = (event) => {
     if (!event?.target) return;
 
@@ -84,6 +105,9 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
     updateField(name, value);
   };
 
+  // ========================================
+  // VALIDATE FORM
+  // ========================================
   const validateForm = () => {
     const nextErrors = {};
 
@@ -96,7 +120,9 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
     });
 
     Object.keys(nextErrors).forEach((key) => {
-      if (!nextErrors[key]) delete nextErrors[key];
+      if (!nextErrors[key]) {
+        delete nextErrors[key];
+      }
     });
 
     setErrors(nextErrors);
@@ -104,6 +130,9 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
     return Object.keys(nextErrors).length === 0;
   };
 
+  // ========================================
+  // RESET FORM
+  // ========================================
   const resetForm = () => {
     setFormData({ ...INITIAL_FORM });
     setErrors({});
@@ -114,6 +143,9 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
     onClose?.();
   };
 
+  // ========================================
+  // SUBMIT FORM
+  // ========================================
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -134,6 +166,9 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
     resetForm();
   };
 
+  // ========================================
+  // OFFCANVAS FOOTER
+  // ========================================
   const footer = (
     <div className="punch-missing-footer-actions">
       <button
@@ -169,9 +204,9 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
         noValidate
       >
         {/* IN / OUT */}
-        <div className="punch-missing-form-group">
-          <label>
-            In / Out <span>*</span>
+        <div className="hrms-form-group">
+          <label className="hrms-form-label">
+            In / Out <span className="hrms-required">*</span>
           </label>
 
           <div className="punch-missing-type-switch">
@@ -190,14 +225,14 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
           </div>
 
           {errors.punchType && (
-            <span className="punch-missing-error">
+            <span className="hrms-field-error">
               {errors.punchType}
             </span>
           )}
         </div>
 
         {/* ATTENDANCE DATE */}
-        <div className="punch-missing-form-group">
+        <div className="hrms-form-group">
           <DynamicCalendar
             label="Attendance Date"
             name="attendanceDate"
@@ -205,12 +240,13 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
             onChange={handleDateChange}
             mode="dd-mm-yyyy"
             placeholder="dd/mm/yyyy"
+            required
             error={errors.attendanceDate}
           />
         </div>
 
         {/* LOG DATE */}
-        <div className="punch-missing-form-group">
+        <div className="hrms-form-group">
           <DynamicCalendar
             label="Log Date"
             name="logDate"
@@ -218,45 +254,38 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
             onChange={handleDateChange}
             mode="dd-mm-yyyy"
             placeholder="dd/mm/yyyy"
-            min={formData.attendanceDate || undefined}
+            minDate={formData.attendanceDate || undefined}
+            required
             error={errors.logDate}
           />
         </div>
 
         {/* TIME */}
-        <div className="punch-missing-form-group">
-          <label htmlFor="punchMissingTime">
-            Time <span>*</span>
-          </label>
-
-          <div className="punch-missing-time-control">
-            <input
-              id="punchMissingTime"
-              type="time"
-              value={formData.time}
-              onChange={(event) =>
-                updateField("time", event.target.value)
-              }
-            />
-            <FiClock size={16} />
-          </div>
-
-          {errors.time && (
-            <span className="punch-missing-error">
-              {errors.time}
-            </span>
-          )}
+        <div className="hrms-form-group">
+          <FormTime
+            label="Time"
+            name="time"
+            value={formData.time}
+            onChange={handleChange}
+            required
+            error={errors.time}
+          />
         </div>
 
         {/* REASON */}
-        <div className="punch-missing-form-group">
-          <label htmlFor="punchMissingReason">
-            Reason <span>*</span>
+        <div className="hrms-form-group">
+          <label
+            htmlFor="punchMissingReason"
+            className="hrms-form-label"
+          >
+            Reason <span className="hrms-required">*</span>
           </label>
 
           <textarea
             id="punchMissingReason"
-            rows="3"
+            name="reason"
+            className="hrms-form-control"
+            rows={3}
             placeholder="Enter reason for missing punch"
             value={formData.reason}
             onChange={(event) =>
@@ -265,7 +294,7 @@ function PunchMissingRequest({ show, onClose, onSubmit }) {
           />
 
           {errors.reason && (
-            <span className="punch-missing-error">
+            <span className="hrms-field-error">
               {errors.reason}
             </span>
           )}

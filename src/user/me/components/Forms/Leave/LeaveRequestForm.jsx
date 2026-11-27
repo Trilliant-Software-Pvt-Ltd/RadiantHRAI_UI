@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { FiClock } from "react-icons/fi";
 
@@ -7,7 +6,8 @@ import FormInput from "../../../../../common/components/Form/FormInput";
 import FormSelect from "../../../../../common/components/Form/FormSelect";
 import FormMultiSelect from "../../../../../common/components/Form/FormMultiSelect";
 import DynamicCalendar from "../../../../../common/components/calendar/DynamicCalendar";
-
+import FormTime from "../../../../../common/components/Form/FormTime";
+import "./LeaveRequestForm.css";
 
 const INITIAL_FORM = {
   fromDate: "",
@@ -26,12 +26,7 @@ const optionsFrom = (values) =>
     label: value,
   }));
 
-function LeaveRequestForm({
-  show,
-  onClose,
-  onSubmit,
-  leaveTypes = [],
-}) {
+function LeaveRequestForm({ show, onClose, onSubmit, leaveTypes = [] }) {
   const [formData, setFormData] = useState({ ...INITIAL_FORM });
   const [errors, setErrors] = useState({});
 
@@ -66,11 +61,7 @@ function LeaveRequestForm({
   }));
 
   // NOTIFY OPTIONS
-  const notifyOptions = optionsFrom([
-    "Reporting Manager",
-    "HR",
-    "Admin",
-  ]);
+  const notifyOptions = optionsFrom(["Reporting Manager", "HR", "Admin"]);
 
   // VALIDATION
   const validateField = (name, value, currentData = formData) => {
@@ -83,10 +74,7 @@ function LeaveRequestForm({
     if (name === "toDate") {
       if (!value) {
         error = "Please select the to date";
-      } else if (
-        currentData.fromDate &&
-        value < currentData.fromDate
-      ) {
+      } else if (currentData.fromDate && value < currentData.fromDate) {
         error = "To date cannot be before from date";
       }
     }
@@ -95,10 +83,7 @@ function LeaveRequestForm({
       error = "Please select leave type";
     }
 
-    if (
-      name === "customHours" &&
-      currentData.leaveMode === "custom"
-    ) {
+    if (name === "customHours" && currentData.leaveMode === "custom") {
       const hours = Number(value);
 
       if (!value || Number.isNaN(hours) || hours <= 0) {
@@ -126,11 +111,7 @@ function LeaveRequestForm({
 
       ...(name === "fromDate"
         ? {
-            toDate: validateField(
-              "toDate",
-              updatedData.toDate,
-              updatedData
-            ),
+            toDate: validateField("toDate", updatedData.toDate, updatedData),
           }
         : {}),
     }));
@@ -142,10 +123,7 @@ function LeaveRequestForm({
 
     const { name, value, type, checked } = event.target;
 
-    updateField(
-      name,
-      type === "checkbox" ? checked : value
-    );
+    updateField(name, type === "checkbox" ? checked : value);
   };
 
   // DATE CHANGE
@@ -172,11 +150,7 @@ function LeaveRequestForm({
 
       ...(name === "fromDate"
         ? {
-            toDate: validateField(
-              "toDate",
-              updatedData.toDate,
-              updatedData
-            ),
+            toDate: validateField("toDate", updatedData.toDate, updatedData),
           }
         : {}),
     }));
@@ -195,10 +169,7 @@ function LeaveRequestForm({
     });
 
     if (formData.leaveMode === "custom") {
-      const error = validateField(
-        "customHours",
-        formData.customHours
-      );
+      const error = validateField("customHours", formData.customHours);
 
       if (error) {
         nextErrors.customHours = error;
@@ -280,14 +251,14 @@ function LeaveRequestForm({
       >
         {/* DATE RANGE */}
         <div className="leave-date-range-card">
-          <div className="leave-date-field">
+          <div className="leave-date-field leave-date-field-left">
             <DynamicCalendar
               label="From"
               name="fromDate"
               value={formData.fromDate}
               onChange={handleDateChange}
               mode="dd-mm-yyyy"
-              placeholder="dd/mm/yyyy"
+              placeholder="Select date"
               error={errors.fromDate}
             />
           </div>
@@ -303,8 +274,8 @@ function LeaveRequestForm({
               value={formData.toDate}
               onChange={handleDateChange}
               mode="dd-mm-yyyy"
-              placeholder="dd/mm/yyyy"
-              min={formData.fromDate || undefined}
+              placeholder="Select date"
+              minDate={formData.fromDate || undefined}
               error={errors.toDate}
             />
           </div>
@@ -313,7 +284,7 @@ function LeaveRequestForm({
         {/* LEAVE TYPE */}
         <div className="leave-form-group">
           <FormSelect
-            label="Select type of leave you want to apply"
+            label="Leave Type"
             name="leaveType"
             value={formData.leaveType}
             onChange={handleChange}
@@ -328,9 +299,7 @@ function LeaveRequestForm({
         <div className="leave-mode-switch">
           <button
             type="button"
-            className={
-              formData.leaveMode === "full" ? "active" : ""
-            }
+            className={formData.leaveMode === "full" ? "active" : ""}
             onClick={() => {
               updateField("leaveMode", "full");
 
@@ -345,9 +314,7 @@ function LeaveRequestForm({
 
           <button
             type="button"
-            className={
-              formData.leaveMode === "custom" ? "active" : ""
-            }
+            className={formData.leaveMode === "custom" ? "active" : ""}
             onClick={() => {
               updateField("leaveMode", "custom");
             }}
@@ -359,55 +326,61 @@ function LeaveRequestForm({
         {/* CUSTOM HOURS */}
         {formData.leaveMode === "custom" && (
           <>
-            <div className="leave-custom-hours">
-              <div className="leave-custom-hours-input">
-                <FormInput
-                  label="Hours"
-                  name="customHours"
-                  type="number"
-                  value={formData.customHours}
-                  onChange={handleChange}
-                  placeholder="Enter hours"
-                  error={errors.customHours}
-                />
+            <div>
+              <label className="hrms-form-label">Hours</label>
+              <div className="leave-custom-hours">
+                <div className="leave-custom-hours-input">
+                  <FormInput
+                    label=""
+                    name="customHours"
+                    type="number"
+                    value={formData.customHours}
+                    onChange={handleChange}
+                    placeholder="Enter hours"
+                    error={errors.customHours}
+                  />
+                </div>
+
+                <span className="leave-custom-hours-separator">hrs from</span>
+
+                <div className="leave-custom-hours-time">
+                  <FormTime
+                    label=""
+                    name="fromTime"
+                    value={formData.fromTime}
+                    onChange={(event) =>
+                      updateField("fromTime", event.target.value)
+                    }
+                    required
+                    error={errors.fromTime}
+                  />
+                </div>
               </div>
-
-              <span>hrs from</span>
-
-              <input
-                type="time"
-                value={formData.fromTime}
-                onChange={(event) =>
-                  updateField("fromTime", event.target.value)
-                }
-              />
             </div>
 
             <div className="leave-duration-info">
               <FiClock size={16} />
-              You are requesting for{" "}
-              <strong>{requestedDuration}</strong> of leave
+              You are requesting for <strong>{requestedDuration}</strong> of
+              leave
             </div>
           </>
         )}
 
         {/* NOTE */}
-        <div className="leave-form-group">
-          <label htmlFor="leaveNote">Note</label>
+        <div className="hrms-form-group">
+          <label htmlFor="leaveNote" className="hrms-form-label">Note</label>
 
           <textarea
             id="leaveNote"
             rows="3"
             placeholder="Enter reason for leave"
             value={formData.note}
-            onChange={(event) =>
-              updateField("note", event.target.value)
-            }
+            onChange={(event) => updateField("note", event.target.value)}
           />
         </div>
 
         {/* NOTIFY MULTISELECT */}
-        <div className="leave-form-group">
+        <div className="hrms-form-group">
           <FormMultiSelect
             label="Notify"
             name="notify"

@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
-import { FiBriefcase } from "react-icons/fi";
-
+import { FiBriefcase, FiArrowLeft } from "react-icons/fi";
 import FormInput from "../../../../../common/components/Form/FormInput";
 import FormSelect from "../../../../../common/components/Form/FormSelect";
 import FormCheckbox from "../../../../../common/components/Form/FormCheckbox";
@@ -116,10 +115,7 @@ function AssetsDetails({ employee, onBackToList, onSave }) {
       ...formData,
       asset: value || "",
       assetTag: value
-        ? `AST-${String(value)
-            .toUpperCase()
-            .trim()
-            .replace(/\s+/g, "-")}-001`
+        ? `AST-${String(value).toUpperCase().trim().replace(/\s+/g, "-")}-001`
         : "",
     };
 
@@ -197,25 +193,31 @@ function AssetsDetails({ employee, onBackToList, onSave }) {
               </div>
 
               <div className="hrms-form-section-heading">
-                <h3 className="hrms-form-section-title">
-                  Assets Details
-                </h3>
+                <h3 className="hrms-form-section-title">Assets Details</h3>
 
                 <div className="employee-information">
                   <span>
-                    {employeeName} - {employeeId} (
-                    {employeeDesignation})
+                    {employeeName} - {employeeId} ({employeeDesignation})
                   </span>
                 </div>
               </div>
             </div>
 
-            <FormToggleBtn
-              isOpen={isAssetsDetailsOpen}
-              onClick={() =>
-                setIsAssetsDetailsOpen((prev) => !prev)
-              }
-            />
+            <div className="hrms-form-header-actions">
+              <FormButton
+                type="button"
+                variant="secondary"
+                onClick={onBackToList}
+              >
+                <FiArrowLeft />
+                Back
+              </FormButton>
+
+              <FormToggleBtn
+                isOpen={isAssetsDetailsOpen}
+                onClick={() => setIsAssetsDetailsOpen((prev) => !prev)}
+              />
+            </div>
           </div>
 
           {/* COLLAPSIBLE CONTENT */}
@@ -298,9 +300,7 @@ function AssetsDetails({ employee, onBackToList, onSave }) {
                     disabled={!formData.requiredAlert}
                     required={formData.requiredAlert}
                     error={
-                      formData.requiredAlert
-                        ? errors.alertDate
-                        : undefined
+                      formData.requiredAlert ? errors.alertDate : undefined
                     }
                   />
                 </div>
@@ -311,14 +311,6 @@ function AssetsDetails({ employee, onBackToList, onSave }) {
 
         {/* FOOTER BUTTONS */}
         <div className="hrms-form-footer">
-          <FormButton
-            type="button"
-            variant="secondary"
-            onClick={onBackToList}
-          >
-            List
-          </FormButton>
-
           <FormButton type="submit" variant="primary">
             Save
           </FormButton>

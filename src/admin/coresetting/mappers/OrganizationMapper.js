@@ -42,10 +42,10 @@ const toDateInput = (value) => {
 
 export const mapOrganizationToApi = (formData, existing = {}) => {
   const employeeName =
-    localStorage.getItem("employeeName") || "";
+    sessionStorage.getItem("employeeName") || "";
 
   const sourceID =
-    localStorage.getItem("sourceID") || "";
+    sessionStorage.getItem("sourceID") || "";
 
   const establishedDate = formData.establishedDate
     ? new Date(formData.establishedDate)

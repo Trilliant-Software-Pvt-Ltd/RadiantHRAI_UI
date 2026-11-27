@@ -8,7 +8,7 @@ function FormCheckbox({
     disabled = false,
 }) {
     return (
-        <label className="hrms-checkbox-wrapper">
+        <label className="hrms-checkbox-wrapper hrms-checkbox-wrapper-sc">
             <input
                 type="checkbox"
                 name={name}

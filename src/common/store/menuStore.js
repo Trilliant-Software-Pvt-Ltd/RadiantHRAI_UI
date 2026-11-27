@@ -1,39 +1,43 @@
-
 import { create } from "zustand";
 
-import { getMenuByModuleId } from "../../common/services/menuApi";
+import { getSubMenu } from "../../common/services/menuApi";
 
 // =====================================================
 // MENU STORE
 // =====================================================
 
 const useMenuStore = create((set, get) => ({
-    // Menu response stored by RoleID + ModuleID
     moduleMenus: {},
-
-    // Loading state stored separately from menu data
     loadingModules: {},
-
-    // API errors stored by RoleID + ModuleID
     errors: {},
 
     // =================================================
     // FETCH MENU FOR A MODULE
     // =================================================
 
-    fetchModuleMenu: async (moduleId, roleId, forceRefresh = false) => {
-        if (!moduleId || !roleId) {
+    fetchModuleMenu: async (
+        moduleId,
+        employeeId,
+        screenType = "Admin",
+        forceRefresh = false
+    ) => {
+        if (!moduleId || !employeeId) {
             return [];
         }
 
-        const cacheKey = `${roleId}_${moduleId}`;
+        // Cache based on EmployeeID + ModuleID + ScreenType
+        const cacheKey = `${employeeId}_${moduleId}_${screenType}`;
 
-        // Return existing store data if already available
-        if (!forceRefresh && get().moduleMenus[cacheKey]) {
+        if (
+            !forceRefresh &&
+            Object.prototype.hasOwnProperty.call(
+                get().moduleMenus,
+                cacheKey
+            )
+        ) {
             return get().moduleMenus[cacheKey];
         }
 
-        // Avoid duplicate fetches while the same module is loading
         if (get().loadingModules[cacheKey]) {
             return [];
         }
@@ -50,10 +54,15 @@ const useMenuStore = create((set, get) => ({
         }));
 
         try {
-           
-            const response = await getMenuByModuleId(moduleId, roleId);
-         
-            const menuData = Array.isArray(response) ? response : [];
+            const response = await getSubMenu(
+                employeeId,
+                screenType,
+                moduleId
+            );
+
+            const menuData = Array.isArray(response)
+                ? response
+                : [];
 
             set((state) => ({
                 moduleMenus: {
@@ -63,8 +72,9 @@ const useMenuStore = create((set, get) => ({
             }));
 
             return menuData;
+
         } catch (error) {
-            console.error("Failed to fetch module menu:", error);
+            console.error("Failed to fetch submenu:", error);
 
             set((state) => ({
                 errors: {
@@ -77,6 +87,7 @@ const useMenuStore = create((set, get) => ({
             }));
 
             return [];
+
         } finally {
             set((state) => ({
                 loadingModules: {

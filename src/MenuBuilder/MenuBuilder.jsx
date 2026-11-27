@@ -53,7 +53,7 @@ const FORM_TYPES = [
 
 const SCREEN_TYPES = [
   { value: "Admin", label: "Admin" },
-  { value: "User", label: "User" },
+  { value: "Operation", label: "Operation" },
 ];
 
 const EMPTY_FORM = {
@@ -157,7 +157,7 @@ const normalizeId = (value) => String(value ?? "").trim();
 
 const getLoggedInModules = () => {
   try {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = sessionStorage.getItem("user");
 
     if (!storedUser) return [];
 
@@ -320,7 +320,7 @@ const ScreenConfig = () => {
     setErrorMessage("");
 
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
 
       if (!token) {
         setErrorMessage(
@@ -828,7 +828,7 @@ const ScreenConfig = () => {
     setSubmitting(true);
 
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
 
       if (!token) {
         setErrorMessage(

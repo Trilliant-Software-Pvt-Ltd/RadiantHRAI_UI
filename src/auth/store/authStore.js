@@ -1,28 +1,53 @@
 import { create } from "zustand";
 
-const clearAuthStorage = () => {
-  const keys = [
-    "auth",
-    "user",
-    "token",
-    "refreshToken",
-    "accessId",
-    "workspace",
-    "employeeId",
-    "employeeName",
-    "roleId",
-    "sourceID",
-    "menus",
-  ];
+/* =========================================================
+   AUTH STORAGE KEYS
+========================================================= */
 
-  keys.forEach((key) => {
+const AUTH_STORAGE_KEYS = [
+  "auth",
+  "user",
+  "token",
+  "refreshToken",
+  "accessId",
+  "workspace",
+  "employeeId",
+  "employeeName",
+  "roleId",
+  "selectedRoleId",
+  "sourceID",
+  "menus",
+  "adminMenus",
+];
+
+/* =========================================================
+   CLEAR LEGACY LOCAL STORAGE
+========================================================= */
+
+const clearLegacyAuthStorage = () => {
+  AUTH_STORAGE_KEYS.forEach((key) => {
     localStorage.removeItem(key);
   });
 };
 
+/* =========================================================
+   CLEAR AUTH STORAGE
+========================================================= */
+
+const clearAuthStorage = () => {
+  AUTH_STORAGE_KEYS.forEach((key) => {
+    sessionStorage.removeItem(key);
+    localStorage.removeItem(key);
+  });
+};
+
+/* =========================================================
+   GET STORED USER MENUS
+========================================================= */
+
 const getStoredMenus = (user) => {
   try {
-    const storedMenus = localStorage.getItem("menus");
+    const storedMenus = sessionStorage.getItem("menus");
 
     if (storedMenus) {
       return JSON.parse(storedMenus);
@@ -34,43 +59,109 @@ const getStoredMenus = (user) => {
   }
 };
 
+/* =========================================================
+   GET STORED ADMIN MENUS
+========================================================= */
+
+const getStoredAdminMenus = () => {
+  try {
+    const storedMenus = sessionStorage.getItem("adminMenus");
+
+    return storedMenus ? JSON.parse(storedMenus) : [];
+  } catch {
+    return [];
+  }
+};
+
+/* =========================================================
+   AUTH STORE
+========================================================= */
+
 const useAuthStore = create((set) => ({
   user: null,
   token: null,
+
+  // Logged-in employee details
+  employeeId: null,
+  employeeName: "",
+
+  // Logged-in user's actual role
   roleId: null,
+
+  // Role currently selected in Role Access
+  selectedRoleId: null,
+
+  // Owner permission of currently selected role
+  selectedRolePermission: null,
+
+  // Existing User Panel menus
   menus: [],
+
+  // Admin Panel menus from ScreenAccess/GetMenu
+  adminMenus: [],
+
   isAuthenticated: false,
   workspace: "user",
   isInitialized: false,
 
   /* =========================================================
-       LOGIN
-    ========================================================= */
+     LOGIN
+  ========================================================= */
 
   login: (user, token) => {
-    const menus = Array.isArray(user?.Menus) ? user.Menus : [];
+    const menus = Array.isArray(user?.Menus)
+      ? user.Menus
+      : [];
 
     const roleId = user?.RoleID ?? null;
+    const employeeId = user?.EmployeeID ?? null;
+    const employeeName = user?.EmployeeName || "";
+    const sourceID = user?.SourceID || "";
 
-    localStorage.setItem("auth", "true");
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("token", token);
-    localStorage.setItem("workspace", "user");
-    localStorage.setItem("menus", JSON.stringify(menus));
+    // New login should not reuse previous Admin menus.
+    const adminMenus = [];
 
-    localStorage.setItem("employeeId", String(user?.EmployeeID ?? ""));
+    // Clear previous authentication details
+    clearAuthStorage();
 
-    localStorage.setItem("employeeName", user?.EmployeeName || "");
+    sessionStorage.setItem("auth", "true");
+    sessionStorage.setItem("user", JSON.stringify(user));
+    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("workspace", "user");
+    sessionStorage.setItem("menus", JSON.stringify(menus));
 
-    localStorage.setItem("roleId", String(roleId ?? ""));
+    sessionStorage.setItem(
+      "adminMenus",
+      JSON.stringify(adminMenus),
+    );
 
-    localStorage.setItem("sourceID", String(user?.SourceID || ""));
+    sessionStorage.setItem(
+      "employeeId",
+      String(employeeId ?? ""),
+    );
+
+    sessionStorage.setItem("employeeName", employeeName);
+    sessionStorage.setItem("roleId", String(roleId ?? ""));
+    sessionStorage.setItem("sourceID", String(sourceID));
 
     set({
       user,
       token,
+
+      employeeId:
+        employeeId !== null && employeeId !== undefined
+          ? String(employeeId)
+          : null,
+
+      employeeName,
       roleId,
+
+      selectedRoleId: null,
+      selectedRolePermission: null,
+
       menus,
+      adminMenus,
+
       isAuthenticated: true,
       workspace: "user",
       isInitialized: true,
@@ -78,13 +169,51 @@ const useAuthStore = create((set) => ({
   },
 
   /* =========================================================
-       UPDATE MENUS
-    ========================================================= */
+     ROLE MANAGEMENT
+  ========================================================= */
+
+  setSelectedRoleId: (roleId) => {
+    const updatedRoleId = roleId
+      ? Number(roleId)
+      : null;
+
+    if (updatedRoleId !== null) {
+      sessionStorage.setItem(
+        "selectedRoleId",
+        String(updatedRoleId),
+      );
+    } else {
+      sessionStorage.removeItem("selectedRoleId");
+    }
+
+    set({
+      selectedRoleId: updatedRoleId,
+      selectedRolePermission: null,
+    });
+  },
+
+  setSelectedRolePermission: (permission) => {
+    set({
+      selectedRolePermission:
+        typeof permission === "boolean"
+          ? permission
+          : null,
+    });
+  },
+
+  /* =========================================================
+     UPDATE USER MENUS
+  ========================================================= */
 
   setMenus: (menus) => {
-    const updatedMenus = Array.isArray(menus) ? menus : [];
+    const updatedMenus = Array.isArray(menus)
+      ? menus
+      : [];
 
-    localStorage.setItem("menus", JSON.stringify(updatedMenus));
+    sessionStorage.setItem(
+      "menus",
+      JSON.stringify(updatedMenus),
+    );
 
     set({
       menus: updatedMenus,
@@ -92,11 +221,30 @@ const useAuthStore = create((set) => ({
   },
 
   /* =========================================================
-       WORKSPACE
-    ========================================================= */
+     UPDATE ADMIN MENUS
+  ========================================================= */
+
+  setAdminMenus: (adminMenus) => {
+    const updatedMenus = Array.isArray(adminMenus)
+      ? adminMenus
+      : [];
+
+    sessionStorage.setItem(
+      "adminMenus",
+      JSON.stringify(updatedMenus),
+    );
+
+    set({
+      adminMenus: updatedMenus,
+    });
+  },
+
+  /* =========================================================
+     WORKSPACE
+  ========================================================= */
 
   setWorkspace: (workspace) => {
-    localStorage.setItem("workspace", workspace);
+    sessionStorage.setItem("workspace", workspace);
 
     set({
       workspace,
@@ -104,8 +252,8 @@ const useAuthStore = create((set) => ({
   },
 
   /* =========================================================
-       LOGOUT
-    ========================================================= */
+     LOGOUT
+  ========================================================= */
 
   logout: () => {
     clearAuthStorage();
@@ -113,8 +261,17 @@ const useAuthStore = create((set) => ({
     set({
       user: null,
       token: null,
+
+      employeeId: null,
+      employeeName: "",
+
       roleId: null,
+      selectedRoleId: null,
+      selectedRolePermission: null,
+
       menus: [],
+      adminMenus: [],
+
       isAuthenticated: false,
       workspace: "user",
       isInitialized: true,
@@ -122,14 +279,19 @@ const useAuthStore = create((set) => ({
   },
 
   /* =========================================================
-       INITIALIZE AUTHENTICATION
-    ========================================================= */
+     INITIALIZE AUTHENTICATION
+  ========================================================= */
 
   initializeAuth: () => {
-    const auth = localStorage.getItem("auth");
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    const workspace = localStorage.getItem("workspace") || "user";
+    // Remove old authentication data from localStorage
+    clearLegacyAuthStorage();
+
+    const auth = sessionStorage.getItem("auth");
+    const storedUser = sessionStorage.getItem("user");
+    const token = sessionStorage.getItem("token");
+
+    const workspace =
+      sessionStorage.getItem("workspace") || "user";
 
     if (auth === "true" && storedUser && token) {
       try {
@@ -140,18 +302,46 @@ const useAuthStore = create((set) => ({
         }
 
         const menus = getStoredMenus(user);
+        const adminMenus = getStoredAdminMenus();
 
         const roleId =
           user?.RoleID ??
-          (localStorage.getItem("roleId")
-            ? Number(localStorage.getItem("roleId"))
+          (sessionStorage.getItem("roleId")
+            ? Number(sessionStorage.getItem("roleId"))
             : null);
+
+        const selectedRoleId = sessionStorage.getItem(
+          "selectedRoleId",
+        )
+          ? Number(sessionStorage.getItem("selectedRoleId"))
+          : null;
+
+        const employeeId =
+          sessionStorage.getItem("employeeId") ||
+          (user?.EmployeeID !== undefined &&
+          user?.EmployeeID !== null
+            ? String(user.EmployeeID)
+            : null);
+
+        const employeeName =
+          sessionStorage.getItem("employeeName") ||
+          user?.EmployeeName ||
+          "";
 
         set({
           user,
           token,
+
+          employeeId,
+          employeeName,
+
           roleId,
+          selectedRoleId,
+          selectedRolePermission: null,
+
           menus,
+          adminMenus,
+
           isAuthenticated: true,
           workspace,
           isInitialized: true,
@@ -163,11 +353,23 @@ const useAuthStore = create((set) => ({
       }
     }
 
+    // Clear incomplete or invalid authentication data
+    clearAuthStorage();
+
     set({
       user: null,
       token: null,
+
+      employeeId: null,
+      employeeName: "",
+
       roleId: null,
+      selectedRoleId: null,
+      selectedRolePermission: null,
+
       menus: [],
+      adminMenus: [],
+
       isAuthenticated: false,
       workspace: "user",
       isInitialized: true,

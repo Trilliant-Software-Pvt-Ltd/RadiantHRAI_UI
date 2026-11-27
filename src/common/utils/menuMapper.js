@@ -1,39 +1,42 @@
 
 export const buildMenuTree = (menuData = []) => {
-    if (!Array.isArray(menuData)) {
+    if (!Array.isArray(menuData) || menuData.length === 0) {
         return [];
     }
 
-    // Only assigned menus should be displayed.
-    const assignedMenus = menuData
-        .filter((item) => item.isAssigned === true)
-        .map((item) => ({
-            id: item.screenID,
-            parentId: item.screenSubID,
-            label: item.screenTitle,
-            path: item.screenName,
-            sequence: Number(item.screenSequence) || 0,
-            icon: item.icon,
-            isSideMenu: item.isSideMenu,
-            formType: item.formType,
-            children: [],
-        }));
+    // Map the new ScreenAccess API response.
+    const mappedMenus = menuData.map((item) => ({
+        id: Number(item.ScreenID),
+        parentId: Number(item.RDHR0000ID),
+        subMenuId: Number(item.ScreenSubID),
+        label: item.ScreenTitle || "",
+        path: item.ScreenName || "",
+        sequence: Number(item.ScreenSequence) || 0,
+        icon: item.Icon || "",
+        isSideMenu: item.IsSideMenu === true,
+        formType: item.FormType || "",
+        screenType: item.ScreenType || "",
+        projectName: item.ProjectName || "",
+        isApp: item.IsApp === true,
+        children: [],
+    }));
 
     const menuMap = new Map();
 
-    assignedMenus.forEach((item) => {
+    mappedMenus.forEach((item) => {
         menuMap.set(Number(item.id), item);
     });
 
     const rootMenus = [];
 
-    assignedMenus.forEach((item) => {
+    mappedMenus.forEach((item) => {
         const parent = menuMap.get(Number(item.parentId));
 
-        if (parent) {
+        if (parent && parent.id !== item.id) {
             parent.children.push(item);
         } else {
-            // Root or item whose parent is not assigned/returned.
+            // Parent is not included in the API response.
+            // Display the item as a root menu.
             rootMenus.push(item);
         }
     });

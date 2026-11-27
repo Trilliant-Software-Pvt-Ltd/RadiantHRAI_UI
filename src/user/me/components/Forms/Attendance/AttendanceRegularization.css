@@ -1,0 +1,424 @@
+
+/* =========================================================
+   ATTENDANCE REGULARIZATION FORM
+========================================================= */
+
+.attendance-regularization-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-bottom: 10px;
+  color: #344054;
+  font-size: 11px;
+}
+
+/* =========================================================
+   SELECTED DATE / SHIFT TIMINGS
+========================================================= */
+
+.ar-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  padding: 6px 0 15px;
+  border-bottom: 1px solid #e6e9ef;
+}
+
+.ar-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ar-summary-label {
+  color: #8994a3;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.ar-summary-item strong {
+  color: #344054;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ar-summary-shift {
+  text-align: right;
+}
+
+/* =========================================================
+   REQUEST OPTIONS
+========================================================= */
+
+.ar-request-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ar-radio-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  position: relative;
+  cursor: pointer;
+  margin: 0;
+}
+
+.ar-radio-option input {
+  position: absolute;
+  opacity: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ar-radio-custom {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 1px solid #98a2b3;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.ar-radio-option input:checked + .ar-radio-custom {
+  border: 1.5px solid #1671e8;
+}
+
+.ar-radio-option input:checked + .ar-radio-custom::after {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #1671e8;
+}
+
+
+
+/* =========================================================
+   INSTRUCTION
+========================================================= */
+
+.ar-instruction {
+  color: #667085;
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: -3px;
+}
+
+/* =========================================================
+   ATTENDANCE ADJUSTMENT
+========================================================= */
+
+.ar-adjustment-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ar-section-title {
+  margin: 0;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   ADD LOG BUTTON
+========================================================= */
+
+.ar-add-log-button {
+  min-height: 34px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #2f80ed;
+  border-radius: 5px;
+  background: #fff;
+  color: #2f80ed;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ar-add-log-button svg {
+  width: 13px;
+  height: 13px;
+}
+
+.ar-add-log-button:hover {
+  background: #f0f7ff;
+  border-color: #1671e8;
+}
+
+/* =========================================================
+   TIME ENTRIES
+========================================================= */
+
+.ar-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.ar-entry-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.ar-entry-row {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) 64px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* =========================================================
+   ENTRY ACTION BUTTONS
+========================================================= */
+
+.ar-entry-action {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #8ca0b8;
+  border-radius: 50%;
+  background: #fff;
+  color: #8295ad;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ar-entry-action svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.8;
+}
+
+.ar-entry-action:hover {
+  border-color: #1671e8;
+  color: #1671e8;
+}
+
+.ar-entry-action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.ar-add-entry {
+  border-color: #1671e8;
+  color: #1671e8;
+}
+
+.ar-remove-entry:hover {
+  border-color: #e5484d;
+  color: #e5484d;
+}
+
+.ar-entry-action-placeholder {
+  width: 24px;
+}
+
+/* =========================================================
+   IN / OUT TIME FIELDS
+========================================================= */
+
+.ar-time-field {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ar-entry-direction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  min-width: 16px;
+}
+
+.ar-entry-direction svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 1.8;
+}
+
+.ar-in-direction {
+  color: #60b66a;
+}
+
+.ar-out-direction {
+  color: #ef5350;
+}
+
+.ar-time-field .hrms-time-picker-wrapper {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.ar-time-field .hrms-time-input-wrapper {
+  width: 100%;
+  min-width: 0;
+  position: relative;
+}
+
+.ar-time-field .hrms-time-control {
+  width: 100% !important;
+  min-width: 0;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 7px 30px 7px 8px;
+  font-size: 11px;
+}
+
+.ar-time-field .hrms-time-picker-icon {
+  right: 8px;
+}
+
+.ar-entry-error {
+  display: block;
+  margin-left: 34px;
+  color: #e5484d;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.ar-general-error {
+  margin-left: 0;
+}
+
+/* =========================================================
+   NOTE
+========================================================= */
+
+.ar-note-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+
+.ar-note-group textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 8px 10px;
+  border: 1px solid #d5dce5;
+  border-radius: 5px;
+  background: #fff;
+  color: #344054;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 11px;
+  box-sizing: border-box;
+}
+
+.ar-note-group textarea::placeholder {
+  color: #98a2b3;
+}
+
+.ar-note-group textarea:focus {
+  border-color: #2f80ed;
+  box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.1);
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.attendance-regularization-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.ar-entry-controls{
+  display: flex;
+  justify-content: space-around;
+}
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 600px) {
+  .attendance-regularization-form {
+    gap: 15px;
+  }
+
+  .ar-summary {
+    gap: 8px;
+  }
+
+  .ar-summary-label {
+    font-size: 10px;
+  }
+
+  .ar-summary-item strong {
+    font-size: 11px;
+  }
+
+  
+
+  .ar-entry-row {
+    grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .ar-entry-controls {
+    grid-column: 2 / -1;
+    justify-content: flex-end;
+  }
+
+  .ar-time-field {
+    gap: 4px;
+  }
+
+  .ar-entry-direction {
+    width: 14px;
+    min-width: 14px;
+  }
+
+  .ar-time-field .hrms-time-control {
+    font-size: 10px;
+    padding-left: 6px;
+    padding-right: 26px;
+  }
+}
+
+@media (max-width: 380px) {
+  .ar-entry-row {
+    grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .ar-time-field .hrms-time-control {
+    font-size: 10px;
+  }
+
+  .ar-entry-direction {
+    display: none;
+  }
+}

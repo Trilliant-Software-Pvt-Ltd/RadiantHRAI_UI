@@ -6,48 +6,6 @@
   padding-bottom: 10px;
 }
 
-.punch-missing-form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
-.punch-missing-form-group label {
-  color: #344054;
-  font-size: 11px;
-  font-weight: 600;
-  margin: 0;
-}
-
-.punch-missing-form-group label span {
-  color: #e05252;
-}
-
-.punch-missing-form-group input,
-.punch-missing-form-group textarea {
-  width: 100%;
-  min-height: 36px;
-  padding: 8px 10px;
-  border: 1px solid #d5dce5;
-  border-radius: 5px;
-  background: #fff;
-  color: #344054;
-  font-size: 11px;
-  outline: none;
-  box-sizing: border-box;
-}
-
-.punch-missing-form-group textarea {
-  min-height: 75px;
-  resize: vertical;
-}
-
-.punch-missing-form-group input:focus,
-.punch-missing-form-group textarea:focus {
-  border-color: #2f80ed;
-  box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.08);
-}
 
 .punch-missing-type-switch {
   display: flex;

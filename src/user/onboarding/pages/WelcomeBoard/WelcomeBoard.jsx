@@ -1,20 +1,8 @@
 import React, { useMemo, useState } from "react";
 
 import {
-  FiUser,
-  FiEdit3,
-  FiCalendar,
-  FiShield,
-  FiFolder,
-  FiFileText,
-  FiBriefcase,
   FiArrowLeft,
-  FiSave,
   FiUsers,
-  FiChevronLeft,
-  FiChevronRight,
-  FiDollarSign,
-  FiCreditCard,
 } from "react-icons/fi";
 
 import DataTable from "../../../../common/components/DataTable/DataTable";
@@ -28,6 +16,9 @@ import "./WelcomeBoard.css";
 import CTCDetails from "../../components/Form/CTCDetails/CTCDetails";
 import EmployeeBank from "../../components/Form/EmployeeBank/EmployeeBank";
 import AssetsDetails from "../../components/Form/AssetsDetails/AssetsDetails";
+import AddEmployee from "../../components/Form/AddEmployee/AddEmployee";
+import EmpOnboardingDetails from "../EmpOnboardingDetails/EmpOnboardingDetails";
+import EmpDocument from "../../components/Form/EmployeeDocument/EmpDocument";
 
 /* =========================================================
    SAMPLE EMPLOYEE DATA
@@ -216,12 +207,6 @@ const INITIAL_EMPLOYEES = [
   },
 ];
 
-/* =========================================================
-   TABLE COLUMNS
-   IMPORTANT:
-   DataTable uses "header", not "label".
-========================================================= */
-
 const EMPLOYEE_COLUMNS = [
   {
     header: "Employee",
@@ -391,47 +376,6 @@ const EMPLOYEE_FILTERS = [
   },
 ];
 
-/* =========================================================
-   EMPLOYEE DETAILS MENU
-========================================================= */
-
-const DETAIL_MENUS = [
-  {
-    id: "personal",
-    label: "Personal",
-    icon: FiUser,
-  },
-  {
-    id: "reporting-manager",
-    label: "Reporting Manager",
-    icon: FiUsers,
-  },
-  {
-    id: "attendance-details",
-    label: "Attendance",
-    icon: FiCalendar,
-  },
-  {
-    id: "statutory",
-    label: "Statutory",
-    icon: FiShield,
-  },
-  {
-    id: "ctc",
-    label: "CTC",
-    icon: FiDollarSign,
-  },
-  {
-    id: "bank",
-    label: "Bank",
-    icon: FiCreditCard,
-  },
-  {
-    id: "assets-details",
-    label: "Assets",
-    icon: FiBriefcase,
-  },
-];
 
 
 /* =========================================================
@@ -465,55 +409,12 @@ function EmployeeFormContent({ employee, activeMenu, onBackToList }) {
     case "assets-details":
       return <AssetsDetails employee={employee} onBackToList={onBackToList}/>;
 
+    case "emp-document":
+      return <EmpDocument employee={employee} onBackToList={onBackToList}/>;
+
     default:
       return null;
   }
-}
-
-/* =========================================================
-   EMPLOYEE MENU
-========================================================= */
-
-function EmployeeMenu({ activeMenu, onMenuChange, expanded, onToggle }) {
-  return (
-    <aside
-      className={`wb-employee-menu ${expanded ? "expanded" : "collapsed"}`}
-    >
-      <button
-        type="button"
-        className="wb-menu-expand-button"
-        onClick={onToggle}
-        title={expanded ? "Collapse menu" : "Expand menu"}
-      >
-        {expanded ? <FiChevronRight size={18} /> : <FiChevronLeft size={18} />}
-      </button>
-
-      <div className="wb-menu-heading">Details</div>
-
-      <div className="wb-menu-list">
-        {DETAIL_MENUS.map((menu) => {
-          const Icon = menu.icon;
-
-          return (
-            <button
-              type="button"
-              key={menu.id}
-              className={`wb-menu-item ${
-                activeMenu === menu.id ? "active" : ""
-              }`}
-              onClick={() => onMenuChange(menu.id)}
-            >
-              <span className="wb-menu-item-icon">
-                <Icon size={16} />
-              </span>
-
-              <span className="wb-menu-item-label">{menu.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </aside>
-  );
 }
 
 /* =========================================================
@@ -527,17 +428,22 @@ function WelcomeBoard() {
 
   const [menuExpanded, setMenuExpanded] = useState(false);
 
+  const [showAddEmployee, setShowAddEmployee] = useState(false);
+  const [viewEmployee, setViewEmployee] = useState(null);
+  const [onboardingForm, setOnboardingForm] = useState(null);
+
   /* =======================================================
      VIEW DETAILS
   ======================================================= */
 
   const handleViewDetails = (employee) => {
-    setSelectedEmployee(employee);
+  setOnboardingForm(null);
+  setViewEmployee(employee);
+};
 
-    setActiveMenu(null);
-
-    setMenuExpanded(false);
-  };
+const handleOpenOnboardingForm = (formId) => {
+  setOnboardingForm(formId);
+};
 
   /* =======================================================
      EDIT
@@ -564,8 +470,8 @@ function WelcomeBoard() {
   ======================================================= */
 
   const handleAddEmployee = () => {
-    alert("Add Employee form will be connected here.");
-  };
+  setShowAddEmployee(true);
+};
 
   /* =======================================================
      MENU
@@ -661,74 +567,113 @@ function WelcomeBoard() {
   ======================================================= */
 
   return (
-    <div className="hrms-form-container welcomeboard-page">
-      {/* ===================================================
-          STATE 1
-          FULL EMPLOYEE TABLE
-      =================================================== */}
+  <div className="hrms-form-container welcomeboard-page">
 
-      {!selectedEmployee && (
-        <div className="welcomeboard-full-table">
-          <DataTable {...tableProps} />
-        </div>
-      )}
+    {/* ===================================================
+        STATE 1: FULL EMPLOYEE TABLE
+    =================================================== */}
 
-      {/* ===================================================
-          STATE 2 / STATE 3
+    {!selectedEmployee && !viewEmployee && (
+      <div className="welcomeboard-full-table">
+        <DataTable {...tableProps} />
+      </div>
+    )}
 
-          MAIN CONTENT + EMPLOYEE MENU
-      =================================================== */}
+    {/* ===================================================
+        STATE 2: EMPLOYEE DETAILS / FORMS
+    =================================================== */}
 
-      {selectedEmployee && (
-        <div
-          className={`welcomeboard-details-layout ${
-            menuExpanded ? "menu-is-expanded" : "menu-is-collapsed"
-          }`}
-        >
-          {/* =================================================
-              MAIN CONTENT
-          ================================================= */}
+    {selectedEmployee && !viewEmployee && (
+      <div
+        className={`welcomeboard-details-layout ${
+          menuExpanded
+            ? "menu-is-expanded"
+            : "menu-is-collapsed"
+        }`}
+      >
+        {/* MAIN CONTENT */}
 
-          <section className="wb-main-section">
-            {/* =================================================
-                DATA TABLE
-            ================================================= */}
+        <section className="wb-main-section">
 
-            {!activeMenu && (
-              <div className="wb-table-inside-section">
-                <DataTable {...tableProps} />
-              </div>
-            )}
+          {/* DATA TABLE */}
 
-            {/* =================================================
-                FORM
-            ================================================= */}
+          {!activeMenu && (
+            <div className="wb-table-inside-section">
+              <DataTable {...tableProps} />
+            </div>
+          )}
 
-            {activeMenu && (
-              <div className="wb-form-section">
-                <EmployeeFormContent
-                  employee={selectedEmployee}
-                  activeMenu={activeMenu}
-                  onBackToList={handleBackToList}
-                />
-              </div>
-            )}
-          </section>
+          {/* EMPLOYEE FORM */}
 
-          {/* =================================================
-              EMPLOYEE MENU
-          ================================================= */}
+          {activeMenu && (
+            <div className="wb-form-section">
+              <EmployeeFormContent
+                employee={selectedEmployee}
+                activeMenu={activeMenu}
+                onBackToList={handleBackToList}
+              />
+            </div>
+          )}
 
-          <EmployeeMenu
-            activeMenu={activeMenu}
-            onMenuChange={handleMenuChange}
-            expanded={menuExpanded}
-            onToggle={() => setMenuExpanded((previous) => !previous)}
-          />
-        </div>
-      )}
-    </div>
-  );
+        </section>
+
+        {/* EMPLOYEE MENU */}
+
+        <EmployeeMenu
+          activeMenu={activeMenu}
+          onMenuChange={handleMenuChange}
+          expanded={menuExpanded}
+          onToggle={() =>
+            setMenuExpanded((previous) => !previous)
+          }
+        />
+
+      </div>
+    )}
+
+    {/* ===================================================
+    STATE 3: EMPLOYEE ONBOARDING DASHBOARD
+=================================================== */}
+
+{viewEmployee && !onboardingForm && (
+  <EmpOnboardingDetails
+    employee={viewEmployee}
+    onBack={() => {
+      setOnboardingForm(null);
+      setViewEmployee(null);
+    }}
+    onOpenForm={handleOpenOnboardingForm}
+  />
+)}
+
+{/* ===================================================
+    STATE 4: ONBOARDING EMPLOYEE FORM
+=================================================== */}
+
+{viewEmployee && onboardingForm && (
+  <div className="wb-form-section">
+    <EmployeeFormContent
+      employee={viewEmployee}
+      activeMenu={onboardingForm}
+      onBackToList={() => setOnboardingForm(null)}
+    />
+  </div>
+)}
+
+    {/* ===================================================
+        ADD EMPLOYEE
+    =================================================== */}
+
+    <AddEmployee
+      show={showAddEmployee}
+      onClose={() => setShowAddEmployee(false)}
+      onSubmit={(candidate) => {
+        console.log("New candidate:", candidate);
+      }}
+    />
+
+  </div>
+);
 }
 
 export default WelcomeBoard;

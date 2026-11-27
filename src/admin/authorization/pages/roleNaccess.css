@@ -6,7 +6,7 @@
 .role-access-page {
     width: 100%;
     min-height: 100vh;
-    padding: 18px;
+    padding: 4px;
     color: #263957;
     font-family: "Inter", "Segoe UI", sans-serif;
     font-size: 12px;
@@ -285,17 +285,31 @@
     white-space: nowrap;
 }
 
+/* ROLE STATUS BADGES */
+
 .ra-status {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 3px 8px;
     border-radius: 20px;
-    background: #e0f8ed;
-    color: #17a66e;
     font-size: 10px;
     font-weight: 600;
     white-space: nowrap;
+}
+
+/* Active - Green */
+.ra-status.active {
+    background: #e0f8ed;
+    color: #17a66e;
+    border: 1px solid #c5eedb;
+}
+
+/* Inactive - Red */
+.ra-status.inactive {
+    background: #feecec;
+    color: #dc3545;
+    border: 1px solid #f8cccc;
 }
 
 .ra-role-arrow {

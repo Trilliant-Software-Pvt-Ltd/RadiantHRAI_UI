@@ -58,6 +58,19 @@ import QualificationList from "../admin/onboarding/pages/Qualificatoin/Qualifica
 
 import RoleAccess from "../admin/authorization/pages/roleNaccess.jsx";
 
+//attendance
+
+import AttendanceDashboard from "../admin/attendance/pages/Dashboard/AttendanceDashboard.jsx";
+import ShiftCreation from "../admin/attendance/pages/ShiftCreation/shiftCreation.jsx";
+import ShiftCreationList from "../admin/attendance/pages/ShiftCreation/shiftCreationList.jsx";
+import ShiftGroup from "../admin/attendance/pages/ShiftGroup/shiftGroup.jsx";
+import ShiftGroupList from "../admin/attendance/pages/ShiftGroup/shiftGroupList.jsx";
+import WFH from "../admin/attendance/pages/WFH/wfh.jsx";
+import Outdoor from "../admin/attendance/pages/Outdoor/outdoor.jsx";
+import PunchMissing from "../admin/attendance/pages/PunchMissing/punchMissing.jsx";
+
+import SiteRegistration from "../admin/attendance/pages/SiteRegistration/SiteRegistration.jsx";
+import SiteRegistrationList from "../admin/attendance/pages/SiteRegistration/SiteRegistrationList.jsx";
 // =====================================================
 // ADMIN PAGES
 // =====================================================
@@ -265,6 +278,8 @@ const AdminRolesPermissions = () => (
   <div>
     <h1>Role & Permission</h1>
     <p>Role and permission page</p>
+
+    
   </div>
 );
 
@@ -285,7 +300,10 @@ const AdminRoutes = (
     <Route path="/admin" element={<CoreSettingsDashboard />} />
 
     {/* Onboarding */}
-    <Route path="/admin/onboarding/dashboard" element={<OnboardingDashboard />} />
+    <Route
+      path="/admin/onboarding/dashboard"
+      element={<OnboardingDashboard />}
+    />
     <Route path="/admin/onboarding/type" element={<TypeList />} />
     <Route path="/admin/onboarding/type/add" element={<Type />} />
 
@@ -369,14 +387,28 @@ const AdminRoutes = (
     <Route path="/admin/coresettings/cell/add" element={<Cell />} />
 
     <Route
-    path="/admin/authorization/dashboard"
-    element={<div>Authorization Dashboard</div>}
-/>
+      path="/admin/authorization/dashboard"
+      element={<div>Authorization Dashboard</div>}
+    />
     <Route path="/admin/authorization/roleNaccess" element={<RoleAccess />} />
 
     {/* ATTENDANCE */}
+    <Route path="/admin/attendance/dashboard" element={<AttendanceDashboard/>}/>
 
-    <Route path="/admin/attendance" element={<AdminAttendance />} />
+    <Route path="/admin/attendance/shiftCreation" element={<ShiftCreationList />} />
+    <Route path="/admin/attendance/shiftCreation/add" element={<ShiftCreation />} />
+
+    {/* <Route path="/admin/attendance/shiftGroup" element={<ShiftGroupList />} />
+    <Route path="/admin/attendance/shiftGroup/add" element={<ShiftGroup />} /> */}
+    <Route path="/admin/attendance/shiftGroup" element={<ShiftGroup />} />
+
+    <Route path="/admin/attendance/punchMissing" element={<PunchMissing />} />
+    <Route path="/admin/attendance/wfh" element={<WFH />} />
+    <Route path="/admin/attendance/outdoor" element={<Outdoor />} />
+
+    <Route path="/admin/attendance/siteRegistration" element={<SiteRegistrationList />} />
+    <Route path="/admin/attendance/siteRegistration/add" element={<SiteRegistration />} />
+
 
     <Route path="/admin/attendance/daily" element={<AdminDailyAttendance />} />
 

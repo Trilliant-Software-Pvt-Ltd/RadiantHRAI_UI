@@ -1,8 +1,10 @@
 import axios from "axios";
+import useAuthStore from "../auth/store/authStore";
 
 const MODULE_BASE_URLS = {
   coreSettings: import.meta.env.VITE_API_BASE_URL_MODULES,
   onboarding: import.meta.env.VITE_API_BASE_URL_ONBOARDING,
+  attendance: import.meta.env.VITE_API_BASE_URL_ADMIN_ATTENDANCE,
 };
 
 const coreSettingsClient = axios.create({
@@ -13,7 +15,7 @@ const coreSettingsClient = axios.create({
 // Add authentication token and select the module base URL.
 coreSettingsClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = useAuthStore.getState().token;
 
     if (token) {
       config.headers = config.headers || {};

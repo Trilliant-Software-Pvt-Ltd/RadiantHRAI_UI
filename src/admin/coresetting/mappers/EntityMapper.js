@@ -1,11 +1,11 @@
-
+import useAuthStore from "../../../auth/store/authStore";
 
 export const mapEntityToApi = (formData) => {
-  const createdByUser =
-    localStorage.getItem("employeeName") || "";
+  const { employeeName, user } = useAuthStore.getState();
 
-  const sourceID =
-    localStorage.getItem("sourceID") || "";
+  const createdByUser = employeeName || "";
+
+  const sourceID = String(user?.SourceID || "");
 
   return {
     isDeactivated: false,
@@ -44,8 +44,6 @@ export const mapEntityToApi = (formData) => {
           : "",
   };
 };
-
-
 
 export const mapEntityFromApi = (data) => ({
   rdhR0000IID: data?.rdhR0000IID ?? "",

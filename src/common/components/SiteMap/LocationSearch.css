@@ -1,0 +1,213 @@
+/* =========================================================
+   LOCATION SEARCH CONTAINER
+========================================================= */
+
+.site-location-search {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: calc(100% - 20px);
+  max-width: 380px;
+  z-index: 1001;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   SEARCH INPUT
+========================================================= */
+
+.site-location-search-input {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 37px;
+  padding: 0 11px;
+  background: #fff;
+  border: 1px solid #d4def0;
+  border-radius: 7px;
+  box-shadow: 0 3px 12px rgba(27, 45, 78, 0.13);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.site-location-search-input:focus-within {
+  border-color: #4382ed;
+  box-shadow: 0 0 0 3px rgba(33, 102, 232, 0.12);
+}
+
+.site-location-search-input input {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #24365b;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.site-location-search-input input::placeholder {
+  color: #8795ad;
+}
+
+.site-location-search-icon {
+  flex-shrink: 0;
+  font-size: 16px;
+  color: #34558b;
+}
+
+/* =========================================================
+   CLEAR BUTTON
+========================================================= */
+
+.site-location-search-clear {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #74829a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.site-location-search-clear:hover {
+  background: #edf3ff;
+  color: #2166e8;
+}
+
+/* =========================================================
+   SUGGESTIONS DROPDOWN
+========================================================= */
+
+.site-location-suggestions {
+  margin-top: 5px;
+  max-height: 210px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #dce5f7;
+  border-radius: 7px;
+  box-shadow: 0 6px 20px rgba(27, 45, 78, 0.16);
+}
+
+.site-location-suggestions-heading {
+  padding: 9px 12px 6px;
+  font-size: 9px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #8290a7;
+}
+
+.site-location-suggestion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid #edf1f7;
+  background: #fff;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.site-location-suggestion:last-child {
+  border-bottom: none;
+}
+
+.site-location-suggestion:hover,
+.site-location-suggestion.active {
+  background: #f0f5ff;
+}
+
+.site-location-pin {
+  width: 29px;
+  height: 29px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #edf3ff;
+  color: #3978db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.site-location-suggestion-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.site-location-suggestion-text strong {
+  color: #24365b;
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.site-location-suggestion-text small {
+  color: #78869c;
+  font-size: 10px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   LOADING AND ERROR
+========================================================= */
+
+.site-location-search-message {
+  padding: 15px 12px;
+  color: #74829a;
+  font-size: 11px;
+  text-align: center;
+}
+
+.site-location-search-error {
+  color: #c24141;
+}
+
+.site-location-search-loader {
+  color: #3978db;
+  font-size: 15px;
+  flex-shrink: 0;
+  animation: site-location-spin 0.8s linear infinite;
+}
+
+@keyframes site-location-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 600px) {
+  .site-location-search {
+    max-width: none;
+    top: 8px;
+    left: 8px;
+    width: calc(100% - 16px);
+  }
+
+  .site-location-search-input input {
+    font-size: 12px;
+  }
+
+  .site-location-suggestions {
+    max-height: 180px;
+  }
+}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { FiUser, FiCalendar, FiEye } from "react-icons/fi";
+import { FiUser, FiCalendar, FiEye, FiArrowLeft  } from "react-icons/fi";
 
 import FormInput from "../../../../../common/components/Form/FormInput";
 import FormSelect from "../../../../../common/components/Form/FormSelect";
@@ -326,27 +326,38 @@ function AttendanceDetails({ onBackToList }) {
 
           <section className="hrms-form-section-card attendance-details-section">
             <div className="hrms-form-section-header">
-              <div className="hrms-section-heading-group">
-                <div className="hrms-form-section-icon">
-                  <FiCalendar size={19} />
-                </div>
+  <div className="hrms-section-heading-group">
+    <div className="hrms-form-section-icon">
+      <FiCalendar size={19} />
+    </div>
 
-                <div className="hrms-form-section-heading">
-                  <h3 className="hrms-form-section-title">
-                    Attendance Details
-                  </h3>
+    <div className="hrms-form-section-heading">
+      <h3 className="hrms-form-section-title">
+        Attendance Details
+      </h3>
 
-                  <div className="employee-information">
-                    <span>Mr.Krishna - TS012 (Software developer - UI/UX)</span>
-                  </div>
-                </div>
-              </div>
+      <div className="employee-information">
+        <span>Mr.Krishna - TS012 (Software developer - UI/UX)</span>
+      </div>
+    </div>
+  </div>
 
-              <FormToggleBtn
-                isOpen={isAttendanceOpen}
-                onClick={() => setIsAttendanceOpen((previous) => !previous)}
-              />
-            </div>
+  <div className="hrms-form-header-actions">
+    <FormButton
+      type="button"
+      variant="secondary"
+      onClick={onBackToList}
+    >
+      <FiArrowLeft />
+      Back
+    </FormButton>
+
+    <FormToggleBtn
+      isOpen={isAttendanceOpen}
+      onClick={() => setIsAttendanceOpen((previous) => !previous)}
+    />
+  </div>
+</div>
 
             <div
               ref={attendanceBodyRef}
@@ -785,15 +796,6 @@ function AttendanceDetails({ onBackToList }) {
         ====================================================== */}
 
           <div className="hrms-form-section-footer">
-            <FormButton
-              type="button"
-              variant="secondary"
-              onClick={onBackToList}
-              aria-label="Back to list"
-            >
-              List
-            </FormButton>
-
             <FormButton type="submit" variant="primary">
               Save
             </FormButton>

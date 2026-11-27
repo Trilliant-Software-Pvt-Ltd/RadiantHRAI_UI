@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiUsers } from "react-icons/fi";
+import { FiUsers, FiArrowLeft } from "react-icons/fi";
 
 import FormSelect from "../../../../../common/components/Form/FormSelect";
 import FormButton from "../../../../../common/components/Form/FormButton";
@@ -43,10 +43,7 @@ function ReportingManager({ employee, onBackToList }) {
 
   // Get the current employee's ID.
   const employeeId = String(
-    employee?.employeeId ??
-      employee?.empId ??
-      employee?.id ??
-      "",
+    employee?.employeeId ?? employee?.empId ?? employee?.id ?? "",
   );
 
   // Check whether an option belongs to the current employee.
@@ -64,9 +61,7 @@ function ReportingManager({ employee, onBackToList }) {
 
     setApprovals((previous) =>
       previous.map((item, itemIndex) =>
-        itemIndex === index
-          ? { ...item, [field]: value }
-          : item,
+        itemIndex === index ? { ...item, [field]: value } : item,
       ),
     );
   };
@@ -109,24 +104,29 @@ function ReportingManager({ employee, onBackToList }) {
               </div>
 
               <div className="hrms-form-section-heading">
-                <h3 className="hrms-form-section-title">
-                  Reporting Manager
-                </h3>
+                <h3 className="hrms-form-section-title">Reporting Manager</h3>
 
                 <div className="employee-information">
-                  <span>
-                    Mr.Krishna - TS012 (Software developer - UI/UX)
-                  </span>
+                  <span>Mr.Krishna - TS012 (Software developer - UI/UX)</span>
                 </div>
               </div>
             </div>
 
-            <FormToggleBtn
-              isOpen={isRepManagerOpen}
-              onClick={() =>
-                setIsRepManagerOpen((previous) => !previous)
-              }
-            />
+            <div className="hrms-form-header-actions">
+              <FormButton
+                type="button"
+                variant="secondary"
+                onClick={onBackToList}
+              >
+                <FiArrowLeft />
+                Back
+              </FormButton>
+
+              <FormToggleBtn
+                isOpen={isRepManagerOpen}
+                onClick={() => setIsRepManagerOpen((previous) => !previous)}
+              />
+            </div>
           </div>
 
           <div
@@ -140,9 +140,7 @@ function ReportingManager({ employee, onBackToList }) {
                 <table className="normal-table">
                   <thead>
                     <tr>
-                      <th className="reporting-manager-sr-column">
-                        Sr.No.
-                      </th>
+                      <th className="reporting-manager-sr-column">Sr.No.</th>
 
                       <th className="reporting-manager-module-column">
                         Module Name
@@ -157,9 +155,7 @@ function ReportingManager({ employee, onBackToList }) {
                   <tbody>
                     {approvals.map((item, index) => (
                       <tr key={item.id}>
-                        <td className="reporting-manager-sr-cell">
-                          {item.id}
-                        </td>
+                        <td className="reporting-manager-sr-cell">{item.id}</td>
 
                         <td className="reporting-manager-module-cell">
                           {item.module}
@@ -172,11 +168,7 @@ function ReportingManager({ employee, onBackToList }) {
                               name={`level1-${item.id}`}
                               value={item.level1}
                               onChange={(event) =>
-                                handleApprovalChange(
-                                  index,
-                                  "level1",
-                                  event,
-                                )
+                                handleApprovalChange(index, "level1", event)
                               }
                               options={getOptions(item, "level1")}
                               placeholder="--Select--"
@@ -191,11 +183,7 @@ function ReportingManager({ employee, onBackToList }) {
                               name={`level2-${item.id}`}
                               value={item.level2}
                               onChange={(event) =>
-                                handleApprovalChange(
-                                  index,
-                                  "level2",
-                                  event,
-                                )
+                                handleApprovalChange(index, "level2", event)
                               }
                               options={getOptions(item, "level2")}
                               placeholder="--Select--"
@@ -213,15 +201,6 @@ function ReportingManager({ employee, onBackToList }) {
 
         {/* Form Footer */}
         <div className="hrms-form-section-footer">
-          <FormButton
-            type="button"
-            variant="secondary"
-            onClick={onBackToList}
-            aria-label="Back to Employee List"
-          >
-            List
-          </FormButton>
-
           <FormButton type="submit" variant="primary">
             Save
           </FormButton>

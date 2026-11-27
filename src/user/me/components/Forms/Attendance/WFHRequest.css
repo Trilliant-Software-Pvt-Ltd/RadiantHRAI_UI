@@ -6,7 +6,7 @@
 .wfh-request-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
   padding-bottom: 10px;
 }
 
@@ -33,6 +33,7 @@
 .wfh-date-field label {
   color: #8994a3;
   font-size: 10px;
+  margin-bottom: 2px;
 }
 
 .wfh-date-field input {
@@ -286,4 +287,26 @@
     padding: 0 9px;
     font-size: 10px;
   }
+}
+
+.wfh-date-field .dc-calendar-trigger {
+  display: none !important;
+}
+
+.wfh-date-field input,
+.wfh-date-field .form-control {
+  caret-color: transparent !important;
+  cursor: pointer !important;
+  user-select: none;
+}
+.wfh-date-field input::placeholder{
+  color: #475467;
+  font-weight: 600;
+}
+.wfh-date-field-left {
+  width: fit-content;
+}
+.wfh-date-field .hrms-form-control{
+  padding-right: 0;
+  height: fit-content;
 }

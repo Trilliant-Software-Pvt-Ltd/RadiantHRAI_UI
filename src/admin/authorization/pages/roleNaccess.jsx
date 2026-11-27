@@ -1,10 +1,24 @@
-import React, { useMemo, useState } from "react";
+
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import menuClient from "../../../api/axiosClientMenu";
+import useAuthStore from "../../../auth/store/authStore.js";
+
 import FormSelect from "../../../common/components/Form/FormSelect";
 import FormOffcanvas from "../../../common/components/offcanvas/FormOffcanvas";
+import Toast from "../../../common/components/Popups/Toast";
+import Alert from "../../../common/components/Popups/Alert.jsx";
+
 import {
   DashboardCard,
   DashboardCardGrid,
 } from "../../../common/components/Card/DashboardCards";
+
 import {
   FiUsers,
   FiUser,
@@ -12,19 +26,15 @@ import {
   FiShield,
   FiPlus,
   FiSearch,
-  FiChevronDown,
   FiChevronRight,
   FiEdit2,
   FiTrash2,
-  FiBriefcase,
   FiDollarSign,
   FiCalendar,
   FiBarChart2,
   FiBookOpen,
   FiFileText,
-  FiSettings,
   FiLayout,
-  FiCheckCircle,
   FiX,
   FiInfo,
   FiLock,
@@ -34,226 +44,180 @@ import {
 import "./roleNaccess.css";
 
 // =====================================================
-// SAMPLE DATA
+// MODULE ICON MAPPING
 // =====================================================
 
-const initialRoles = [
-  {
-    id: 1,
-    name: "Super Admin",
-    description: "Full system access with all permissions",
-    users: 5,
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "HR Manager",
-    description: "HR module access with limited admin rights",
-    users: 8,
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Payroll Executive",
-    description: "Payroll module access",
-    users: 6,
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Team Lead",
-    description: "Team management and basic HR access",
-    users: 10,
-    status: "Active",
-  },
-  {
-    id: 5,
-    name: "Employee",
-    description: "Self-service access and limited view rights",
-    users: 18,
-    status: "Active",
-  },
-  {
-    id: 6,
-    name: "Recruiter",
-    description: "Recruitment module access",
-    users: 3,
-    status: "Active",
-  },
-  {
-    id: 7,
-    name: "Finance Manager",
-    description: "Finance and payroll reports access",
-    users: 2,
-    status: "Active",
-  },
-  {
-    id: 8,
-    name: "IT Support",
-    description: "System configuration and support access",
-    users: 1,
-    status: "Active",
-  },
-];
+const moduleIconMap = {
+  dashboard: FiLayout,
+  "core setting": FiGrid,
+  authorization: FiShield,
+  onboarding: FiUser,
+  attendance: FiCalendar,
+  payroll: FiDollarSign,
+  performance: FiBarChart2,
+  learning: FiBookOpen,
+  reports: FiFileText,
+};
 
-const moduleData = [
-  {
-    id: 1,
-    name: "Dashboard",
-    icon: FiLayout,
-    description: "View and access dashboard and reports",
-    permissions: [
-      "View Dashboard",
-      "View My Reports",
-      "Export Reports",
-      "Access Analytics",
-    ],
-    subModules: [
-      "Employee Summary",
-      "Attendance Overview",
-      "Leave Balance",
-      "Payroll Summary",
-    ],
-  },
-  {
-    id: 2,
-    name: "Profile Management",
-    icon: FiUser,
-    description: "Manage employee profile information",
-    permissions: [
-      "View Profile",
-      "Edit Profile",
-      "Update Personal Details",
-      "Upload Documents",
-    ],
-    subModules: ["Personal Information", "Address Details", "Bank Details"],
-  },
-  {
-    id: 3,
-    name: "Leave Management",
-    icon: FiCalendar,
-    description: "Manage employee leave requests",
-    permissions: ["View Leave", "Apply Leave", "Approve Leave", "Cancel Leave"],
-    subModules: ["Leave Application", "Leave Approval", "Leave Balance"],
-  },
-  {
-    id: 4,
-    name: "Attendance",
-    icon: FiCheckCircle,
-    description: "Manage employee attendance",
-    permissions: ["View Attendance", "Mark Attendance", "Edit Attendance"],
-    subModules: ["Daily Attendance", "Attendance Reports"],
-  },
-  {
-    id: 5,
-    name: "Payroll",
-    icon: FiDollarSign,
-    description: "Manage salary and payroll",
-    permissions: ["View Payroll", "Process Payroll", "Approve Payroll"],
-    subModules: ["Salary Structure", "Payslip", "Payroll Processing"],
-  },
-  {
-    id: 6,
-    name: "Performance",
-    icon: FiBarChart2,
-    description: "Manage employee performance",
-    permissions: ["View Performance", "Create Reviews", "Approve Reviews"],
-    subModules: ["Performance Reviews", "Appraisals"],
-  },
-  {
-    id: 7,
-    name: "Learning & Development",
-    icon: FiBookOpen,
-    description: "Manage employee learning",
-    permissions: ["View Courses", "Assign Courses", "Manage Training"],
-    subModules: ["Training Programs", "Employee Courses"],
-  },
-  {
-    id: 8,
-    name: "Reports",
-    icon: FiFileText,
-    description: "Access HR reports",
-    permissions: ["View Reports", "Export Reports"],
-    subModules: ["Employee Reports", "Attendance Reports"],
-  },
-];
+const getModuleIcon = (moduleName) => {
+  const normalizedName = String(moduleName || "").toLowerCase();
 
-const initialEmployees = [
-  {
-    id: 1,
-    name: "Rahul Sharma",
-    employeeCode: "EMP001",
-    department: "Human Resources",
-  },
-  { id: 2, name: "Priya Patel", employeeCode: "EMP002", department: "Finance" },
-  { id: 3, name: "Amit Kumar", employeeCode: "EMP003", department: "IT" },
-  {
-    id: 4,
-    name: "Sneha Desai",
-    employeeCode: "EMP004",
-    department: "Human Resources",
-  },
-  {
-    id: 5,
-    name: "Rohit Verma",
-    employeeCode: "EMP005",
-    department: "Operations",
-  },
-  { id: 6, name: "Neha Joshi", employeeCode: "EMP006", department: "Finance" },
-  { id: 7, name: "Vikas Singh", employeeCode: "EMP007", department: "IT" },
-  {
-    id: 8,
-    name: "Anjali Mehta",
-    employeeCode: "EMP008",
-    department: "Recruitment",
-  },
-  {
-    id: 9,
-    name: "Karan Shah",
-    employeeCode: "EMP009",
-    department: "Operations",
-  },
-  {
-    id: 10,
-    name: "Pooja Nair",
-    employeeCode: "EMP010",
-    department: "Human Resources",
-  },
-];
+  return (
+    moduleIconMap[normalizedName] ||
+    Object.entries(moduleIconMap).find(([key]) =>
+      normalizedName.includes(key),
+    )?.[1] ||
+    FiGrid
+  );
+};
 
-const initialAccess = {
-  1: {
-    permissions: ["View Dashboard", "View My Reports"],
-    subModules: ["Employee Summary", "Attendance Overview", "Leave Balance"],
-  },
-  2: {
-    permissions: ["View Profile"],
-    subModules: ["Personal Information"],
-  },
-  3: {
-    permissions: ["View Leave"],
-    subModules: ["Leave Application"],
-  },
-  4: {
-    permissions: ["View Attendance"],
-    subModules: ["Daily Attendance"],
-  },
-  5: {
-    permissions: ["View Payroll"],
-    subModules: ["Payslip"],
-  },
-  6: {
-    permissions: ["View Performance"],
-    subModules: ["Performance Reviews"],
-  },
-  7: {
-    permissions: ["View Courses"],
-    subModules: ["Employee Courses"],
-  },
-  8: {
-    permissions: ["View Reports"],
-    subModules: ["Employee Reports"],
-  },
+// =====================================================
+// API HELPERS
+// =====================================================
+
+const getApiErrorMessage = (error) =>
+  error?.response?.data?.message ||
+  error?.response?.data?.title ||
+  error?.message ||
+  "Something went wrong. Please try again.";
+
+const getApiArray = (data) => {
+  if (Array.isArray(data)) return data;
+
+  if (Array.isArray(data?.data)) return data.data;
+
+  if (Array.isArray(data?.result)) return data.result;
+
+  return [];
+};
+
+// =====================================================
+// ROLE MAPPER
+// =====================================================
+
+const mapRoleFromApi = (role) => ({
+  id: Number(role.rdhR0000LIVID),
+  name: role.rdhR0000LIVName || "",
+  description: role.rdhR0000LIVDescription || "",
+  users: Number(role.employeeCount) || 0,
+  status: role.isDeactivated ? "Inactive" : "Active",
+
+  // true = Owner, false = Read and Write
+  owner: role.rdhR0000LIVPermission === true,
+});
+
+// =====================================================
+// MODULE MAPPER
+// =====================================================
+
+const mapModuleFromApi = (module) => ({
+  id: Number(module.moduleId),
+  name: module.name || "",
+  icon: getModuleIcon(module.name),
+  authScreens: module.authScreens || "0/0",
+});
+
+// =====================================================
+// SCREEN MAPPER
+// =====================================================
+
+const mapScreenFromApi = (screen) => ({
+  screenID: Number(screen.screenID),
+  screenSubID: Number(screen.screenSubID) || 0,
+  rdhR0000ID: Number(screen.rdhR0000ID),
+  screenSequence: Number(screen.screenSequence) || 0,
+  screenTitle: screen.screenTitle || "",
+  formType: screen.formType || "",
+  screenType: screen.screenType || "",
+  icon: screen.icon || "",
+  isSideMenu: Boolean(screen.isSideMenu),
+  projectName: screen.projectName || "",
+  screenName: screen.screenName || "",
+  isApp: Boolean(screen.isApp),
+  isAssigned: screen.isAssigned === true,
+});
+
+// =====================================================
+// USER ASSIGNMENT MAPPER
+//
+// Supports common camelCase and PascalCase response names.
+// Confirm these fields against your actual GetUsers response.
+// =====================================================
+
+const mapEmployeeFromApi = (employee) => {
+  const assignedValue =
+    employee.isAssigned ??
+    employee.IsAssigned ??
+    false;
+
+  return {
+    id: Number(
+      employee.employeeId ??
+      employee.EmployeeID ??
+      employee.employeeID ??
+      employee.id
+    ),
+
+    name:
+      employee.employeeName ??
+      employee.EmployeeName ??
+      employee.name ??
+      "",
+
+    roleId: Number(
+      employee.rdhR0000LIVID ??
+      employee.roleID ??
+      employee.RoleID
+    ),
+
+    roleName:
+      employee.roleName ??
+      employee.RoleName ??
+      "",
+
+    assignmentId: Number(
+      employee.rdhR0000XLVId ??
+      employee.assignmentId ??
+      employee.AssignmentID
+    ),
+
+    isAssigned:
+      assignedValue === true ||
+      assignedValue === 1 ||
+      assignedValue === "1",
+  };
+};
+
+// =====================================================
+// AUTH DETAILS
+// =====================================================
+
+const getCurrentUserDetails = () => {
+  const user = useAuthStore.getState().user || {};
+
+  return {
+    createdByUser:
+      user.EmployeeName ||
+      user.employeeName ||
+      "",
+
+    sourceID:
+      user.SourceID ||
+      user.sourceID ||
+      "",
+  };
+};
+
+// =====================================================
+// SCREEN COUNT HELPER
+// =====================================================
+
+const getAuthScreenCount = (authScreens) => {
+  const [authorized, total] = String(authScreens || "0/0")
+    .split("/")
+    .map((value) => Number(value) || 0);
+
+  return { authorized, total };
 };
 
 // =====================================================
@@ -261,31 +225,103 @@ const initialAccess = {
 // =====================================================
 
 const RoleAccess = () => {
-  const [roles, setRoles] = useState(initialRoles);
-  const [employees] = useState(initialEmployees);
+  // =================================================
+  // AUTH STORE
+  // =================================================
 
-  const [selectedRoleId, setSelectedRoleId] = useState(5);
+  const selectedRoleId = useAuthStore(
+    (state) => state.selectedRoleId,
+  );
+
+  const setSelectedRoleId = useAuthStore(
+    (state) => state.setSelectedRoleId,
+  );
+
+  const employeeId = useAuthStore(
+    (state) => state.employeeId,
+  );
+
+  // This value is populated from GetAllRole.
+  const selectedRolePermission = useAuthStore(
+    (state) => state.selectedRolePermission,
+  );
+
+  // =================================================
+  // ROLE STATES
+  // =================================================
+
+  const [roles, setRoles] = useState([]);
+  const [rolesLoading, setRolesLoading] = useState(true);
+  const [rolesError, setRolesError] = useState("");
+
+  const [roleSaving, setRoleSaving] = useState(false);
+  const [roleDeleting, setRoleDeleting] = useState(false);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // =================================================
+  // MODULE STATES
+  // =================================================
+
+  const [moduleData, setModuleData] = useState([]);
+  const [modulesLoading, setModulesLoading] = useState(false);
+  const [modulesError, setModulesError] = useState("");
+
+  const [selectedModule, setSelectedModule] = useState(null);
+
+  // =================================================
+  // SCREEN STATES
+  // =================================================
+
+  const [screens, setScreens] = useState([]);
+  const [screensLoading, setScreensLoading] = useState(false);
+  const [screensError, setScreensError] = useState("");
+  const [screenSaving, setScreenSaving] = useState(false);
+
+  // =================================================
+  // USER ASSIGNMENT STATES
+  // =================================================
+
+  const [employees, setEmployees] = useState([]);
+  const [employeesLoading, setEmployeesLoading] = useState(false);
+  const [employeesError, setEmployeesError] = useState("");
+
+  const [assignedUsers, setAssignedUsers] = useState({});
+  const [assignmentSaving, setAssignmentSaving] = useState(false);
+
+  // =================================================
+  // PERMISSION STATES
+  // =================================================
+
+  const [rolePermissions, setRolePermissions] = useState({});
+  const [permissionSaving, setPermissionSaving] = useState(false);
+
+  // =================================================
+  // GENERAL STATES
+  // =================================================
+
+  const [toast, setToast] = useState(null);
+
   const [activeTab, setActiveTab] = useState("modules");
 
   const [searchRole, setSearchRole] = useState("");
   const [searchEmployee, setSearchEmployee] = useState("");
 
-  const [selectedModule, setSelectedModule] = useState(1);
+  // =================================================
+// DASHBOARD STATES
+// =================================================
 
-  const [moduleAccess, setModuleAccess] = useState({
-    5: initialAccess,
-  });
+const [dashboardCounts, setDashboardCounts] = useState({
+  totalRoles: 0,
+  totalUsers: 0,
+  totalModules: 0,
+  totalPermissions: 0,
+});
 
-  const [rolePermissions, setRolePermissions] = useState({
-    5: {
-      readWrite: true,
-      owner: false,
-    },
-  });
-
-  const [assignedUsers, setAssignedUsers] = useState({
-    5: [1, 2, 4, 5, 7, 9],
-  });
+const [dashboardLoading, setDashboardLoading] = useState(false);
+  // =================================================
+  // ROLE MODAL STATES
+  // =================================================
 
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
@@ -296,64 +332,436 @@ const RoleAccess = () => {
   });
 
   // =================================================
+  // TOAST
+  // =================================================
+
+  const showToast = useCallback(
+    (message, type = "info", duration = 3000) => {
+      setToast({
+        id: Date.now(),
+        message,
+        type,
+        duration,
+      });
+    },
+    [],
+  );
+
+  const closeToast = useCallback(() => {
+    setToast(null);
+  }, []);
+// =================================================
+// FETCH DASHBOARD COUNTS
+// GET /Dashboard/GetDashboardCounts
+// =================================================
+
+const fetchDashboardCounts = useCallback(async () => {
+  setDashboardLoading(true);
+
+  try {
+    const response = await menuClient.get(
+      "/Dashboard/GetDashboardCounts",
+    );
+
+    const data = response.data?.data ?? response.data;
+
+    setDashboardCounts({
+      totalRoles: Number(data?.totalRoles) || 0,
+      totalUsers: Number(data?.totalUsers) || 0,
+      totalModules: Number(data?.totalModules) || 0,
+      totalPermissions: Number(data?.totalPermissions) || 0,
+    });
+  } catch (error) {
+    showToast(getApiErrorMessage(error), "error");
+  } finally {
+    setDashboardLoading(false);
+  }
+}, [showToast]);
+  // =================================================
+  // FETCH ROLES
+  // GET /Menu/GetAllRole
+  // =================================================
+
+  const fetchRoles = useCallback(
+    async (preferredRoleId = null) => {
+      setRolesLoading(true);
+      setRolesError("");
+
+      try {
+        const response = await menuClient.get("/Menu/GetAllRole");
+
+        const apiRoles = getApiArray(response.data);
+
+        const mappedRoles = apiRoles
+          .map(mapRoleFromApi)
+          .filter((role) => Number.isFinite(role.id));
+
+        setRoles(mappedRoles);
+
+        // Initialize permission state from API.
+        const permissionMap = {};
+
+        mappedRoles.forEach((role) => {
+          permissionMap[role.id] = {
+            owner: role.owner,
+            readWrite: !role.owner,
+          };
+        });
+
+        setRolePermissions((previous) => ({
+          ...permissionMap,
+          ...previous,
+        }));
+
+        const currentSelectedId =
+          useAuthStore.getState().selectedRoleId;
+
+        const requestedId =
+          preferredRoleId ?? currentSelectedId;
+
+        const existingRole = mappedRoles.find(
+          (role) => role.id === Number(requestedId),
+        );
+
+        const nextRoleId = existingRole
+          ? existingRole.id
+          : mappedRoles[0]?.id ?? null;
+
+        setSelectedRoleId(nextRoleId);
+
+        const nextRole = mappedRoles.find(
+          (role) => role.id === Number(nextRoleId),
+        );
+
+        // Keep selected role's Owner permission in Zustand.
+        useAuthStore.setState({
+          selectedRolePermission: nextRole?.owner ?? false,
+        });
+
+        return mappedRoles;
+      } catch (error) {
+        const message = getApiErrorMessage(error);
+
+        setRolesError(message);
+        showToast(message, "error");
+
+        return [];
+      } finally {
+        setRolesLoading(false);
+      }
+    },
+    [setSelectedRoleId, showToast],
+  );
+
+  // =================================================
+  // FETCH MODULES
+  // GET /Menu/GetAllModules/{RoleID}
+  // =================================================
+
+  const fetchModules = useCallback(
+    async (roleId, preferredModuleId = null) => {
+      if (!roleId) {
+        setModuleData([]);
+        setSelectedModule(null);
+        setScreens([]);
+        return [];
+      }
+
+      setModulesLoading(true);
+      setModulesError("");
+
+      setScreens([]);
+      setScreensError("");
+
+      try {
+        const response = await menuClient.get(
+          `/Menu/GetAllModules/${roleId}`,
+        );
+
+        const apiModules = getApiArray(response.data);
+
+        const mappedModules = apiModules
+          .map(mapModuleFromApi)
+          .filter((module) => Number.isFinite(module.id));
+
+        setModuleData(mappedModules);
+
+        const preferredModule = mappedModules.find(
+          (module) => module.id === Number(preferredModuleId),
+        );
+
+        const nextModuleId =
+          preferredModule?.id ??
+          mappedModules[0]?.id ??
+          null;
+
+        setSelectedModule(nextModuleId);
+
+        return mappedModules;
+      } catch (error) {
+        const message = getApiErrorMessage(error);
+
+        setModuleData([]);
+        setSelectedModule(null);
+        setModulesError(message);
+
+        showToast(message, "error");
+
+        return [];
+      } finally {
+        setModulesLoading(false);
+      }
+    },
+    [showToast],
+  );
+
+  // =================================================
+  // FETCH SCREENS
+  // GET /Menu/GetScreenByID/{ModuleID}
+  // =================================================
+
+  const fetchScreens = useCallback(
+    async (moduleId, roleId) => {
+      if (!moduleId || !roleId) {
+        setScreens([]);
+        return [];
+      }
+
+      setScreensLoading(true);
+      setScreensError("");
+      setScreens([]);
+
+      try {
+       const response = await menuClient.get(
+  `/Menu/GetScreenByID/${moduleId}`,
+  {
+    params: {
+      RoleID: Number(roleId),
+    },
+  },
+);
+
+        const apiScreens = getApiArray(response.data);
+
+        const mappedScreens = apiScreens
+          .map(mapScreenFromApi)
+          .filter((screen) =>
+            Number.isFinite(screen.screenID),
+          );
+
+        setScreens(mappedScreens);
+
+        return mappedScreens;
+      } catch (error) {
+        const message = getApiErrorMessage(error);
+
+        setScreens([]);
+        setScreensError(message);
+
+        showToast(message, "error");
+
+        return [];
+      } finally {
+        setScreensLoading(false);
+      }
+    },
+    [showToast],
+  );
+
+  // =================================================
+  // FETCH USERS
+  // GET /UserAssigment/GetUsers
+  // =================================================
+
+const fetchEmployees = useCallback(async () => {
+  if (!selectedRoleId) return;
+
+  setEmployeesLoading(true);
+  setEmployeesError("");
+
+  try {
+    const response = await menuClient.get(
+      `/UserAssigment/GetUsers/${Number(selectedRoleId)}`
+    );
+
+    const employeeList = getApiArray(response.data).map(
+      mapEmployeeFromApi
+    );
+
+    setEmployees(employeeList);
+
+    // Automatically check employees where API returns isAssigned = 1.
+    setAssignedUsers((previous) => ({
+      ...previous,
+      [selectedRoleId]: employeeList
+        .filter((employee) => employee.isAssigned)
+        .map((employee) => employee.id),
+    }));
+
+  } catch (error) {
+    setEmployeesError(getApiErrorMessage(error));
+  } finally {
+    setEmployeesLoading(false);
+  }
+}, [selectedRoleId]);
+
+  // =================================================
+  // INITIAL ROLE LOAD
+  // =================================================
+
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
+
+  // =================================================
+  // LOAD MODULES WHEN ROLE CHANGES
+  // =================================================
+
+  useEffect(() => {
+    if (selectedRoleId) {
+      fetchModules(selectedRoleId);
+    } else {
+      setModuleData([]);
+      setSelectedModule(null);
+      setScreens([]);
+    }
+  }, [selectedRoleId, fetchModules]);
+
+  // =================================================
+  // LOAD SCREENS WHEN MODULE OR ROLE CHANGES
+  // =================================================
+
+  useEffect(() => {
+    if (selectedRoleId && selectedModule) {
+      fetchScreens(selectedModule, selectedRoleId);
+    } else {
+      setScreens([]);
+    }
+  }, [selectedModule, selectedRoleId, fetchScreens]);
+
+  // =================================================
+  // LOAD EMPLOYEES WHEN USER TAB IS OPENED
+  // =================================================
+
+  useEffect(() => {
+    if (activeTab === "users" && selectedRoleId) {
+      fetchEmployees();
+    }
+  }, [activeTab, selectedRoleId, fetchEmployees]);
+
+  useEffect(() => {
+  fetchDashboardCounts();
+}, [fetchDashboardCounts]);
+  // =================================================
   // SELECTED ROLE
   // =================================================
 
-  const selectedRole = roles.find((role) => role.id === selectedRoleId);
+  const selectedRole = useMemo(
+    () =>
+      roles.find(
+        (role) => role.id === Number(selectedRoleId),
+      ),
+    [roles, selectedRoleId],
+  );
 
-  const currentAccess = moduleAccess[selectedRoleId] || {};
+  const currentPermissions =
+    rolePermissions[selectedRoleId] || {
+      owner:
+        selectedRolePermission ??
+        selectedRole?.owner ??
+        false,
 
-  const currentPermissions = rolePermissions[selectedRoleId] || {
-    readWrite: false,
-    owner: false,
-  };
+      readWrite: !(
+        selectedRolePermission ??
+        selectedRole?.owner ??
+        false
+      ),
+    };
 
-  const currentAssignedUsers = assignedUsers[selectedRoleId] || [];
+  const currentAssignedUsers =
+    assignedUsers[selectedRoleId] || [];
 
   // =================================================
   // FILTER ROLES
   // =================================================
 
-  const filteredRoles = useMemo(() => {
-    return roles.filter((role) =>
-      role.name.toLowerCase().includes(searchRole.toLowerCase()),
-    );
-  }, [roles, searchRole]);
+  const filteredRoles = useMemo(
+    () =>
+      roles.filter((role) =>
+        role.name
+          .toLowerCase()
+          .includes(searchRole.toLowerCase()),
+      ),
+    [roles, searchRole],
+  );
 
   // =================================================
   // FILTER EMPLOYEES
   // =================================================
 
-  const filteredEmployees = useMemo(() => {
-    return employees.filter((employee) =>
-      `${employee.name} ${employee.employeeCode} ${employee.department}`
-        .toLowerCase()
-        .includes(searchEmployee.toLowerCase()),
-    );
-  }, [employees, searchEmployee]);
+  const filteredEmployees = useMemo(
+    () =>
+      employees.filter((employee) =>
+        `${employee.name} ${employee.roleName} ${employee.id}`
+          .toLowerCase()
+          .includes(searchEmployee.toLowerCase()),
+      ),
+    [employees, searchEmployee],
+  );
+
+  // =================================================
+  // SCREEN GROUPS
+  // =================================================
+
+  const menuScreens = useMemo(
+    () =>
+      screens.filter(
+        (screen) =>
+          screen.formType.toLowerCase() === "menu",
+      ),
+    [screens],
+  );
+
+  const formScreens = useMemo(
+    () =>
+      screens.filter(
+        (screen) =>
+          screen.formType.toLowerCase() !== "menu",
+      ),
+    [screens],
+  );
+
+  // =================================================
+  // SCREEN COUNTS
+  // =================================================
+
+  const assignedScreenCount = screens.filter(
+    (screen) => screen.isAssigned,
+  ).length;
+
+  const totalScreenCount = screens.length;
 
   // =================================================
   // DASHBOARD STATISTICS
   // =================================================
 
-  const totalUsers = employees.length;
+// =================================================
+// DASHBOARD STATISTICS
+// =================================================
 
-  const assignedCount = Object.values(assignedUsers).reduce(
-    (total, users) => total + users.length,
-    0,
-  );
+const totalUsers = dashboardCounts.totalUsers;
 
-  const activeModules = Object.values(currentAccess).filter(
-    (module) => module.permissions?.length > 0 || module.subModules?.length > 0,
-  ).length;
+const assignedCount = Object.values(assignedUsers).reduce(
+  (total, users) => total + users.length,
+  0,
+);
 
-  const totalPermissions = Object.values(currentAccess).reduce(
-    (total, module) =>
-      total +
-      (module.permissions?.length || 0) +
-      (module.subModules?.length || 0),
-    0,
-  );
+const activeModules = moduleData.filter(
+  (module) =>
+    getAuthScreenCount(module.authScreens).authorized > 0,
+).length;
+
+const totalPermissions = dashboardCounts.totalPermissions;
 
   // =================================================
   // ROLE MODAL
@@ -383,166 +791,350 @@ const RoleAccess = () => {
     setShowRoleModal(true);
   };
 
-  const saveRole = (e) => {
-    e.preventDefault();
+  // =================================================
+  // SAVE ROLE
+  // =================================================
 
-    if (!roleForm.name.trim()) return;
+  const saveRole = async (event) => {
+    event.preventDefault();
 
-    if (editingRole) {
-      setRoles((prev) =>
-        prev.map((role) =>
-          role.id === editingRole.id
-            ? {
-                ...role,
-                name: roleForm.name.trim(),
-                description: roleForm.description.trim(),
-              }
-            : role,
-        ),
+    const roleName = roleForm.name.trim();
+    const roleDescription = roleForm.description.trim();
+
+    if (!roleName || roleSaving) return;
+
+    const { createdByUser, sourceID } =
+      getCurrentUserDetails();
+
+    if (!createdByUser || !sourceID) {
+      showToast(
+        "Unable to identify the logged-in user or source ID.",
+        "error",
       );
-    } else {
-      const newRole = {
-        id: Date.now(),
-        name: roleForm.name.trim(),
-        description: roleForm.description.trim(),
-        users: 0,
-        status: "Active",
-      };
-
-      setRoles((prev) => [...prev, newRole]);
-      setSelectedRoleId(newRole.id);
-      setModuleAccess((prev) => ({
-        ...prev,
-        [newRole.id]: {},
-      }));
-      setRolePermissions((prev) => ({
-        ...prev,
-        [newRole.id]: {
-          readWrite: false,
-          owner: false,
-        },
-      }));
-      setAssignedUsers((prev) => ({
-        ...prev,
-        [newRole.id]: [],
-      }));
+      return;
     }
 
-    setShowRoleModal(false);
+    const dto = {
+      createdByUser,
+      sourceID,
+      rdhR0000LIVName: roleName,
+      rdhR0000LIVDescription: roleDescription,
+    };
+
+    setRoleSaving(true);
+
+    try {
+      if (editingRole) {
+        await menuClient.patch(
+          `/Role/UpdateRole/${editingRole.id}`,
+          {
+            roleId: editingRole.id,
+            dto,
+          },
+        );
+
+        await fetchRoles(editingRole.id);
+        await fetchDashboardCounts();
+
+        showToast("Role updated successfully.", "success");
+      } else {
+        await menuClient.post("/Role/CreateRole", dto);
+
+        const refreshedRoles = await fetchRoles();
+        await fetchDashboardCounts();
+        const createdRole = refreshedRoles.find(
+          (role) =>
+            role.name.toLowerCase() ===
+            roleName.toLowerCase(),
+        );
+
+        if (createdRole) {
+          setSelectedRoleId(createdRole.id);
+
+          useAuthStore.setState({
+            selectedRolePermission: createdRole.owner,
+          });
+        }
+
+        showToast("Role created successfully.", "success");
+      }
+
+      setShowRoleModal(false);
+
+      setRoleForm({
+        name: "",
+        description: "",
+      });
+    } catch (error) {
+      showToast(getApiErrorMessage(error), "error");
+    } finally {
+      setRoleSaving(false);
+    }
   };
 
-  const deleteRole = () => {
-    if (!selectedRole) return;
+  // =================================================
+  // DELETE ROLE
+  // =================================================
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedRole.name}?`,
+  const openDeleteConfirm = () => {
+    if (!selectedRole || roleDeleting) return;
+
+    setShowDeleteConfirm(true);
+  };
+
+  const deleteRole = async () => {
+    if (!selectedRole || roleDeleting) return;
+
+    const deletingRole = selectedRole;
+
+    setRoleDeleting(true);
+
+    try {
+      await menuClient.patch(
+        `/Role/DeleteRole/${deletingRole.id}`,
+      );
+
+      const remainingRoles = roles.filter(
+        (role) => role.id !== deletingRole.id,
+      );
+
+      const nextRoleId = remainingRoles[0]?.id ?? null;
+
+      setSelectedRoleId(nextRoleId);
+
+      await fetchRoles(nextRoleId);
+      await fetchDashboardCounts();
+      setShowDeleteConfirm(false);
+
+      showToast(
+        `"${deletingRole.name}" deleted successfully.`,
+        "success",
+      );
+    } catch (error) {
+      setShowDeleteConfirm(false);
+      showToast(getApiErrorMessage(error), "error");
+    } finally {
+      setRoleDeleting(false);
+    }
+  };
+
+  // =================================================
+  // TOGGLE SCREEN ACCESS
+  // =================================================
+
+  const toggleScreenAccess = (screenID, checked) => {
+    setScreens((previous) =>
+      previous.map((screen) =>
+        screen.screenID === screenID
+          ? { ...screen, isAssigned: checked }
+          : screen,
+      ),
+    );
+  };
+
+  // =================================================
+  // SELECT ALL SCREENS
+  // =================================================
+
+  const toggleAllScreens = (checked) => {
+    setScreens((previous) =>
+      previous.map((screen) => ({
+        ...screen,
+        isAssigned: checked,
+      })),
+    );
+  };
+
+  // =================================================
+  // SELECT ALL MENU SCREENS
+  // =================================================
+
+  const toggleAllMenuScreens = (checked) => {
+    const menuIds = new Set(
+      menuScreens.map((screen) => screen.screenID),
     );
 
-    if (!confirmed) return;
+    setScreens((previous) =>
+      previous.map((screen) =>
+        menuIds.has(screen.screenID)
+          ? { ...screen, isAssigned: checked }
+          : screen,
+      ),
+    );
+  };
 
-    const remainingRoles = roles.filter((role) => role.id !== selectedRoleId);
+  // =================================================
+  // SELECT ALL FORM SCREENS
+  // =================================================
 
-    setRoles(remainingRoles);
+  const toggleAllFormScreens = (checked) => {
+    const formIds = new Set(
+      formScreens.map((screen) => screen.screenID),
+    );
 
-    if (remainingRoles.length > 0) {
-      setSelectedRoleId(remainingRoles[0].id);
+    setScreens((previous) =>
+      previous.map((screen) =>
+        formIds.has(screen.screenID)
+          ? { ...screen, isAssigned: checked }
+          : screen,
+      ),
+    );
+  };
+
+  // =================================================
+  // SAVE MODULE ACCESS
+  //
+  // PATCH /Menu/UpdateFormAccess
+  //
+  // Sends ALL checked screen IDs for this module.
+  // =================================================
+
+  const saveModuleAccess = async () => {
+    if (
+      !selectedRoleId ||
+      !selectedModule ||
+      screenSaving
+    ) {
+      return;
     }
-  };
 
-  // =================================================
-  // MODULE ACCESS
-  // =================================================
+    const screenIDs = [
+      ...new Set(
+        screens
+          .filter((screen) => screen.isAssigned)
+          .map((screen) => Number(screen.screenID))
+          .filter((id) => Number.isFinite(id)),
+      ),
+    ];
 
-  const toggleModulePermission = (moduleId, permission) => {
-    setModuleAccess((prev) => {
-      const roleData = prev[selectedRoleId] || {};
-      const moduleData = roleData[moduleId] || {
-        permissions: [],
-        subModules: [],
-      };
+    const payload = {
+      moduleID: Number(selectedModule),
+      dto: {
+        rdhR0000LIVID: Number(selectedRoleId),
+        screenIDs,
+      },
+    };
 
-      const existing = moduleData.permissions || [];
+    setScreenSaving(true);
 
-      const updated = existing.includes(permission)
-        ? existing.filter((item) => item !== permission)
-        : [...existing, permission];
+    try {
+      await menuClient.patch(
+        "/Menu/UpdateFormAccess",
+        payload,
+      );
 
-      return {
-        ...prev,
-        [selectedRoleId]: {
-          ...roleData,
-          [moduleId]: {
-            ...moduleData,
-            permissions: updated,
-          },
-        },
-      };
-    });
-  };
+      // Refresh module counts and retain the selected module.
+      await fetchModules(selectedRoleId, selectedModule);
 
-  const toggleSubModule = (moduleId, subModule) => {
-    setModuleAccess((prev) => {
-      const roleData = prev[selectedRoleId] || {};
-      const moduleData = roleData[moduleId] || {
-        permissions: [],
-        subModules: [],
-      };
-
-      const existing = moduleData.subModules || [];
-
-      const updated = existing.includes(subModule)
-        ? existing.filter((item) => item !== subModule)
-        : [...existing, subModule];
-
-      return {
-        ...prev,
-        [selectedRoleId]: {
-          ...roleData,
-          [moduleId]: {
-            ...moduleData,
-            subModules: updated,
-          },
-        },
-      };
-    });
-  };
-
-  const toggleAllModuleAccess = (moduleId, checked) => {
-    const module = moduleData.find((item) => item.id === moduleId);
-
-    if (!module) return;
-
-    setModuleAccess((prev) => {
-      const roleData = prev[selectedRoleId] || {};
-
-      return {
-        ...prev,
-        [selectedRoleId]: {
-          ...roleData,
-          [moduleId]: {
-            permissions: checked ? [...module.permissions] : [],
-            subModules: checked ? [...module.subModules] : [],
-          },
-        },
-      };
-    });
+      // Refresh the selected module's screen assignments.
+      await fetchScreens(selectedModule, selectedRoleId);
+      await fetchDashboardCounts();
+      showToast(
+        "Module screen access updated successfully.",
+        "success",
+      );
+    } catch (error) {
+      showToast(getApiErrorMessage(error), "error");
+    } finally {
+      setScreenSaving(false);
+    }
   };
 
   // =================================================
   // ROLE PERMISSIONS
+  //
+  // OWNER       = true
+  // READ/WRITE  = false
+  //
+  // ONLY ONE CAN BE SELECTED
   // =================================================
 
   const toggleRolePermission = (key) => {
-    setRolePermissions((prev) => ({
-      ...prev,
-      [selectedRoleId]: {
-        ...(prev[selectedRoleId] || {
-          readWrite: false,
-          owner: false,
-        }),
-        [key]: !currentPermissions[key],
-      },
-    }));
+    setRolePermissions((previous) => {
+      const existing = previous[selectedRoleId] || {
+        readWrite: !selectedRole?.owner,
+        owner: selectedRole?.owner ?? false,
+      };
+
+      const isCurrentlySelected = existing[key];
+
+      return {
+        ...previous,
+
+        [selectedRoleId]: {
+          readWrite:
+            !isCurrentlySelected && key === "readWrite",
+
+          owner:
+            !isCurrentlySelected && key === "owner",
+        },
+      };
+    });
+  };
+
+  // =================================================
+  // SAVE ROLE PERMISSION
+  //
+  // PATCH /UserAssigment/UpdatePermissions/{RoleID}
+  // =================================================
+
+  const saveRolePermission = async () => {
+    if (!selectedRoleId || permissionSaving) return;
+
+    if (
+      !currentPermissions.owner &&
+      !currentPermissions.readWrite
+    ) {
+      showToast(
+        "Please select a permission before saving.",
+        "warning",
+      );
+      return;
+    }
+
+    const permission = currentPermissions.owner;
+
+    const payload = {
+      roleID: Number(selectedRoleId),
+      permission,
+    };
+
+    setPermissionSaving(true);
+
+    try {
+      await menuClient.patch(
+        `/UserAssigment/UpdatePermissions/${selectedRoleId}`,
+        payload,
+      );
+
+      // Update local role permission state.
+      setRolePermissions((previous) => ({
+        ...previous,
+        [selectedRoleId]: {
+          owner: permission,
+          readWrite: !permission,
+        },
+      }));
+
+      // Update selected role permission in Zustand.
+      useAuthStore.setState({
+        selectedRolePermission: permission,
+      });
+
+      // Refresh roles so the API remains the source of truth.
+      await fetchRoles(selectedRoleId);
+
+      showToast(
+        permission
+          ? "Owner permission updated successfully."
+          : "Read and Write permission updated successfully.",
+        "success",
+      );
+    } catch (error) {
+      showToast(getApiErrorMessage(error), "error");
+    } finally {
+      setPermissionSaving(false);
+    }
   };
 
   // =================================================
@@ -550,70 +1142,112 @@ const RoleAccess = () => {
   // =================================================
 
   const toggleEmployee = (employeeId) => {
-    setAssignedUsers((prev) => {
-      const existing = prev[selectedRoleId] || [];
+    setAssignedUsers((previous) => {
+      const existing = previous[selectedRoleId] || [];
 
       const updated = existing.includes(employeeId)
         ? existing.filter((id) => id !== employeeId)
         : [...existing, employeeId];
 
       return {
-        ...prev,
+        ...previous,
         [selectedRoleId]: updated,
       };
     });
-
-    setRoles((prev) =>
-      prev.map((role) => {
-        if (role.id !== selectedRoleId) return role;
-
-        const existing = assignedUsers[selectedRoleId] || [];
-
-        return {
-          ...role,
-          users: existing.includes(employeeId)
-            ? Math.max(0, role.users - 1)
-            : role.users + 1,
-        };
-      }),
-    );
   };
 
   const selectAllEmployees = () => {
-    const visibleIds = filteredEmployees.map((employee) => employee.id);
-
-    const allSelected = visibleIds.every((id) =>
-      currentAssignedUsers.includes(id),
+    const visibleIds = filteredEmployees.map(
+      (employee) => employee.id,
     );
 
-    setAssignedUsers((prev) => {
-      const existing = prev[selectedRoleId] || [];
+    const allSelected =
+      visibleIds.length > 0 &&
+      visibleIds.every((id) =>
+        currentAssignedUsers.includes(id),
+      );
+
+    setAssignedUsers((previous) => {
+      const existing = previous[selectedRoleId] || [];
 
       const updated = allSelected
         ? existing.filter((id) => !visibleIds.includes(id))
         : [...new Set([...existing, ...visibleIds])];
 
       return {
-        ...prev,
+        ...previous,
         [selectedRoleId]: updated,
       };
     });
+  };
 
-    setRoles((prev) =>
-      prev.map((role) => {
-        if (role.id !== selectedRoleId) return role;
+  // =================================================
+  // SAVE EMPLOYEE ASSIGNMENTS
+  //
+  // PATCH /UserAssigment/AssignEmployees/{RoleID}
+  //
+  // Sends ALL checked employee IDs for this role.
+  // =================================================
 
-        const existing = assignedUsers[selectedRoleId] || [];
-        const updated = allSelected
-          ? existing.filter((id) => !visibleIds.includes(id))
-          : [...new Set([...existing, ...visibleIds])];
+  const saveEmployeeAssignments = async () => {
+    if (!selectedRoleId || assignmentSaving) return;
 
-        return {
-          ...role,
-          users: updated.length,
-        };
-      }),
-    );
+    const employeeIDs = [
+      ...new Set(
+        (assignedUsers[selectedRoleId] || [])
+          .map(Number)
+          .filter((id) => Number.isFinite(id)),
+      ),
+    ];
+
+    const payload = {
+      roleID: Number(selectedRoleId),
+      employeeIDs,
+    };
+
+    setAssignmentSaving(true);
+
+    try {
+      await menuClient.patch(
+        `/UserAssigment/AssignEmployees/${selectedRoleId}`,
+        payload,
+      );
+
+      // Refresh assignment status from the API.
+      await fetchEmployees();
+
+      // Refresh role employee counts.
+      await fetchRoles(selectedRoleId);
+
+      showToast(
+        "Employee assignments updated successfully.",
+        "success",
+      );
+    } catch (error) {
+      showToast(getApiErrorMessage(error), "error");
+    } finally {
+      setAssignmentSaving(false);
+    }
+  };
+
+  // =================================================
+  // SAVE CURRENT TAB
+  // =================================================
+
+  const saveCurrentTab = () => {
+    if (activeTab === "modules") {
+      saveModuleAccess();
+      return;
+    }
+
+    if (activeTab === "permissions") {
+      saveRolePermission();
+      return;
+    }
+
+    if (activeTab === "users") {
+      saveEmployeeAssignments();
+    }
   };
 
   // =================================================
@@ -624,18 +1258,53 @@ const RoleAccess = () => {
     (module) => module.id === selectedModule,
   );
 
-  const activeModuleAccess = currentAccess[selectedModule] || {
-    permissions: [],
-    subModules: [],
-  };
+  const activeModuleCount = activeModule
+    ? getAuthScreenCount(activeModule.authScreens)
+    : { authorized: 0, total: 0 };
 
-  const moduleSelectedCount =
-    (activeModuleAccess.permissions?.length || 0) +
-    (activeModuleAccess.subModules?.length || 0);
+  const allScreensAssigned =
+    screens.length > 0 &&
+    screens.every((screen) => screen.isAssigned);
 
-  const moduleTotalCount =
-    (activeModule?.permissions.length || 0) +
-    (activeModule?.subModules.length || 0);
+  const allMenuScreensAssigned =
+    menuScreens.length > 0 &&
+    menuScreens.every((screen) => screen.isAssigned);
+
+  const allFormScreensAssigned =
+    formScreens.length > 0 &&
+    formScreens.every((screen) => screen.isAssigned);
+
+  const allVisibleEmployeesAssigned =
+    filteredEmployees.length > 0 &&
+    filteredEmployees.every((employee) =>
+      currentAssignedUsers.includes(employee.id),
+    );
+
+  // =================================================
+  // SCREEN CHECKBOX RENDERER
+  // =================================================
+
+  const renderScreenCheckbox = (screen) => (
+    <label
+      className="ra-checkbox-row"
+      key={`${screen.screenID}-${screen.screenSubID}`}
+    >
+      <input
+        type="checkbox"
+        checked={screen.isAssigned}
+        onChange={(event) =>
+          toggleScreenAccess(
+            screen.screenID,
+            event.target.checked,
+          )
+        }
+      />
+
+      <span className="ra-custom-check"></span>
+
+      <span>{screen.screenTitle}</span>
+    </label>
+  );
 
   // =================================================
   // RENDER
@@ -643,80 +1312,97 @@ const RoleAccess = () => {
 
   return (
     <div className="role-access-page">
-      {/* =========================================
-                HEADER
-            ========================================= */}
+
+      {/* HEADER */}
 
       <div className="ra-page-header">
         <div>
           <h2>Role and Access</h2>
-
           <p>
-            Create roles, assign module access and manage permissions with ease.
+            Create roles, assign module access and manage
+            permissions with ease.
           </p>
         </div>
 
-        <button className="ra-primary-btn" onClick={openCreateRole}>
+        <button
+          className="ra-primary-btn"
+          onClick={openCreateRole}
+        >
           <FiPlus />
           Create New Role
         </button>
       </div>
 
-      {/* =========================================
-                DASHBOARD STATISTICS
-            ========================================= */}
+      {/* DASHBOARD STATISTICS */}
 
-      <div className="ra-stats-grid">
-        <DashboardCardGrid>
-          <DashboardCard
-            title="Total Roles"
-            value={roles.length}
-            growth="Role management"
-            icon={FiUsers}
-            color="blue"
-          />
+      {/* DASHBOARD STATISTICS */}
 
-          <DashboardCard
-            title="Total Users Assigned"
-            value={totalUsers}
-            growth={`${assignedCount} role assignments`}
-            icon={FiUserCheck}
-            color="green"
-          />
+<div className="ra-stats-grid">
+  <DashboardCardGrid>
+    <DashboardCard
+      title="Total Roles"
+      value={
+        dashboardLoading
+          ? "..."
+          : dashboardCounts.totalRoles
+      }
+      growth="Total roles"
+      icon={FiUsers}
+      color="blue"
+    />
 
-          <DashboardCard
-            title="Modules"
-            value={moduleData.length}
-            growth="All Active"
-            icon={FiGrid}
-            color="purple"
-          />
+    <DashboardCard
+      title="Total Users"
+      value={
+        dashboardLoading
+          ? "..."
+          : dashboardCounts.totalUsers
+      }
+      growth="Total users"
+      icon={FiUserCheck}
+      color="green"
+    />
 
-          <DashboardCard
-            title="Permissions"
-            value={totalPermissions}
-            growth={`Across ${activeModules} modules`}
-            icon={FiShield}
-            color="orange"
-          />
-        </DashboardCardGrid>
-      </div>
+    <DashboardCard
+      title="Total Modules"
+      value={
+        dashboardLoading
+          ? "..."
+          : dashboardCounts.totalModules
+      }
+      growth="Total modules"
+      icon={FiGrid}
+      color="purple"
+    />
 
-      {/* =========================================
-                MAIN CONTENT
-            ========================================= */}
+    <DashboardCard
+      title="Total Permissions"
+      value={
+        dashboardLoading
+          ? "..."
+          : dashboardCounts.totalPermissions
+      }
+      growth="Total permissions"
+      icon={FiShield}
+      color="orange"
+    />
+  </DashboardCardGrid>
+</div>
+
+      {/* MAIN LAYOUT */}
 
       <div className="ra-main-layout">
-        {/* =====================================
-                    LEFT: ROLE LIST
-                ===================================== */}
+
+        {/* LEFT ROLE LIST */}
 
         <aside className="ra-roles-panel">
+
           <div className="ra-panel-heading">
             <h3>Roles</h3>
           </div>
 
           <div className="ra-role-filters">
+
             <div className="ra-search-box">
               <FiSearch />
 
@@ -724,7 +1410,9 @@ const RoleAccess = () => {
                 type="text"
                 placeholder="Search roles..."
                 value={searchRole}
-                onChange={(e) => setSearchRole(e.target.value)}
+                onChange={(event) =>
+                  setSearchRole(event.target.value)
+                }
               />
             </div>
 
@@ -733,61 +1421,99 @@ const RoleAccess = () => {
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </FormSelect>
+
           </div>
 
           <div className="ra-role-list">
-            {filteredRoles.map((role) => (
-              <button
-                key={role.id}
-                className={`ra-role-item ${
-                  selectedRoleId === role.id ? "selected" : ""
-                }`}
-                onClick={() => {
-                  setSelectedRoleId(role.id);
-                  setSelectedModule(1);
-                  setActiveTab("modules");
-                }}
-              >
-                <div className="ra-role-icon">
-                  {role.id === 1 ? (
-                    <FiShield />
-                  ) : role.id === 5 ? (
-                    <FiUser />
-                  ) : (
-                    <FiUsers />
-                  )}
-                </div>
 
-                <div className="ra-role-info">
-                  <strong>{role.name}</strong>
-                  <span>{role.description}</span>
-                </div>
+            {rolesLoading ? (
+              <div className="ra-empty-state">
+                Loading roles...
+              </div>
+            ) : rolesError ? (
+              <div className="ra-empty-state">
+                <p>{rolesError}</p>
 
-                <div className="ra-role-meta">
-                  <small>{role.users} users</small>
-                  <span className="ra-status">{role.status}</span>
-                </div>
+                <button
+                  className="ra-outline-btn"
+                  onClick={() => fetchRoles()}
+                >
+                  Retry
+                </button>
+              </div>
+            ) : (
+              filteredRoles.map((role) => (
+                <button
+                  key={role.id}
+                  className={`ra-role-item ${
+                    selectedRoleId === role.id
+                      ? "selected"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedRoleId(role.id);
 
-                <FiChevronRight className="ra-role-arrow" />
-              </button>
-            ))}
+                    useAuthStore.setState({
+                      selectedRolePermission: role.owner,
+                    });
 
-            {filteredRoles.length === 0 && (
-              <div className="ra-empty-state">No roles found.</div>
+                    setActiveTab("modules");
+                  }}
+                >
+                  <div className="ra-role-icon">
+                    {role.owner ? (
+                      <FiShield />
+                    ) : (
+                      <FiUsers />
+                    )}
+                  </div>
+
+                  <div className="ra-role-info">
+                    <strong>{role.name}</strong>
+                    <span>{role.description}</span>
+                  </div>
+
+                  <div className="ra-role-meta">
+                    <small>{role.users} users</small>
+
+                    <span
+                      className={`ra-status ${
+                        role.status === "Active"
+                          ? "active"
+                          : "inactive"
+                      }`}
+                    >
+                      {role.status}
+                    </span>
+                  </div>
+
+                  <FiChevronRight className="ra-role-arrow" />
+                </button>
+              ))
             )}
+
+            {!rolesLoading &&
+              !rolesError &&
+              filteredRoles.length === 0 && (
+                <div className="ra-empty-state">
+                  No roles found.
+                </div>
+              )}
+
           </div>
         </aside>
 
-        {/* =====================================
-                    RIGHT: ROLE DETAILS
-                ===================================== */}
+        {/* RIGHT ROLE DETAILS */}
 
         <main className="ra-details-panel">
+
           {selectedRole ? (
             <>
+
               {/* ROLE INFORMATION */}
 
               <div className="ra-role-details-header">
+
                 <div className="ra-selected-role">
                   <div className="ra-selected-role-icon">
                     <FiUser />
@@ -795,26 +1521,40 @@ const RoleAccess = () => {
 
                   <div>
                     <h3>{selectedRole.name}</h3>
-                    <p>{selectedRole.description}</p>
+
+                    <p>
+                      {selectedRole.description ||
+                        "No description provided."}
+                    </p>
                   </div>
                 </div>
 
                 <div className="ra-role-actions">
-                  <button className="ra-outline-btn" onClick={openEditRole}>
+
+                  <button
+                    className="ra-outline-btn"
+                    onClick={openEditRole}
+                  >
                     <FiEdit2 />
                     Edit Role
                   </button>
 
-                  <button className="ra-delete-btn" onClick={deleteRole}>
+                  <button
+                    className="ra-delete-btn"
+                    onClick={openDeleteConfirm}
+                    disabled={roleDeleting}
+                  >
                     <FiTrash2 />
                     Delete Role
                   </button>
+
                 </div>
               </div>
 
               {/* ROLE SUMMARY */}
 
               <div className="ra-role-summary">
+
                 <div>
                   <span>Role Name</span>
                   <strong>{selectedRole.name}</strong>
@@ -822,27 +1562,41 @@ const RoleAccess = () => {
 
                 <div>
                   <span>Description</span>
-                  <strong>{selectedRole.description}</strong>
+                  <strong>
+                    {selectedRole.description || "—"}
+                  </strong>
                 </div>
 
                 <div>
                   <span>Users Assigned</span>
-                  <strong>{currentAssignedUsers.length}</strong>
+                  <strong>{selectedRole.users}</strong>
                 </div>
 
                 <div>
                   <span>Status</span>
                   <strong>
-                    <span className="ra-status">{selectedRole.status}</span>
+                    <span
+                      className={`ra-status ${
+                        selectedRole.status === "Active"
+                          ? "active"
+                          : "inactive"
+                      }`}
+                    >
+                      {selectedRole.status}
+                    </span>
                   </strong>
                 </div>
+
               </div>
 
               {/* TABS */}
 
               <div className="ra-tabs">
+
                 <button
-                  className={activeTab === "modules" ? "active" : ""}
+                  className={
+                    activeTab === "modules" ? "active" : ""
+                  }
                   onClick={() => setActiveTab("modules")}
                 >
                   <FiGrid />
@@ -850,7 +1604,9 @@ const RoleAccess = () => {
                 </button>
 
                 <button
-                  className={activeTab === "permissions" ? "active" : ""}
+                  className={
+                    activeTab === "permissions" ? "active" : ""
+                  }
                   onClick={() => setActiveTab("permissions")}
                 >
                   <FiShield />
@@ -858,346 +1614,542 @@ const RoleAccess = () => {
                 </button>
 
                 <button
-                  className={activeTab === "users" ? "active" : ""}
+                  className={
+                    activeTab === "users" ? "active" : ""
+                  }
                   onClick={() => setActiveTab("users")}
                 >
                   <FiUsers />
                   User Assignment
+
                   <span className="ra-tab-count">
                     {currentAssignedUsers.length}
                   </span>
                 </button>
+
               </div>
 
               {/* =================================
-                                TAB 1: MODULE ACCESS
-                            ================================= */}
+                  TAB 1: MODULE ACCESS
+              ================================= */}
 
               {activeTab === "modules" && (
+
                 <div className="ra-module-layout">
+
                   <div className="ra-module-sidebar">
-                    {moduleData.map((module) => {
-                      const Icon = module.icon;
 
-                      const access = currentAccess[module.id] || {
-                        permissions: [],
-                        subModules: [],
-                      };
+                    {modulesLoading ? (
+                      <div className="ra-empty-state">
+                        Loading modules...
+                      </div>
+                    ) : modulesError ? (
+                      <div className="ra-empty-state">
+                        <p>{modulesError}</p>
 
-                      const count =
-                        access.permissions.length + access.subModules.length;
-
-                      const total =
-                        module.permissions.length + module.subModules.length;
-
-                      return (
                         <button
-                          key={module.id}
-                          className={`ra-module-item ${
-                            selectedModule === module.id ? "active" : ""
-                          }`}
-                          onClick={() => setSelectedModule(module.id)}
+                          className="ra-outline-btn"
+                          onClick={() =>
+                            fetchModules(
+                              selectedRoleId,
+                              selectedModule,
+                            )
+                          }
                         >
-                          <Icon />
-
-                          <span>{module.name}</span>
-
-                          <small>
-                            {count}/{total}
-                          </small>
+                          Retry
                         </button>
-                      );
-                    })}
+                      </div>
+                    ) : moduleData.length === 0 ? (
+                      <div className="ra-empty-state">
+                        No modules available.
+                      </div>
+                    ) : (
+                      moduleData.map((module) => {
+                        const Icon = module.icon;
+
+                        const counts = getAuthScreenCount(
+                          module.authScreens,
+                        );
+
+                        return (
+                          <button
+                            key={module.id}
+                            className={`ra-module-item ${
+                              selectedModule === module.id
+                                ? "active"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              setSelectedModule(module.id)
+                            }
+                          >
+                            <Icon />
+
+                            <span>{module.name}</span>
+
+                            <small>
+                              {counts.authorized}/{counts.total}
+                            </small>
+                          </button>
+                        );
+                      })
+                    )}
+
                   </div>
 
-                  {/* MODULE SETTINGS */}
-
                   <div className="ra-module-settings">
-                    {activeModule && (
+
+                    {modulesLoading || screensLoading ? (
+                      <div className="ra-empty-state">
+                        Loading module screens...
+                      </div>
+                    ) : screensError ? (
+                      <div className="ra-empty-state">
+                        <p>{screensError}</p>
+
+                        <button
+                          className="ra-outline-btn"
+                          onClick={() =>
+                            fetchScreens(
+                              selectedModule,
+                              selectedRoleId,
+                            )
+                          }
+                        >
+                          Retry
+                        </button>
+                      </div>
+                    ) : activeModule ? (
                       <>
+
                         <div className="ra-module-title">
+
                           <div className="ra-module-title-info">
+
                             <div className="ra-module-title-icon">
                               {React.createElement(activeModule.icon)}
                             </div>
 
                             <div>
                               <h4>{activeModule.name}</h4>
-                              <p>{activeModule.description}</p>
+                              <p>
+                                Module ID: {activeModule.id}
+                              </p>
                             </div>
+
                           </div>
 
                           <label className="ra-switch">
                             <input
                               type="checkbox"
-                              checked={moduleSelectedCount === moduleTotalCount}
-                              onChange={(e) =>
-                                toggleAllModuleAccess(
-                                  selectedModule,
-                                  e.target.checked,
+                              checked={allScreensAssigned}
+                              onChange={(event) =>
+                                toggleAllScreens(
+                                  event.target.checked,
                                 )
                               }
+                              disabled={screens.length === 0}
                             />
                             <span></span>
                           </label>
+
                         </div>
 
-                        {/* PERMISSIONS */}
+                        {menuScreens.length > 0 && (
+                          <div className="ra-module-section">
 
-                        <div className="ra-module-section">
-                          <h5>Permissions</h5>
+                            <div className="ra-tab-heading">
+                              <div>
+                                <h4>Menu Permissions</h4>
+                                <p>
+                                  Manage menu access for this role.
+                                </p>
+                              </div>
 
-                          <div className="ra-checkbox-list">
-                            {activeModule.permissions.map((permission) => (
-                              <label
-                                className="ra-checkbox-row"
-                                key={permission}
-                              >
+                              <label className="ra-switch">
                                 <input
                                   type="checkbox"
-                                  checked={activeModuleAccess.permissions.includes(
-                                    permission,
-                                  )}
-                                  onChange={() =>
-                                    toggleModulePermission(
-                                      selectedModule,
-                                      permission,
+                                  checked={allMenuScreensAssigned}
+                                  onChange={(event) =>
+                                    toggleAllMenuScreens(
+                                      event.target.checked,
                                     )
                                   }
                                 />
-
-                                <span className="ra-custom-check"></span>
-
-                                <span>{permission}</span>
+                                <span></span>
                               </label>
-                            ))}
+                            </div>
+
+                            <div className="ra-checkbox-list">
+                              {menuScreens.map(
+                                renderScreenCheckbox,
+                              )}
+                            </div>
+
                           </div>
-                        </div>
+                        )}
 
-                        {/* SUBMODULES */}
+                        {formScreens.length > 0 && (
+                          <div className="ra-module-section">
 
-                        <div className="ra-module-section">
-                          <h5>Sub Modules</h5>
+                            <div className="ra-tab-heading">
+                              <div>
+                                <h4>Sub Modules / Forms</h4>
+                                <p>
+                                  Manage screen and form access.
+                                </p>
+                              </div>
 
-                          <div className="ra-checkbox-list">
-                            {activeModule.subModules.map((subModule) => (
-                              <label
-                                className="ra-checkbox-row"
-                                key={subModule}
-                              >
+                              <label className="ra-switch">
                                 <input
                                   type="checkbox"
-                                  checked={activeModuleAccess.subModules.includes(
-                                    subModule,
-                                  )}
-                                  onChange={() =>
-                                    toggleSubModule(selectedModule, subModule)
+                                  checked={allFormScreensAssigned}
+                                  onChange={(event) =>
+                                    toggleAllFormScreens(
+                                      event.target.checked,
+                                    )
                                   }
                                 />
-
-                                <span className="ra-custom-check"></span>
-
-                                <span>{subModule}</span>
+                                <span></span>
                               </label>
-                            ))}
+                            </div>
+
+                            <div className="ra-checkbox-list">
+                              {formScreens.map(
+                                renderScreenCheckbox,
+                              )}
+                            </div>
+
                           </div>
-                        </div>
+                        )}
+
+                        {screens.length === 0 && (
+                          <div className="ra-empty-state">
+                            No screens found for this module.
+                          </div>
+                        )}
 
                         <div className="ra-info-message">
                           <FiInfo />
-                          Changes will be applied to all users assigned to this
-                          role after saving.
+                          {assignedScreenCount} of {totalScreenCount}{" "}
+                          screens are currently selected. Click Save
+                          Changes to apply this module's access.
                         </div>
+
                       </>
+                    ) : (
+                      <div className="ra-empty-state">
+                        Select a module to view its screen access.
+                      </div>
                     )}
+
                   </div>
+
                 </div>
               )}
 
               {/* =================================
-                                TAB 2: PERMISSIONS
-                            ================================= */}
+                  TAB 2: PERMISSIONS
+              ================================= */}
 
               {activeTab === "permissions" && (
+
                 <div className="ra-tab-content">
+
                   <div className="ra-tab-heading">
                     <div>
                       <h4>Role Permissions</h4>
-                      <p>Configure the access level for this role.</p>
+
+                      <p>
+                        Select one access level for this role.
+                        Only one permission can be active at a time.
+                      </p>
                     </div>
                   </div>
 
                   <div className="ra-permission-cards">
+
+                    {/* READ AND WRITE */}
+
                     <div className="ra-permission-card">
+
                       <div className="ra-permission-icon blue">
                         <FiLock />
                       </div>
 
                       <div className="ra-permission-info">
                         <h4>Read and Write</h4>
+
                         <p>
-                          Allow users to view and modify records within their
-                          permitted modules.
+                          Allow users to view and modify records
+                          within their permitted modules.
                         </p>
                       </div>
 
                       <label className="ra-checkbox-row ra-permission-checkbox">
+
                         <input
                           type="checkbox"
                           checked={currentPermissions.readWrite}
-                          onChange={() => toggleRolePermission("readWrite")}
+                          onChange={() =>
+                            toggleRolePermission("readWrite")
+                          }
                         />
+
                         <span className="ra-custom-check"></span>
+
                       </label>
+
                     </div>
 
+                    {/* OWNER */}
+
                     <div className="ra-permission-card">
+
                       <div className="ra-permission-icon purple">
                         <FiShield />
                       </div>
 
                       <div className="ra-permission-info">
                         <h4>Owner</h4>
+
                         <p>
-                          Grant ownership-level access and control over assigned
-                          records.
+                          Grant ownership-level access and
+                          control over assigned records.
                         </p>
                       </div>
 
                       <label className="ra-checkbox-row ra-permission-checkbox">
+
                         <input
                           type="checkbox"
                           checked={currentPermissions.owner}
-                          onChange={() => toggleRolePermission("owner")}
+                          onChange={() =>
+                            toggleRolePermission("owner")
+                          }
                         />
+
                         <span className="ra-custom-check"></span>
+
                       </label>
+
                     </div>
+
                   </div>
 
-                  <div className="ra-info-message">
+                  {/* <div className="ra-info-message">
                     <FiInfo />
-                    These permissions apply to the selected role.
+
+                    Owner sends permission: true.
+                    Read and Write sends permission: false.
+                    Both permissions cannot be selected together.
+                  </div> */}
+
+                  <div className="ra-role-actions">
+                    <button
+                      type="button"
+                      className="ra-primary-btn mt-3"
+                      onClick={saveRolePermission}
+                      disabled={permissionSaving}
+                    >
+                      {permissionSaving
+                        ? "Saving..."
+                        : "Save Permission"}
+                    </button>
                   </div>
+
                 </div>
               )}
 
               {/* =================================
-                                TAB 3: USER ASSIGNMENT
-                            ================================= */}
+                  TAB 3: USER ASSIGNMENT
+              ================================= */}
 
               {activeTab === "users" && (
+
                 <div className="ra-tab-content">
+
                   <div className="ra-tab-heading">
+
                     <div>
                       <h4>Assign Employees</h4>
+
                       <p>
-                        Select employees who should be assigned to the{" "}
-                        {selectedRole.name} role.
+                        Select employees who should be assigned
+                        to the {selectedRole.name} role.
                       </p>
                     </div>
 
                     <span className="ra-assigned-badge">
                       {currentAssignedUsers.length} Assigned
                     </span>
+
                   </div>
 
                   <div className="ra-user-toolbar">
+
                     <div className="ra-search-box">
+
                       <FiSearch />
 
                       <input
                         type="text"
-                        placeholder="Search employees by name, code or department..."
+                        placeholder="Search employees by name or role..."
                         value={searchEmployee}
-                        onChange={(e) => setSearchEmployee(e.target.value)}
+                        onChange={(event) =>
+                          setSearchEmployee(event.target.value)
+                        }
                       />
 
                       {searchEmployee && (
                         <button
+                          type="button"
                           onClick={() => setSearchEmployee("")}
-                          aria-label="Clear employee search"
+                          aria-label="Clear search"
                         >
                           <FiX />
                         </button>
                       )}
+
                     </div>
 
                     <button
+                      type="button"
                       className="ra-outline-btn"
                       onClick={selectAllEmployees}
+                      disabled={
+                        employeesLoading ||
+                        filteredEmployees.length === 0
+                      }
                     >
-                      Select All
+                      {allVisibleEmployeesAssigned
+                        ? "Unselect All"
+                        : "Select All"}
                     </button>
+
+                  </div>
+
+                  {/* LOGGED-IN USER INFORMATION */}
+
+                  <div className="ra-info-message">
+                    <FiInfo />
+                    Logged-in Employee ID: {employeeId || "Not available"}
                   </div>
 
                   <div className="ra-employee-list">
+
                     <div className="ra-employee-list-header">
                       <span>Employee</span>
-                      <span>Department</span>
+                      <span>Current Role</span>
                       <span>Assignment</span>
                     </div>
 
-                    {filteredEmployees.map((employee) => {
-                      const isAssigned = currentAssignedUsers.includes(
-                        employee.id,
-                      );
+                    {employeesLoading ? (
+                      <div className="ra-empty-state">
+                        Loading employees...
+                      </div>
+                    ) : employeesError ? (
+                      <div className="ra-empty-state">
+                        <p>{employeesError}</p>
 
-                      return (
-                        <label
-                          key={employee.id}
-                          className={`ra-employee-row ${
-                            isAssigned ? "assigned" : ""
-                          }`}
+                        <button
+                          type="button"
+                          className="ra-outline-btn"
+                          onClick={fetchEmployees}
                         >
-                          <div className="ra-employee-name">
-                            <input
-                              type="checkbox"
-                              checked={isAssigned}
-                              onChange={() => toggleEmployee(employee.id)}
-                            />
+                          Retry
+                        </button>
+                      </div>
+                    ) : (
+                      filteredEmployees.map((employee) => {
+                        const isAssigned =
+                          currentAssignedUsers.includes(
+                            employee.id,
+                          );
 
-                            <span className="ra-custom-check"></span>
-
-                            <div className="ra-avatar">
-                              {employee.name
-                                .split(" ")
-                                .map((part) => part[0])
-                                .slice(0, 2)
-                                .join("")}
-                            </div>
-
-                            <div>
-                              <strong>{employee.name}</strong>
-                              <small>{employee.employeeCode}</small>
-                            </div>
-                          </div>
-
-                          <span className="ra-employee-department">
-                            {employee.department}
-                          </span>
-
-                          <span
-                            className={`ra-assignment-status ${
+                        return (
+                          <label
+                            key={employee.id}
+                            className={`ra-employee-row ${
                               isAssigned ? "assigned" : ""
                             }`}
                           >
-                            {isAssigned ? "Assigned" : "Not Assigned"}
-                          </span>
-                        </label>
-                      );
-                    })}
 
-                    {filteredEmployees.length === 0 && (
-                      <div className="ra-empty-state">No employees found.</div>
+                            <div className="ra-employee-name">
+
+                              <input
+                                type="checkbox"
+                                checked={isAssigned}
+                                onChange={() =>
+                                  toggleEmployee(employee.id)
+                                }
+                              />
+
+                              <span className="ra-custom-check"></span>
+
+                              <div className="ra-avatar">
+                                {employee.name
+                                  .split(" ")
+                                  .filter(Boolean)
+                                  .map((part) => part[0])
+                                  .slice(0, 2)
+                                  .join("")
+                                  .toUpperCase()}
+                              </div>
+
+                              <div>
+                                <strong>{employee.name}</strong>
+                                <small>
+                                  Employee ID: {employee.id}
+                                </small>
+                              </div>
+
+                            </div>
+
+                            <span className="ra-employee-department">
+                              {employee.roleName || "—"}
+                            </span>
+
+                            <span
+                              className={`ra-assignment-status ${
+                                isAssigned ? "assigned" : ""
+                              }`}
+                            >
+                              {isAssigned
+                                ? "Assigned"
+                                : "Not Assigned"}
+                            </span>
+
+                          </label>
+                        );
+                      })
                     )}
+
+                    {!employeesLoading &&
+                      !employeesError &&
+                      filteredEmployees.length === 0 && (
+                        <div className="ra-empty-state">
+                          No employees found.
+                        </div>
+                      )}
+
                   </div>
+
+                  <div className="ra-info-message">
+                    <FiInfo />
+                    {currentAssignedUsers.length} employees selected.
+                    Click Save Changes to update assignments for this role.
+                  </div>
+
                 </div>
               )}
+
             </>
           ) : (
             <div className="ra-empty-state">
-              Select a role to manage its access.
+              {rolesLoading
+                ? "Loading roles..."
+                : "Select a role to manage its access."}
             </div>
           )}
 
@@ -1205,29 +2157,47 @@ const RoleAccess = () => {
 
           {selectedRole && (
             <div className="ra-details-footer">
+
               <span>
                 <FiInfo />
-                Remember to save your changes.
+
+                {activeTab === "modules"
+                  ? "Save access changes for the selected module."
+                  : activeTab === "permissions"
+                    ? "Save the selected role permission."
+                    : "Save employee assignments for this role."}
               </span>
 
               <button
+                type="button"
                 className="ra-primary-btn"
-                onClick={() =>
-                  alert(
-                    "UI changes are ready. Connect the save API to persist them.",
-                  )
+                onClick={saveCurrentTab}
+                disabled={
+                  (activeTab === "modules" &&
+                    (screenSaving ||
+                      screensLoading ||
+                      !selectedModule)) ||
+                  (activeTab === "permissions" &&
+                    permissionSaving) ||
+                  (activeTab === "users" &&
+                    assignmentSaving)
                 }
               >
-                Save Changes
+                {(activeTab === "modules" && screenSaving) ||
+                (activeTab === "permissions" && permissionSaving) ||
+                (activeTab === "users" && assignmentSaving)
+                  ? "Saving..."
+                  : "Save Changes"}
               </button>
+
             </div>
           )}
+
         </main>
+
       </div>
 
-      {/* =========================================
-                CREATE / EDIT ROLE OFFCANVAS
-            ========================================= */}
+      {/* CREATE / EDIT ROLE OFFCANVAS */}
 
       <FormOffcanvas
         show={showRoleModal}
@@ -1248,13 +2218,23 @@ const RoleAccess = () => {
               type="submit"
               form="ra-role-form"
               className="ra-primary-btn"
+              disabled={roleSaving}
             >
-              {editingRole ? "Update Role" : "Create Role"}
+              {roleSaving
+                ? "Saving..."
+                : editingRole
+                  ? "Update Role"
+                  : "Create Role"}
             </button>
           </>
         }
       >
-        <form id="ra-role-form" onSubmit={saveRole}>
+
+        <form
+          id="ra-role-form"
+          onSubmit={saveRole}
+        >
+
           <div className="ra-form-group">
             <label>
               Role Name <span>*</span>
@@ -1264,11 +2244,11 @@ const RoleAccess = () => {
               type="text"
               placeholder="Enter role name"
               value={roleForm.name}
-              onChange={(e) =>
-                setRoleForm({
-                  ...roleForm,
-                  name: e.target.value,
-                })
+              onChange={(event) =>
+                setRoleForm((previous) => ({
+                  ...previous,
+                  name: event.target.value,
+                }))
               }
               required
               autoFocus
@@ -1282,16 +2262,48 @@ const RoleAccess = () => {
               placeholder="Enter role description"
               rows="4"
               value={roleForm.description}
-              onChange={(e) =>
-                setRoleForm({
-                  ...roleForm,
-                  description: e.target.value,
-                })
+              onChange={(event) =>
+                setRoleForm((previous) => ({
+                  ...previous,
+                  description: event.target.value,
+                }))
               }
             />
           </div>
+
         </form>
+
       </FormOffcanvas>
+
+      {/* DELETE CONFIRMATION */}
+
+      <Alert
+        isOpen={showDeleteConfirm}
+        title="Delete Role"
+        message="Are you sure you want to delete"
+        itemName={selectedRole?.name || ""}
+        confirmText="Delete"
+        cancelText="Cancel"
+        loading={roleDeleting}
+        onConfirm={deleteRole}
+        onCancel={() => {
+          if (roleDeleting) return;
+          setShowDeleteConfirm(false);
+        }}
+      />
+
+      {/* TOAST */}
+
+      {toast && (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          onClose={closeToast}
+        />
+      )}
+
     </div>
   );
 };

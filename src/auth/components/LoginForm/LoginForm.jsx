@@ -7,6 +7,7 @@ import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import "./LoginForm.css";
 import productLogo from "../../../assets/logo.png";
 import useAuthStore from "../../store/authStore";
+import getClientIp from "../../services/getClientIP";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const LoginForm = () => {
   const login = useAuthStore((state) => state.login);
 
   const [showPassword, setShowPassword] = useState(false);
+  const [fetchingIp, setFetchingIp] = useState(false);
 
   const [formData, setFormData] = useState({
     clientId: import.meta.env.VITE_CLIENT_ID,
@@ -32,49 +34,70 @@ const LoginForm = () => {
     }));
   };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.id || !formData.pass) {
-        return;
+      return;
     }
 
-    const response = await loginApiCall({
+    if (loading || fetchingIp) {
+      return;
+    }
+
+    setFetchingIp(true);
+
+    try {
+      // Fetch client IP address
+      const clientIp = await getClientIp();
+
+      // Update sourceID in form state
+      setFormData((prev) => ({
+        ...prev,
+        sourceID: clientIp,
+      }));
+
+      // Pass client IP directly as sourceID
+      const response = await loginApiCall({
         clientId: formData.clientId,
         id: formData.id,
         pass: formData.pass,
-        sourceID: formData.sourceID,
-    });
+        sourceID: clientIp,
+      });
 
-    if (!response) {
+      if (!response) {
         return;
-    }
+      }
 
-    // Support both Axios response and direct API response
-    const result = response?.data ?? response;
+      // Support both Axios response and direct API response
+      const result = response?.data ?? response;
 
-    // Extract actual API response properties
-    const user = result?.User;
-    const token = result?.Token;
+      // Extract actual API response properties
+      const user = result?.User;
+      const token = result?.Token;
 
-    if (!user || !token) {
+      if (!user || !token) {
         console.error("Invalid login response:", result);
         return;
-    }
+      }
 
-    // Save user and menus in Zustand
-    login(
+      // Save user and menus in Zustand
+      login(
         {
-            ...user,
-            id: formData.id,
+          ...user,
+          id: formData.id,
+          sourceID: clientIp,
         },
         token
-    );
+      );
 
-    navigate("/dashboard", {
+      navigate("/dashboard", {
         replace: true,
-    });
-};
+      });
+    } finally {
+      setFetchingIp(false);
+    }
+  };
 
   return (
     <div className="login-form-wrapper">
@@ -126,15 +149,23 @@ const handleSubmit = async (e) => {
           <a href="#">Forgot Password?</a>
         </div>
 
-        {/* Login Button */}
+        {/* Login Error */}
         {error && (
-    <p className="login-error">
-        {error}
-    </p>
-)}
+          <p className="login-error">
+            {error}
+          </p>
+        )}
+
+        {/* Login Button */}
         <div className="button-group">
-          <button type="submit" className="signin-btn" disabled={loading}>
-            {loading ? "SIGNING IN..." : "SIGN IN"}
+          <button
+            type="submit"
+            className="signin-btn"
+            disabled={loading || fetchingIp}
+          >
+            {loading || fetchingIp
+              ? "SIGNING IN..."
+              : "SIGN IN"}
           </button>
         </div>
 

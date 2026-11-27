@@ -150,8 +150,8 @@ const mapCellToForm = (cell) => ({
 export default function Cell({ onSave }) {
   const location = useLocation();
 
-  const employeeName = localStorage.getItem("employeeName") || "";
-  const sourceID = localStorage.getItem("sourceID") || "";
+  const employeeName = sessionStorage.getItem("employeeName") || "";
+  const sourceID = sessionStorage.getItem("sourceID") || "";
 
   const navigationState = location.state || {};
   const isEditMode =

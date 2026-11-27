@@ -28,8 +28,8 @@ import {
 const Qualification = ({ onSave }) => {
   const location = useLocation();
 
-  const employeeName = localStorage.getItem("employeeName") || "";
-  const sourceID = localStorage.getItem("sourceID") || "";
+  const employeeName = sessionStorage.getItem("employeeName") || "";
+  const sourceID = sessionStorage.getItem("sourceID") || "";
 
   const isEdit =
     location.state?.mode === "edit" ||

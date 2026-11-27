@@ -635,23 +635,9 @@
   white-space: nowrap;
 }
 
-/* FORM GROUPS */
 
-.leave-form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
 
-.leave-form-group label {
-  color: #475467;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.leave-form-group input,
-.leave-form-group select,
-.leave-form-group textarea {
+.hrms-form-group textarea {
   width: 100%;
   min-height: 36px;
   padding: 8px 10px;
@@ -663,19 +649,18 @@
   font-size: 11px;
 }
 
-.leave-form-group textarea {
+.hrms-form-group textarea {
   resize: vertical;
 }
 
-.leave-form-group input:focus,
-.leave-form-group select:focus,
-.leave-form-group textarea:focus {
+
+.hrms-form-group textarea:focus {
   border-color: #2f80ed;
   box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.1);
 }
 
-.leave-form-group input::placeholder,
-.leave-form-group textarea::placeholder {
+
+.hrms-form-group textarea::placeholder {
   color: #98a2b3;
 }
 
@@ -712,12 +697,9 @@
 /* CUSTOM HOURS */
 
 .leave-custom-hours {
-  padding: 10px;
   display: flex;
   align-items: center;
   gap: 9px;
-  border: 1px solid #e6e2dc;
-  border-radius: 5px;
   background: #fff;
 }
 

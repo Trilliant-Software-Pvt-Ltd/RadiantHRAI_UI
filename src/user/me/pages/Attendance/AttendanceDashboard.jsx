@@ -1,15 +1,12 @@
 import React, { useMemo, useState } from "react";
+
 import {
   FiCalendar,
   FiClock,
   FiLogIn,
   FiLogOut,
   FiMapPin,
-  FiChevronLeft,
   FiChevronRight,
-  FiGrid,
-  FiList,
-  FiPlus,
   FiCheckCircle,
   FiAlertCircle,
   FiHome,
@@ -23,9 +20,19 @@ import {
 } from "react-icons/fi";
 
 import WFHRequest from "../../components/Forms/Attendance/WFHRequest";
+import LeaveRequestForm from "../../components/Forms/Leave/LeaveRequestForm";
 import PunchMissingRequest from "../../components/Forms/Attendance/PunchMissingRequest";
+import AttendanceRegularizationForm from "../../components/Forms/Attendance/AttendanceRegularization"
+
+import AttendanceLog from "../../components/AttendanceDashboard/AttendanceLog";
+import AttendanceCalendar from "../../components/AttendanceDashboard/AttendanceCalendar";
+import AttendanceRequests from "../../components/AttendanceDashboard/AttendanceRequests";
 
 import "./AttendanceDashboard.css";
+
+/* =========================================================
+   CONSTANTS
+========================================================= */
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -39,23 +46,15 @@ const FULL_WEEKDAYS = [
   "Sunday",
 ];
 
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+/* =========================================================
+   DATE HELPERS
+========================================================= */
 
 const makeDateKey = (date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+    2,
+    "0",
+  )}-${String(date.getDate()).padStart(2, "0")}`;
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -67,7 +66,9 @@ const formatDate = (value) => {
   });
 };
 
-/* GENERATE CURRENT WEEK DYNAMICALLY */
+/* =========================================================
+   GENERATE CURRENT WEEK DYNAMICALLY
+========================================================= */
 
 const getCurrentWeekTimings = () => {
   const today = new Date();
@@ -119,6 +120,10 @@ const getCurrentWeekTimings = () => {
     };
   });
 };
+
+/* =========================================================
+   SAMPLE ATTENDANCE RECORDS
+========================================================= */
 
 const sampleRecords = [
   {
@@ -219,6 +224,10 @@ const sampleRecords = [
   },
 ];
 
+/* =========================================================
+   STATS DATA
+========================================================= */
+
 const statsData = {
   "Last Week": {
     mine: {
@@ -236,6 +245,7 @@ const statsData = {
       late: "06",
     },
   },
+
   "This Week": {
     mine: {
       present: "03",
@@ -252,6 +262,7 @@ const statsData = {
       late: "04",
     },
   },
+
   "This Month": {
     mine: {
       present: "12",
@@ -269,6 +280,10 @@ const statsData = {
     },
   },
 };
+
+/* =========================================================
+   ATTENDANCE STATUS HELPERS
+========================================================= */
 
 const getStatusClass = (status) => {
   const normalized = String(status || "")
@@ -293,7 +308,9 @@ const getStatusClass = (status) => {
   return statusMap[normalized] || "";
 };
 
-/* WEEKLY ATTENDANCE STATUS HELPERS */
+/* =========================================================
+   WEEKLY ATTENDANCE HELPERS
+========================================================= */
 
 const getWeekStatus = (day) => {
   return getStatusClass(day.status) || "unmarked";
@@ -316,6 +333,10 @@ const getWeekStatusLabel = (status) => {
   return labels[status] ?? "No Record";
 };
 
+/* =========================================================
+   WEEKLY STATUS MESSAGES
+========================================================= */
+
 const weekMessages = {
   "week-off": {
     title: "Enjoy your day off!",
@@ -323,21 +344,25 @@ const weekMessages = {
       "This is your scheduled weekly off. No working hours are expected.",
     icon: <FiCalendarOff />,
   },
+
   absent: {
     title: "No attendance recorded",
     description: "There are no working hours recorded for this day.",
     icon: <FiAlertCircle />,
   },
+
   leave: {
     title: "Leave day",
     description: "You are marked as on leave for this day.",
     icon: <FiCalendar />,
   },
+
   holiday: {
     title: "Public holiday",
     description: "No regular shift is scheduled for this day.",
     icon: <FiSun />,
   },
+
   unmarked: {
     title: "No attendance record",
     description: "Attendance details are not available for this day.",
@@ -345,9 +370,17 @@ const weekMessages = {
   },
 };
 
+/* =========================================================
+   ATTENDANCE DASHBOARD
+========================================================= */
+
 function Attendance() {
+  /* STATS STATE */
+
   const [statsPeriod, setStatsPeriod] = useState("Last Week");
   const [statsType, setStatsType] = useState("mine");
+
+  /* CALENDAR STATE */
 
   const [currentDate, setCurrentDate] = useState(() => new Date());
 
@@ -356,59 +389,47 @@ function Attendance() {
   );
 
   const [calendarMode, setCalendarMode] = useState("calendar");
+
+  /* TABS STATE */
+
   const [activeTab, setActiveTab] = useState("log");
+
+  /* WEEKLY TIMINGS STATE */
 
   const [selectedWeekday, setSelectedWeekday] = useState(() => {
     return WEEKDAYS[(new Date().getDay() + 6) % 7];
   });
 
+  /* RECORDS AND REQUESTS */
+
   const [records, setRecords] = useState(sampleRecords);
   const [requests, setRequests] = useState([]);
 
+  /* ATTENDANCE ACTIONS */
+
   const [isClockedIn, setIsClockedIn] = useState(true);
   const [showWfhForm, setShowWfhForm] = useState(false);
-
+  const [showLeaveForm, setShowLeaveForm] = useState(false);
   const [showPunchMissing, setShowPunchMissing] = useState(false);
+  const [showRegularizeForm, setShowRegularizeForm] = useState(false);
+const [selectedRegularizeRecord, setSelectedRegularizeRecord] = useState(null);
+
+  /* FILTERS */
 
   const [filterStatus, setFilterStatus] = useState("All");
   const [show24Hour, setShow24Hour] = useState(false);
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  /* =========================================================
+     DERIVED DATA
+  ========================================================= */
 
   const selectedStats = statsData[statsPeriod][statsType];
 
   const weekTimings = useMemo(() => getCurrentWeekTimings(), []);
 
-  const monthDays = useMemo(() => {
-    const firstDay = new Date(year, month, 1);
-    const totalDays = new Date(year, month + 1, 0).getDate();
-    const offset = (firstDay.getDay() + 6) % 7;
-
-    return [
-      ...Array(offset).fill(null),
-      ...Array.from({ length: totalDays }, (_, index) => {
-        const date = new Date(year, month, index + 1);
-        return { day: index + 1, key: makeDateKey(date) };
-      }),
-    ];
-  }, [year, month]);
-
-  const selectedRecord = records.find((item) => item.date === selectedDate);
-
-  const filteredRecords = records.filter((record) =>
-    filterStatus === "All" ? true : record.status === filterStatus,
-  );
-
-  const changeMonth = (direction) => {
-    setCurrentDate(
-      (previous) =>
-        new Date(previous.getFullYear(), previous.getMonth() + direction, 1),
-    );
-  };
-
-  const getRecord = (dateKey) =>
-    records.find((record) => record.date === dateKey);
+  /* =========================================================
+     FORMAT TIME
+  ========================================================= */
 
   const formatTime = (time) => {
     if (!time || time === "-") return "-";
@@ -416,32 +437,54 @@ function Attendance() {
     const [hours, minutes] = time.split(":").map(Number);
 
     if (show24Hour) {
-      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+        2,
+        "0",
+      )}`;
     }
 
     const suffix = hours >= 12 ? "PM" : "AM";
     const displayHour = hours % 12 || 12;
 
-    return `${String(displayHour).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${suffix}`;
+    return `${String(displayHour).padStart(
+      2,
+      "0",
+    )}:${String(minutes).padStart(2, "0")} ${suffix}`;
   };
 
-  /* WORK FROM HOME REQUEST HANDLERS */
+  /* =========================================================
+     REQUEST HANDLERS
+  ========================================================= */
 
   const handleAddWfhRequest = (request) => {
     setRequests((previous) => [request, ...previous]);
+
     setShowWfhForm(false);
     setActiveTab("requests");
   };
 
-  const handleClockOut = () => setIsClockedIn(false);
+  const handleAddPunchMissingRequest = (request) => {
+    setRequests((previous) => [request, ...previous]);
 
-  const handleYearChange = (event) => {
-    setCurrentDate(new Date(Number(event.target.value), month, 1));
+    setShowPunchMissing(false);
+    setActiveTab("requests");
   };
 
-  const handleMonthChange = (event) => {
-    setCurrentDate(new Date(year, Number(event.target.value), 1));
+  const handleOpenRegularizeForm = (record) => {
+  setSelectedRegularizeRecord(record);
+  setShowRegularizeForm(true);
+};
+  /* =========================================================
+     CLOCK OUT
+  ========================================================= */
+
+  const handleClockOut = () => {
+    setIsClockedIn(false);
   };
+
+  /* =========================================================
+     STATS CARDS
+  ========================================================= */
 
   const statsCards = [
     {
@@ -470,9 +513,16 @@ function Attendance() {
     },
   ];
 
+  /* =========================================================
+     RENDER
+  ========================================================= */
+
   return (
     <div className="attendance-page">
-      {/* 1. ATTENDANCE STATS */}
+      {/* =====================================================
+          1. ATTENDANCE STATS
+      ===================================================== */}
+
       <section className="attendance-section">
         <div className="attendance-section-heading">
           <div>
@@ -512,6 +562,7 @@ function Attendance() {
             <span>
               <FiClock /> Late arrivals
             </span>
+
             <strong>{selectedStats.late}</strong>
           </div>
         </div>
@@ -533,9 +584,13 @@ function Attendance() {
         </div>
       </section>
 
-      {/* 2. TIMINGS + ACTIONS */}
+      {/* =====================================================
+          2. TIMINGS + ACTIONS
+      ===================================================== */}
+
       <div className="attendance-middle-grid">
-        {/* TIMINGS */}
+        {/* WEEKLY TIMINGS */}
+
         <section className="attendance-section attendance-timings-section">
           <div className="attendance-section-heading">
             <div>
@@ -549,6 +604,7 @@ function Attendance() {
           </div>
 
           {/* WEEK STRIP */}
+
           <div className="attendance-week-strip">
             {weekTimings.map((day) => {
               const status = getWeekStatus(day);
@@ -558,14 +614,19 @@ function Attendance() {
                   key={day.id}
                   type="button"
                   aria-pressed={selectedWeekday === day.id}
-                  aria-label={`${day.day}, ${day.date}: ${getWeekStatusLabel(status) || "No status"}`}
-                  title={`${day.day} - ${getWeekStatusLabel(status) || "No status"}`}
+                  aria-label={`${day.day}, ${day.date}: ${
+                    getWeekStatusLabel(status) || "No status"
+                  }`}
+                  title={`${day.day} - ${
+                    getWeekStatusLabel(status) || "No status"
+                  }`}
                   className={`attendance-week-day status-${status} ${
                     selectedWeekday === day.id ? "active" : ""
                   }`}
                   onClick={() => setSelectedWeekday(day.id)}
                 >
                   <span className="attendance-week-day-name">{day.id}</span>
+
                   <strong>{day.date}</strong>
 
                   <span className="attendance-week-status">
@@ -582,10 +643,12 @@ function Attendance() {
           </div>
 
           {/* SELECTED DAY DETAILS */}
+
           {weekTimings
             .filter((day) => day.id === selectedWeekday)
             .map((day) => {
               const status = getWeekStatus(day);
+
               const isNonWorkingDay = Object.prototype.hasOwnProperty.call(
                 weekMessages,
                 status,
@@ -595,6 +658,7 @@ function Attendance() {
                 <div className="attendance-timing-details" key={day.id}>
                   <div className="attendance-timing-title">
                     <strong>{day.day}</strong>
+
                     <span className={`attendance-detail-status ${status}`}>
                       {getWeekStatusLabel(status)}
                     </span>
@@ -608,6 +672,7 @@ function Attendance() {
 
                       <div>
                         <strong>{weekMessages[status].title}</strong>
+
                         <p>{weekMessages[status].description}</p>
                       </div>
                     </div>
@@ -617,6 +682,7 @@ function Attendance() {
                         <span>
                           <FiClock /> Working Hours
                         </span>
+
                         <strong>{day.working || "—"}</strong>
                       </div>
 
@@ -624,6 +690,7 @@ function Attendance() {
                         <span>
                           <FiCoffee /> Break Time
                         </span>
+
                         <strong>{day.break || "—"}</strong>
                       </div>
 
@@ -631,6 +698,7 @@ function Attendance() {
                         <span>
                           <FiBriefcase /> Shift Duration
                         </span>
+
                         <strong>{day.shiftDuration || "09h 00m"}</strong>
                       </div>
                     </div>
@@ -640,9 +708,11 @@ function Attendance() {
             })}
 
           {/* SHIFT INFORMATION */}
+
           <div className="attendance-shift-info">
             <div>
               <span>Shift Timing</span>
+
               <strong>
                 {formatTime("09:00")} - {formatTime("18:00")}
               </strong>
@@ -650,6 +720,7 @@ function Attendance() {
 
             <div>
               <span>Location</span>
+
               <strong>
                 <FiMapPin /> Office
               </strong>
@@ -657,7 +728,8 @@ function Attendance() {
           </div>
         </section>
 
-        {/* ACTIONS */}
+        {/* ATTENDANCE ACTIONS */}
+
         <section className="attendance-section attendance-actions-section">
           <div className="attendance-section-heading">
             <div>
@@ -671,10 +743,12 @@ function Attendance() {
               <span
                 className={isClockedIn ? "status-online" : "status-offline"}
               />
+
               {isClockedIn ? "Currently Clocked In" : "Clocked Out"}
             </div>
 
             <div className="attendance-clock-time">{formatTime("09:00")}</div>
+
             <p>Today's attendance</p>
 
             <button
@@ -688,6 +762,7 @@ function Attendance() {
 
           <div className="attendance-action-list">
             {/* WORK FROM HOME */}
+
             <button type="button" onClick={() => setShowWfhForm(true)}>
               <span className="attendance-action-icon blue">
                 <FiHome />
@@ -701,7 +776,8 @@ function Attendance() {
               <FiChevronRight />
             </button>
 
-            {/* PUNCH MISSING - FORM WILL BE CREATED NEXT */}
+            {/* PUNCH MISSING */}
+
             <button type="button" onClick={() => setShowPunchMissing(true)}>
               <span className="attendance-action-icon orange">
                 <FiClock />
@@ -715,7 +791,8 @@ function Attendance() {
               <FiChevronRight />
             </button>
 
-            {/* ATTENDANCE POLICY - FORM/DETAIL VIEW WILL BE ADDED LATER */}
+            {/* ATTENDANCE POLICY */}
+
             <button type="button" disabled>
               <span className="attendance-action-icon purple">
                 <FiFileText />
@@ -732,7 +809,10 @@ function Attendance() {
         </section>
       </div>
 
-      {/* 3. LOGS & REQUESTS */}
+      {/* =====================================================
+          3. LOGS & REQUESTS
+      ===================================================== */}
+
       <section className="attendance-section attendance-records-section">
         <div className="attendance-section-heading attendance-records-heading">
           <div>
@@ -740,6 +820,8 @@ function Attendance() {
             <p>Manage your attendance records and requests.</p>
           </div>
         </div>
+
+        {/* TABS */}
 
         <div className="attendance-tabs">
           <button
@@ -769,306 +851,52 @@ function Attendance() {
           </button>
         </div>
 
-        {/* ATTENDANCE LOG */}
+        {/* ATTENDANCE LOG COMPONENT */}
+
         {activeTab === "log" && (
-          <>
-            <div className="attendance-log-toolbar">
-              <span>Attendance Records</span>
-
-              <select
-                className="attendance-select"
-                value={filterStatus}
-                onChange={(event) => setFilterStatus(event.target.value)}
-              >
-                <option>All</option>
-                <option>Present</option>
-                <option>Late</option>
-                <option>Absent</option>
-                <option>Half Day</option>
-                <option>Leave</option>
-              </select>
-            </div>
-
-            <div className="attendance-table-wrapper">
-              <table className="attendance-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Check In</th>
-                    <th>Check Out</th>
-                    <th>Working Hours</th>
-                    <th>Break Time</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredRecords.length ? (
-                    filteredRecords.map((record) => (
-                      <tr key={record.date}>
-                        <td>{formatDate(record.date)}</td>
-                        <td>{formatTime(record.checkIn)}</td>
-                        <td>{formatTime(record.checkOut)}</td>
-                        <td>{record.hours}</td>
-                        <td>{record.break}</td>
-                        <td>
-                          <span
-                            className={`attendance-status-badge ${getStatusClass(record.status)}`}
-                          >
-                            {record.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="attendance-no-records">
-                        No attendance records found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
+          <AttendanceLog
+  records={records}
+  filterStatus={filterStatus}
+  setFilterStatus={setFilterStatus}
+  formatDate={formatDate}
+  formatTime={formatTime}
+  getStatusClass={getStatusClass}
+  onOpenWfhForm={() => setShowWfhForm(true)}
+  onOpenPunchMissingForm={() => setShowPunchMissing(true)}
+  onOpenLeaveForm={() => setShowLeaveForm(true)}
+  onOpenRegularizeForm={handleOpenRegularizeForm}
+/>
         )}
 
-        {/* CALENDAR */}
+        {/* ATTENDANCE CALENDAR COMPONENT */}
+
         {activeTab === "calendar" && (
-          <div className="attendance-calendar-layout">
-            <div className="attendance-calendar-main">
-              <div className="attendance-calendar-toolbar">
-                <div className="attendance-calendar-navigation">
-                  <button
-                    aria-label="Previous month"
-                    onClick={() => changeMonth(-1)}
-                  >
-                    <FiChevronLeft />
-                  </button>
-
-                  <button
-                    aria-label="Next month"
-                    onClick={() => changeMonth(1)}
-                  >
-                    <FiChevronRight />
-                  </button>
-                </div>
-
-                <div className="attendance-calendar-selectors">
-                  <select
-                    className="attendance-select"
-                    value={month}
-                    onChange={handleMonthChange}
-                  >
-                    {MONTHS.map((name, index) => (
-                      <option value={index} key={name}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
-
-                  <select
-                    className="attendance-select"
-                    value={year}
-                    onChange={handleYearChange}
-                  >
-                    {Array.from({ length: 15 }, (_, index) => 2020 + index).map(
-                      (value) => (
-                        <option value={value} key={value}>
-                          {value}
-                        </option>
-                      ),
-                    )}
-                  </select>
-                </div>
-
-                <div className="attendance-view-toggle">
-                  <button
-                    className={calendarMode === "calendar" ? "active" : ""}
-                    onClick={() => setCalendarMode("calendar")}
-                    aria-label="Calendar view"
-                  >
-                    <FiGrid />
-                  </button>
-
-                  <button
-                    className={calendarMode === "list" ? "active" : ""}
-                    onClick={() => setCalendarMode("list")}
-                    aria-label="List view"
-                  >
-                    <FiList />
-                  </button>
-                </div>
-              </div>
-
-              {calendarMode === "calendar" ? (
-                <div className="attendance-month-grid">
-                  {WEEKDAYS.map((day) => (
-                    <div className="attendance-month-weekday" key={day}>
-                      {day}
-                    </div>
-                  ))}
-
-                  {monthDays.map((date, index) => {
-                    if (!date) {
-                      return (
-                        <div
-                          key={`empty-${index}`}
-                          className="attendance-month-empty"
-                        />
-                      );
-                    }
-
-                    const record = getRecord(date.key);
-
-                    return (
-                      <button
-                        key={date.key}
-                        className={`attendance-month-day ${
-                          record ? getStatusClass(record.status) : ""
-                        } ${selectedDate === date.key ? "selected" : ""}`}
-                        onClick={() => setSelectedDate(date.key)}
-                      >
-                        <span>{date.day}</span>
-                        {record && <i />}
-                        {record && <small>{record.status}</small>}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="attendance-calendar-list">
-                  {records
-                    .filter((record) =>
-                      record.date.startsWith(
-                        `${year}-${String(month + 1).padStart(2, "0")}`,
-                      ),
-                    )
-                    .map((record) => (
-                      <button
-                        key={record.date}
-                        className={
-                          selectedDate === record.date ? "selected" : ""
-                        }
-                        onClick={() => setSelectedDate(record.date)}
-                      >
-                        <span>{formatDate(record.date)}</span>
-                        <span>{record.hours}</span>
-                        <span
-                          className={`attendance-status-badge ${getStatusClass(record.status)}`}
-                        >
-                          {record.status}
-                        </span>
-                      </button>
-                    ))}
-
-                  {!records.some((record) =>
-                    record.date.startsWith(
-                      `${year}-${String(month + 1).padStart(2, "0")}`,
-                    ),
-                  ) && (
-                    <div className="attendance-no-records">
-                      No records for this month.
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="attendance-calendar-legend">
-                {["Present", "Late", "Absent", "Half Day", "Leave"].map(
-                  (status) => (
-                    <span key={status}>
-                      <i className={getStatusClass(status)} />
-                      {status}
-                    </span>
-                  ),
-                )}
-              </div>
-            </div>
-
-            <aside className="attendance-selected-day">
-              <h4>Daily Attendance Details</h4>
-              <p>{formatDate(selectedDate)}</p>
-
-              {selectedRecord ? (
-                <>
-                  <span
-                    className={`attendance-status-badge ${getStatusClass(selectedRecord.status)}`}
-                  >
-                    {selectedRecord.status}
-                  </span>
-
-                  <div className="attendance-detail-line">
-                    <span>Check In</span>
-                    <strong>{formatTime(selectedRecord.checkIn)}</strong>
-                  </div>
-
-                  <div className="attendance-detail-line">
-                    <span>Check Out</span>
-                    <strong>{formatTime(selectedRecord.checkOut)}</strong>
-                  </div>
-
-                  <div className="attendance-detail-line">
-                    <span>Working Hours</span>
-                    <strong>{selectedRecord.hours}</strong>
-                  </div>
-
-                  <div className="attendance-detail-line">
-                    <span>Break Time</span>
-                    <strong>{selectedRecord.break}</strong>
-                  </div>
-                </>
-              ) : (
-                <div className="attendance-day-empty">
-                  <FiCalendar />
-                  <span>No attendance record for this date.</span>
-                </div>
-              )}
-            </aside>
-          </div>
+          <AttendanceCalendar
+            records={records}
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            calendarMode={calendarMode}
+            setCalendarMode={setCalendarMode}
+            formatDate={formatDate}
+            formatTime={formatTime}
+            getStatusClass={getStatusClass}
+            show24Hour={show24Hour}
+          />
         )}
 
-        {/* ATTENDANCE REQUESTS */}
+        {/* ATTENDANCE REQUESTS COMPONENT */}
+
         {activeTab === "requests" && (
-          <div className="attendance-requests-list">
-            {requests.length === 0 ? (
-              <div className="attendance-no-records">
-                No attendance requests submitted yet.
-              </div>
-            ) : (
-              requests.map((request) => (
-                <div className="attendance-request-item" key={request.id}>
-                  <div>
-                    <strong>{request.type}</strong>
-
-                    <span>
-                      {request.type === "Work From Home"
-                        ? `${formatDate(request.from)} - ${formatDate(request.to)}`
-                        : formatDate(request.date)}
-                    </span>
-
-                    <p>{request.reason || "—"}</p>
-
-                    {request.type === "Work From Home" && (
-                      <small>
-                        Duration: {request.duration}
-                        {request.workMode !== "Hourly" &&
-                          ` (${request.workMode})`}
-                      </small>
-                    )}
-                  </div>
-
-                  <span className="attendance-status-badge pending">
-                    {request.status}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
+          <AttendanceRequests requests={requests} formatDate={formatDate} />
         )}
       </section>
 
-      {/* WORK FROM HOME REQUEST OFFCANVAS */}
+      {/* =====================================================
+          4. WFH REQUEST FORM
+      ===================================================== */}
+
       <WFHRequest
         show={showWfhForm}
         onClose={() => setShowWfhForm(false)}
@@ -1076,13 +904,44 @@ function Attendance() {
         employeeOptions={[]}
       />
 
+      {/* =====================================================
+          5. PUNCH MISSING REQUEST FORM
+      ===================================================== */}
+
       <PunchMissingRequest
         show={showPunchMissing}
         onClose={() => setShowPunchMissing(false)}
-        onSubmit={(request) => {
-          console.log("Punch Missing Request:", request);
-        }}
+        onSubmit={handleAddPunchMissingRequest}
       />
+
+      {/* LEAVE REQUEST FORM */}
+
+<LeaveRequestForm
+  show={showLeaveForm}
+  onClose={() => setShowLeaveForm(false)}
+  onSubmit={(request) => {
+    setRequests((previous) => [request, ...previous]);
+    setShowLeaveForm(false);
+    setActiveTab("requests");
+  }}
+/>
+
+{/* ATTENDANCE REGULARIZATION FORM */}
+
+<AttendanceRegularizationForm
+  show={showRegularizeForm}
+  onClose={() => {
+    setShowRegularizeForm(false);
+    setSelectedRegularizeRecord(null);
+  }}
+  record={selectedRegularizeRecord}
+  onSubmit={(request) => {
+    setRequests((previous) => [request, ...previous]);
+    setShowRegularizeForm(false);
+    setSelectedRegularizeRecord(null);
+    setActiveTab("requests");
+  }}
+/>
     </div>
   );
 }

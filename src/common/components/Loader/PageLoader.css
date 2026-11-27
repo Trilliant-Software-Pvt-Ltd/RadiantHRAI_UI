@@ -1,0 +1,198 @@
+
+/* =========================================================
+   RADIANT HR - REUSABLE PAGE LOADER
+========================================================= */
+
+.hrms-page-loader {
+  width: 100%;
+  min-height: 65vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f8fafc;
+  padding: 24px;
+
+  box-sizing: border-box;
+  position: relative;
+  z-index: 10;
+}
+
+.hrms-loader-fullscreen {
+  position: fixed;
+  inset: 0;
+
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100dvh;
+
+  z-index: 9999;
+  background: rgba(248, 250, 252, 0.98);
+}
+
+.hrms-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  max-width: 240px;
+
+  text-align: center;
+}
+
+/* =========================================================
+   ANIMATED LOADER
+========================================================= */
+
+.hrms-loader-symbol {
+  position: relative;
+
+  width: 74px;
+  height: 74px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 18px;
+}
+
+.hrms-loader-ring {
+  position: absolute;
+  inset: 0;
+
+  border-radius: 50%;
+  border: 4px solid #e4ebf7;
+  border-top-color: #326de6;
+  border-right-color: #8baef4;
+
+  animation: hrmsLoaderSpin 0.85s linear infinite;
+}
+
+.hrms-loader-center {
+  width: 54px;
+  height: 54px;
+
+  border-radius: 50%;
+
+  background: #edf3ff;
+  color: #326de6;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 27px;
+  font-weight: 800;
+
+  box-shadow: 0 3px 12px rgba(50, 109, 230, 0.08);
+}
+
+/* =========================================================
+   LOADER TEXT
+========================================================= */
+
+.hrms-loader-title {
+  margin: 0;
+
+  font-size: 22px;
+  font-weight: 750;
+
+  color: #233654;
+  letter-spacing: -0.6px;
+}
+
+.hrms-loader-title span {
+  color: #326de6;
+}
+
+.hrms-loader-message {
+  margin: 8px 0 18px;
+
+  color: #8190a6;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   ANIMATED PROGRESS BAR
+========================================================= */
+
+.hrms-loader-progress {
+  width: 170px;
+  height: 4px;
+
+  overflow: hidden;
+  border-radius: 20px;
+
+  background: #e5ebf4;
+}
+
+.hrms-loader-progress-bar {
+  width: 40%;
+  height: 100%;
+
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    #326de6,
+    #89aff7
+  );
+
+  animation: hrmsLoaderProgress 1.5s ease-in-out infinite;
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes hrmsLoaderSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes hrmsLoaderProgress {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  100% {
+    transform: translateX(360%);
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+  .hrms-page-loader {
+    min-height: 55vh;
+    padding: 16px;
+  }
+
+  .hrms-loader-symbol {
+    width: 62px;
+    height: 62px;
+  }
+
+  .hrms-loader-center {
+    width: 44px;
+    height: 44px;
+    font-size: 23px;
+  }
+
+  .hrms-loader-title {
+    font-size: 19px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hrms-loader-ring,
+  .hrms-loader-progress-bar {
+    animation: none;
+  }
+}

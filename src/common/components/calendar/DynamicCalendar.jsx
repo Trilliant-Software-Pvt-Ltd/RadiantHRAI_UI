@@ -1,5 +1,12 @@
+
 import React, { useEffect, useRef, useState } from "react";
-import { FiChevronLeft, FiChevronRight, FiX, FiCalendar } from "react-icons/fi";
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiX,
+  FiCalendar,
+} from "react-icons/fi";
+
 import FormInput from "../../../common/components/Form/FormInput";
 import "./DynamicCalendar.css";
 
@@ -33,6 +40,7 @@ const SHORT_MONTHS = [
   "Aug",
   "Sep",
   "Oct",
+  "Nov",
   "Dec",
 ];
 
@@ -63,7 +71,6 @@ const normalizeDate = (value) => {
 
       const date = new Date(year, month, day);
 
-      // Reject invalid calendar dates such as 2026-02-31.
       if (
         date.getFullYear() !== year ||
         date.getMonth() !== month ||
@@ -81,7 +88,7 @@ const normalizeDate = (value) => {
       return new Date(
         parsed.getFullYear(),
         parsed.getMonth(),
-        parsed.getDate(),
+        parsed.getDate()
       );
     }
   }
@@ -92,7 +99,11 @@ const normalizeDate = (value) => {
 const getToday = () => {
   const today = new Date();
 
-  return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
 };
 
 const isSameDate = (date1, date2) => {
@@ -193,6 +204,7 @@ const DynamicCalendar = ({
   clearable = true,
   showToday = true,
   className = "",
+  displayText,
 }) => {
   /* =====================================================
      REFS
@@ -222,11 +234,6 @@ const DynamicCalendar = ({
      CALENDAR POSITION
   ===================================================== */
 
-  /* =========================================================
-   CALENDAR POSITION
-   ACCOUNT FOR HEADER AND MODULE NAV CSS VARIABLES
-========================================================= */
-
   const updateCalendarPosition = () => {
     const wrapper = calendarRef.current;
     if (!wrapper) return;
@@ -238,30 +245,33 @@ const DynamicCalendar = ({
     const padding = 8;
     const gap = 4;
 
-    // Read fixed header and module navigation heights.
     const rootStyles = getComputedStyle(document.documentElement);
 
     const headerHeight =
       parseFloat(rootStyles.getPropertyValue("--rh-header-height")) || 0;
 
     const moduleNavHeight =
-      parseFloat(rootStyles.getPropertyValue("--rh-module-nav-height")) || 0;
+      parseFloat(
+        rootStyles.getPropertyValue("--rh-module-nav-height")
+      ) || 0;
 
-    // Visible viewport boundaries.
     const usableTop = headerHeight + moduleNavHeight + padding;
     const usableBottom = window.innerHeight - padding;
 
-    // Space available above and below the input.
-    const spaceBelow = Math.max(0, usableBottom - rect.bottom - gap);
+    const spaceBelow = Math.max(
+      0,
+      usableBottom - rect.bottom - gap
+    );
 
-    const spaceAbove = Math.max(0, rect.top - usableTop - gap);
+    const spaceAbove = Math.max(
+      0,
+      rect.top - usableTop - gap
+    );
 
-    // Measure natural popup height without constraining it.
     const popupHeight = popup.scrollHeight;
 
-    // Open upward only when the popup doesn't fit below
-    // and there is more usable space above.
-    const placeAbove = spaceBelow < popupHeight && spaceAbove > spaceBelow;
+    const placeAbove =
+      spaceBelow < popupHeight && spaceAbove > spaceBelow;
 
     setOpensUp(placeAbove);
   };
@@ -320,10 +330,10 @@ const DynamicCalendar = ({
     };
   }, [open, calendarView, mode]);
 
-  /*
-   * Recalculate if the popup content changes height,
-   * such as when switching between date, month and year.
-   */
+  /* =====================================================
+     OBSERVE POPUP SIZE
+  ===================================================== */
+
   useEffect(() => {
     if (!open || !calendarRef.current) {
       return undefined;
@@ -352,7 +362,10 @@ const DynamicCalendar = ({
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(event.target)
+      ) {
         setOpen(false);
         setCalendarView("date");
       }
@@ -374,11 +387,17 @@ const DynamicCalendar = ({
       return true;
     }
 
-    if (normalizedMinDate && isBeforeDate(date, normalizedMinDate)) {
+    if (
+      normalizedMinDate &&
+      isBeforeDate(date, normalizedMinDate)
+    ) {
       return true;
     }
 
-    if (normalizedMaxDate && isAfterDate(date, normalizedMaxDate)) {
+    if (
+      normalizedMaxDate &&
+      isAfterDate(date, normalizedMaxDate)
+    ) {
       return true;
     }
 
@@ -392,13 +411,23 @@ const DynamicCalendar = ({
   const isMonthDisabled = (year, month) => {
     const firstDay = new Date(year, month, 1);
 
-    const lastDay = new Date(year, month, getDaysInMonth(year, month));
+    const lastDay = new Date(
+      year,
+      month,
+      getDaysInMonth(year, month)
+    );
 
-    if (normalizedMinDate && isBeforeDate(lastDay, normalizedMinDate)) {
+    if (
+      normalizedMinDate &&
+      isBeforeDate(lastDay, normalizedMinDate)
+    ) {
       return true;
     }
 
-    if (normalizedMaxDate && isAfterDate(firstDay, normalizedMaxDate)) {
+    if (
+      normalizedMaxDate &&
+      isAfterDate(firstDay, normalizedMaxDate)
+    ) {
       return true;
     }
 
@@ -410,11 +439,17 @@ const DynamicCalendar = ({
   ===================================================== */
 
   const isYearDisabled = (year) => {
-    if (normalizedMinDate && year < normalizedMinDate.getFullYear()) {
+    if (
+      normalizedMinDate &&
+      year < normalizedMinDate.getFullYear()
+    ) {
       return true;
     }
 
-    if (normalizedMaxDate && year > normalizedMaxDate.getFullYear()) {
+    if (
+      normalizedMaxDate &&
+      year > normalizedMaxDate.getFullYear()
+    ) {
       return true;
     }
 
@@ -594,11 +629,23 @@ const DynamicCalendar = ({
   ===================================================== */
 
   const previousMonth = () => {
-    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
+    setViewDate(
+      new Date(
+        viewDate.getFullYear(),
+        viewDate.getMonth() - 1,
+        1
+      )
+    );
   };
 
   const nextMonth = () => {
-    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
+    setViewDate(
+      new Date(
+        viewDate.getFullYear(),
+        viewDate.getMonth() + 1,
+        1
+      )
+    );
   };
 
   /* =====================================================
@@ -608,23 +655,43 @@ const DynamicCalendar = ({
   const previousYear = () => {
     if (calendarView === "year") {
       setViewDate(
-        new Date(viewDate.getFullYear() - 12, viewDate.getMonth(), 1),
+        new Date(
+          viewDate.getFullYear() - 12,
+          viewDate.getMonth(),
+          1
+        )
       );
       return;
     }
 
-    setViewDate(new Date(viewDate.getFullYear() - 1, viewDate.getMonth(), 1));
+    setViewDate(
+      new Date(
+        viewDate.getFullYear() - 1,
+        viewDate.getMonth(),
+        1
+      )
+    );
   };
 
   const nextYear = () => {
     if (calendarView === "year") {
       setViewDate(
-        new Date(viewDate.getFullYear() + 12, viewDate.getMonth(), 1),
+        new Date(
+          viewDate.getFullYear() + 12,
+          viewDate.getMonth(),
+          1
+        )
       );
       return;
     }
 
-    setViewDate(new Date(viewDate.getFullYear() + 1, viewDate.getMonth(), 1));
+    setViewDate(
+      new Date(
+        viewDate.getFullYear() + 1,
+        viewDate.getMonth(),
+        1
+      )
+    );
   };
 
   /* =====================================================
@@ -677,7 +744,10 @@ const DynamicCalendar = ({
     const currentYear = viewDate.getFullYear();
     const startYear = Math.floor(currentYear / 12) * 12;
 
-    return Array.from({ length: 12 }, (_, index) => startYear + index);
+    return Array.from(
+      { length: 12 },
+      (_, index) => startYear + index
+    );
   };
 
   /* =====================================================
@@ -750,7 +820,8 @@ const DynamicCalendar = ({
             const { date, currentMonth } = item;
 
             const selected =
-              normalizedValue && isSameDate(date, normalizedValue);
+              normalizedValue &&
+              isSameDate(date, normalizedValue);
 
             const today = isSameDate(date, getToday());
             const dateDisabled = isDateDisabled(date);
@@ -818,7 +889,9 @@ const DynamicCalendar = ({
 
         <div className="dc-year-grid">
           {years.map((year) => {
-            const selected = normalizedValue?.getFullYear() === year;
+            const selected =
+              normalizedValue?.getFullYear() === year;
+
             const disabledYear = isYearDisabled(year);
 
             return (
@@ -826,7 +899,10 @@ const DynamicCalendar = ({
                 key={year}
                 type="button"
                 disabled={disabledYear}
-                className={["dc-year-item", selected ? "dc-selected" : ""]
+                className={[
+                  "dc-year-item",
+                  selected ? "dc-selected" : "",
+                ]
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => handleYearSelect(year)}
@@ -891,12 +967,17 @@ const DynamicCalendar = ({
                 key={month}
                 type="button"
                 disabled={monthDisabled}
-                className={["dc-month-item", selected ? "dc-selected" : ""]
+                className={[
+                  "dc-month-item",
+                  selected ? "dc-selected" : "",
+                ]
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => handleMonthSelect(index)}
               >
-                <span className="dc-month-short">{SHORT_MONTHS[index]}</span>
+                <span className="dc-month-short">
+                  {SHORT_MONTHS[index]}
+                </span>
               </button>
             );
           })}
@@ -956,12 +1037,17 @@ const DynamicCalendar = ({
                 key={month}
                 type="button"
                 disabled={monthDisabled}
-                className={["dc-month-item", selected ? "dc-selected" : ""]
+                className={[
+                  "dc-month-item",
+                  selected ? "dc-selected" : "",
+                ]
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => handleMonthSelect(index)}
               >
-                <span className="dc-month-short">{SHORT_MONTHS[index]}</span>
+                <span className="dc-month-short">
+                  {SHORT_MONTHS[index]}
+                </span>
 
                 <span>{month}</span>
               </button>
@@ -977,7 +1063,11 @@ const DynamicCalendar = ({
   ===================================================== */
 
   const renderCalendarContent = () => {
-    if (mode !== "year" && mode !== "month" && mode !== "month-year") {
+    if (
+      mode !== "year" &&
+      mode !== "month" &&
+      mode !== "month-year"
+    ) {
       if (calendarView === "year") {
         return renderYearView();
       }
@@ -1011,12 +1101,15 @@ const DynamicCalendar = ({
   };
 
   /* =====================================================
-     DISPLAY VALUE
-  ===================================================== */
+   DISPLAY VALUE
+===================================================== */
 
-  const displayValue = normalizedValue
-    ? formatDisplayDate(normalizedValue, mode)
-    : "";
+const displayValue = normalizedValue
+  ? formatDisplayDate(normalizedValue, mode)
+  : "";
+
+  // NEW: Use custom display text only when explicitly provided.
+  // const inputDisplayValue = displayText ?? displayValue;
 
   /* =====================================================
      COMPONENT UI
@@ -1034,21 +1127,23 @@ const DynamicCalendar = ({
         .filter(Boolean)
         .join(" ")}
     >
-      <div className={`dc-input-container ${
-    label ? "has-label" : "no-label"
-  }`} >
+      <div
+        className={`dc-input-container ${
+          label ? "has-label" : "no-label"
+        }`}
+      >
         <FormInput
-          label={label}
-          name={name}
-          value={displayValue}
-          placeholder={placeholder}
-          required={required}
-          disabled={disabled}
-          error={error}
-          readOnly
-          onClick={handleInputClick}
-          autoComplete="off"
-        />
+  label={label}
+  name={name}
+  value={displayValue}
+  placeholder={displayText ?? placeholder}
+  required={required}
+  disabled={disabled}
+  error={error}
+  readOnly
+  onClick={handleInputClick}
+  autoComplete="off"
+/>
 
         <button
           type="button"

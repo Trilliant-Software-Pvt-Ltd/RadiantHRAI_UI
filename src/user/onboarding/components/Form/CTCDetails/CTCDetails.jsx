@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiDollarSign } from "react-icons/fi";
+import { FiDollarSign, FiArrowLeft  } from "react-icons/fi";
 
 import FormInput from "../../../../../common/components/Form/FormInput";
 import FormSelect from "../../../../../common/components/Form/FormSelect";
@@ -341,7 +341,16 @@ function CTCDetails({ employee = {}, onBackToList }) {
                   </div>
                 </div>
 
-                <div className="ctc-header-actions">
+                <div className="hrms-form-header-actions">
+                  <FormButton
+                    type="button"
+                    variant="secondary"
+                    onClick={onBackToList}
+                  >
+                    <FiArrowLeft />
+                    Back
+                  </FormButton>
+
                   <FormButton
                     type="button"
                     variant="secondary"
@@ -657,13 +666,6 @@ function CTCDetails({ employee = {}, onBackToList }) {
 
             {/* FORM FOOTER */}
             <div className="hrms-form-section-footer">
-              <FormButton
-                type="button"
-                variant="secondary"
-                onClick={handleList}
-              >
-                List
-              </FormButton>
               <FormButton type="submit" variant="primary">
                 Save
               </FormButton>

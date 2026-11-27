@@ -22,25 +22,21 @@ function Header({ setMobileOpen }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
 
-  const displayName =
-    user?.EmployeeName || user?.name || "Admin User";
+  const displayName = user?.EmployeeName || user?.name || "Admin User";
 
-  const handleDeveloperInfo = () => {
-    navigate("/developerInfo");
+  const handleEmployeeInfo = () => {
+    navigate("/ess-onboarding");
   };
 
- const handleLogout = () => {
+  const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
-};
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target)
-      ) {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false);
       }
     };
@@ -48,10 +44,7 @@ function Header({ setMobileOpen }) {
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -84,13 +77,13 @@ function Header({ setMobileOpen }) {
           <FiMenu size={21} />
         </button>
 
-        {/* Developer info */}
+        {/* Employee info */}
         <button
           type="button"
           className="header-icon-button"
-          onClick={handleDeveloperInfo}
-          title="Developer Info"
-          aria-label="Developer Info"
+          onClick={handleEmployeeInfo}
+          title="Employee Info"
+          aria-label="Employee Info"
         >
           <FiInfo size={20} />
         </button>
@@ -138,9 +131,7 @@ function Header({ setMobileOpen }) {
                 </div>
 
                 <div className="profile-dropdown-details">
-                  <span className="profile-dropdown-name">
-                    {displayName}
-                  </span>
+                  <span className="profile-dropdown-name">{displayName}</span>
 
                   <span className="profile-dropdown-role">
                     {user?.role || "User"}

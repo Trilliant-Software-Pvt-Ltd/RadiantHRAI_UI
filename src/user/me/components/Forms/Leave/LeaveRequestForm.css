@@ -1,0 +1,122 @@
+/* =========================================================
+   CUSTOM HOURS
+========================================================= */
+
+.leave-custom-hours {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: 12px;
+  width: 100%;
+}
+
+.leave-custom-hours-input,
+.leave-custom-hours-time {
+  width: 100%;
+  min-width: 0;
+}
+
+.leave-custom-hours-time > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.leave-custom-hours-separator {
+  white-space: nowrap;
+  padding-bottom: 10px;
+  color: #234A75;
+  font-size: 13px;
+}
+
+@media (max-width: 400px) {
+  .leave-custom-hours {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 8px;
+  }
+}
+.leave-date-field .dc-calendar-trigger {
+  display: none !important;
+}
+
+.leave-date-field input,
+.leave-date-field .form-control {
+  caret-color: transparent !important;
+  cursor: pointer !important;
+  user-select: none;
+}
+.leave-date-field input::placeholder{
+  color: #475467;
+  font-weight: 600;
+}
+.leave-date-field-left {
+  width: fit-content;
+}
+.leave-date-field .hrms-form-control{
+  padding-right: 0;
+  height: fit-content;
+}
+
+/* =========================================================
+   CUSTOM HOURS - TIME FIELD ALIGNMENT
+========================================================= */
+
+.leave-custom-hours {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: 12px;
+  width: 100%;
+}
+
+.leave-custom-hours-input,
+.leave-custom-hours-time {
+  width: 100%;
+  min-width: 0;
+}
+
+/* FormTime outer wrapper */
+.leave-custom-hours-time .hrms-time-picker-wrapper {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+/* Time input wrapper */
+.leave-custom-hours-time .hrms-time-input-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Actual time input */
+.leave-custom-hours-time .hrms-time-control {
+  display: block;
+  width: 100% !important;
+  min-width: 0;
+  max-width: none;
+  box-sizing: border-box;
+  padding-right: 42px;
+}
+
+/* Clock icon */
+.leave-custom-hours-time .hrms-time-picker-icon {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+}
+
+/* Separator */
+.leave-custom-hours-separator {
+  white-space: nowrap;
+  padding-bottom: 10px;
+  color: #234A75;
+  font-size: 13px;
+}
+
+@media (max-width: 400px) {
+  .leave-custom-hours {
+    gap: 8px;
+  }
+}

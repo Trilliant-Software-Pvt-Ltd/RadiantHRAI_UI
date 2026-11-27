@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { FiShield, FiEye } from "react-icons/fi";
+import { FiShield, FiEye, FiArrowLeft } from "react-icons/fi";
 
 import FormInput from "../../../../../common/components/Form/FormInput";
 import FormSelect from "../../../../../common/components/Form/FormSelect";
@@ -107,7 +107,16 @@ const pfWagesOptions = optionsFrom(["Staff"]);
 
 const pfLimitOptions = optionsFrom(["Applicable", "Not Applicable"]);
 
-const relationOptions = optionsFrom([ "Father", "Mother", "Spouse", "Son", "Daughter", "Brother", "Sister", "Other", ]);
+const relationOptions = optionsFrom([
+  "Father",
+  "Mother",
+  "Spouse",
+  "Son",
+  "Daughter",
+  "Brother",
+  "Sister",
+  "Other",
+]);
 
 /* =========================================================
    COMPONENT
@@ -120,7 +129,7 @@ function StatutoryDetails({ onBackToList }) {
 
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
-const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   /* =========================================================
      HANDLE INPUT CHANGES
@@ -130,154 +139,149 @@ const [hasSubmitted, setHasSubmitted] = useState(false);
    VALIDATION HELPERS
 ========================================================= */
 
-const getValidationErrors = (data) => {
-  const result = statutoryDetailsSchema.safeParse(data);
-  const nextErrors = {};
+  const getValidationErrors = (data) => {
+    const result = statutoryDetailsSchema.safeParse(data);
+    const nextErrors = {};
 
-  if (!result.success) {
-    result.error.issues.forEach((issue) => {
-      const field = issue.path[0];
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0];
 
-      if (field && !nextErrors[field]) {
-        nextErrors[field] = issue.message;
-      }
-    });
-  }
+        if (field && !nextErrors[field]) {
+          nextErrors[field] = issue.message;
+        }
+      });
+    }
 
-  return nextErrors;
-};
+    return nextErrors;
+  };
 
-const validateForm = (data = formData) => {
-  const nextErrors = getValidationErrors(data);
+  const validateForm = (data = formData) => {
+    const nextErrors = getValidationErrors(data);
 
-  setErrors(nextErrors);
+    setErrors(nextErrors);
 
-  return Object.keys(nextErrors).length === 0;
-};
+    return Object.keys(nextErrors).length === 0;
+  };
 
-/* =========================================================
+  /* =========================================================
    HANDLE INPUT CHANGES
 ========================================================= */
 
+  const handleChange = (event) => {
+    const { name, value, type, checked, files } = event.target;
 
+    const newValue =
+      type === "checkbox"
+        ? checked
+        : type === "file"
+          ? files?.[0] || null
+          : value;
 
-const handleChange = (event) => {
-  const { name, value, type, checked, files } = event.target;
+    setFormData((prev) => {
+      const updatedData = {
+        ...prev,
+        [name]: newValue,
+      };
 
-  const newValue =
-    type === "checkbox"
-      ? checked
-      : type === "file"
-        ? files?.[0] || null
-        : value;
+      const dependentFields = {
+        ptCodeEnabled: ["ptCode", "ptMaster"],
+        lwfCodeEnabled: ["lwfCode", "lwfMaster"],
+        esicCodeEnabled: ["esicCode", "esicNo"],
+        oldEsicNoEnabled: ["oldEsicNo", "esicClosingDate"],
+        gratuityEnabled: ["gratuityNo"],
+        pfCodeEnabled: [
+          "pfCode",
+          "pfLimit",
+          "pfWagesEnabled",
+          "pfWages",
+          "pfNo",
+          "oldUanNo",
+          "linkWithPfCode",
+          "uanNo",
+          "relationWithNominee1",
+          "nominee1Name",
+          "nominee1Dob",
+          "nominee1PfShare",
+          "nominee1Address",
+          "nominee1Guardian",
+          "relationWithNominee2",
+          "nominee2Name",
+          "nominee2Dob",
+          "nominee2PfShare",
+          "nominee2Address",
+          "nominee2Guardian",
+        ],
+        pfWagesEnabled: ["pfWages"],
+      };
 
-  setFormData((prev) => {
-    const updatedData = {
-      ...prev,
-      [name]: newValue,
-    };
+      const clearedFields =
+        type === "checkbox" && !checked ? dependentFields[name] || [] : [];
 
-    const dependentFields = {
-      ptCodeEnabled: ["ptCode", "ptMaster"],
-      lwfCodeEnabled: ["lwfCode", "lwfMaster"],
-      esicCodeEnabled: ["esicCode", "esicNo"],
-      oldEsicNoEnabled: ["oldEsicNo", "esicClosingDate"],
-      gratuityEnabled: ["gratuityNo"],
-      pfCodeEnabled: [
-        "pfCode",
-        "pfLimit",
-        "pfWagesEnabled",
-        "pfWages",
-        "pfNo",
-        "oldUanNo",
-        "linkWithPfCode",
-        "uanNo",
-        "relationWithNominee1",
-        "nominee1Name",
-        "nominee1Dob",
-        "nominee1PfShare",
-        "nominee1Address",
-        "nominee1Guardian",
-        "relationWithNominee2",
-        "nominee2Name",
-        "nominee2Dob",
-        "nominee2PfShare",
-        "nominee2Address",
-        "nominee2Guardian",
-      ],
-      pfWagesEnabled: ["pfWages"],
-    };
+      clearedFields.forEach((field) => {
+        updatedData[field] =
+          typeof initialFormData[field] === "boolean" ? false : "";
+      });
 
-    const clearedFields =
-      type === "checkbox" && !checked
-        ? dependentFields[name] || []
-        : [];
+      // Revalidate after the state change, so errors update immediately.
+      const nextErrors = getValidationErrors(updatedData);
 
-    clearedFields.forEach((field) => {
-      updatedData[field] =
-        typeof initialFormData[field] === "boolean" ? false : "";
-    });
+      // Remove errors for fields cleared by unchecking a checkbox.
+      clearedFields.forEach((field) => {
+        delete nextErrors[field];
+      });
 
-    // Revalidate after the state change, so errors update immediately.
-    const nextErrors = getValidationErrors(updatedData);
+      setErrors((prevErrors) => {
+        // Before the user first submits, don't show new errors for untouched fields.
+        if (!hasSubmitted) {
+          const mergedErrors = { ...prevErrors };
 
-    // Remove errors for fields cleared by unchecking a checkbox.
-    clearedFields.forEach((field) => {
-      delete nextErrors[field];
-    });
+          // Update the changed field's error.
+          if (nextErrors[name]) {
+            mergedErrors[name] = nextErrors[name];
+          } else {
+            delete mergedErrors[name];
+          }
 
-    setErrors((prevErrors) => {
-      // Before the user first submits, don't show new errors for untouched fields.
-      if (!hasSubmitted) {
-        const mergedErrors = { ...prevErrors };
-
-        // Update the changed field's error.
-        if (nextErrors[name]) {
-          mergedErrors[name] = nextErrors[name];
-        } else {
-          delete mergedErrors[name];
-        }
-
-        // Update errors for cleared fields.
-        clearedFields.forEach((field) => {
-          delete mergedErrors[field];
-        });
-
-        // Update related errors when PF share values change.
-        if (
-          ["nominee1PfShare", "nominee2PfShare"].includes(name) ||
-          name === "pfCodeEnabled"
-        ) {
-          ["nominee1PfShare", "nominee2PfShare"].forEach((field) => {
-            if (nextErrors[field]) {
-              mergedErrors[field] = nextErrors[field];
-            } else {
-              delete mergedErrors[field];
-            }
+          // Update errors for cleared fields.
+          clearedFields.forEach((field) => {
+            delete mergedErrors[field];
           });
+
+          // Update related errors when PF share values change.
+          if (
+            ["nominee1PfShare", "nominee2PfShare"].includes(name) ||
+            name === "pfCodeEnabled"
+          ) {
+            ["nominee1PfShare", "nominee2PfShare"].forEach((field) => {
+              if (nextErrors[field]) {
+                mergedErrors[field] = nextErrors[field];
+              } else {
+                delete mergedErrors[field];
+              }
+            });
+          }
+
+          return mergedErrors;
         }
 
-        return mergedErrors;
-      }
+        // After submission, keep all validation errors in sync.
+        return nextErrors;
+      });
 
-      // After submission, keep all validation errors in sync.
-      return nextErrors;
+      return updatedData;
     });
+  };
 
-    return updatedData;
-  });
-};
-
-
-/* =========================================================
+  /* =========================================================
    RESET FORM
 ========================================================= */
 
-const handleReset = () => {
-  setFormData({ ...initialFormData });
-  setErrors({});
-  setHasSubmitted(false);
-};
+  const handleReset = () => {
+    setFormData({ ...initialFormData });
+    setErrors({});
+    setHasSubmitted(false);
+  };
 
   /* =========================================================
      RENDER
@@ -286,21 +290,21 @@ const handleReset = () => {
   return (
     <div className="hrms-form-container statutory-details-page">
       <form
-  className="statutory-details-form"
-  onSubmit={(event) => {
-    event.preventDefault();
+        className="statutory-details-form"
+        onSubmit={(event) => {
+          event.preventDefault();
 
-    setHasSubmitted(true);
+          setHasSubmitted(true);
 
-    if (!validateForm()) {
-      setIsStatutoryOpen(true);
-      return;
-    }
+          if (!validateForm()) {
+            setIsStatutoryOpen(true);
+            return;
+          }
 
-    // API integration can be added here later.
-    console.log("Statutory Details:", formData);
-  }}
->
+          // API integration can be added here later.
+          console.log("Statutory Details:", formData);
+        }}
+      >
         {/* =====================================================
             STATUTORY DETAILS
         ====================================================== */}
@@ -321,10 +325,21 @@ const handleReset = () => {
               </div>
             </div>
 
-            <FormToggleBtn
-              isOpen={isStatutoryOpen}
-              onClick={() => setIsStatutoryOpen((previous) => !previous)}
-            />
+            <div className="hrms-form-header-actions">
+              <FormButton
+                type="button"
+                variant="secondary"
+                onClick={onBackToList}
+              >
+                <FiArrowLeft />
+                Back
+              </FormButton>
+
+              <FormToggleBtn
+                isOpen={isStatutoryOpen}
+                onClick={() => setIsStatutoryOpen((previous) => !previous)}
+              />
+            </div>
           </div>
 
           <div
@@ -374,29 +389,28 @@ const handleReset = () => {
                 <div className="hrms-form-group">
                   <div className="d-flex gap-2 align-items-end">
                     <div className="flex-grow-1">
-                    <FormSelect
-                      label="Bonus Group"
-                      name="bonusGroup"
-                      value={formData.bonusGroup}
-                      onChange={handleChange}
-                      options={bonusGroupOptions}
-                    />
-                  </div>
+                      <FormSelect
+                        label="Bonus Group"
+                        name="bonusGroup"
+                        value={formData.bonusGroup}
+                        onChange={handleChange}
+                        options={bonusGroupOptions}
+                      />
+                    </div>
 
-                  <button
-                    type="button"
-                    className="hrms-icon-button"
-                    aria-label="Preview bonus group"
-                    onClick={() =>
-                      window.alert(
-                        "Bonus group preview will be connected later.",
-                      )
-                    }
-                  >
-                    <FiEye size={19} />
-                  </button>
+                    <button
+                      type="button"
+                      className="hrms-icon-button"
+                      aria-label="Preview bonus group"
+                      onClick={() =>
+                        window.alert(
+                          "Bonus group preview will be connected later.",
+                        )
+                      }
+                    >
+                      <FiEye size={19} />
+                    </button>
                   </div>
-                  
                 </div>
 
                 <div className="hrms-form-group">
@@ -405,7 +419,6 @@ const handleReset = () => {
                     name="ptCodeEnabled"
                     checked={formData.ptCodeEnabled}
                     onChange={handleChange}
-                    
                   />
 
                   <FormSelect
@@ -639,7 +652,6 @@ const handleReset = () => {
                     options={relationOptions}
                     disabled={!formData.pfCodeEnabled}
                     error={errors.relationWithNominee1}
-
                   />
                 </div>
 
@@ -886,15 +898,6 @@ const handleReset = () => {
         {/* FORM FOOTER */}
 
         <div className="hrms-form-section-footer">
-          <FormButton
-            type="button"
-            variant="secondary"
-            onClick={onBackToList}
-            aria-label="Back to list"
-          >
-            List
-          </FormButton>
-
           <FormButton type="submit" variant="primary">
             Save
           </FormButton>

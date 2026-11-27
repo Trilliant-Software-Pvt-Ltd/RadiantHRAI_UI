@@ -5,17 +5,18 @@ import { NavLink, useLocation } from "react-router-dom";
 import useMenuStore from "../../../common/store/menuStore";
 import useAuthStore from "../../../auth/store/authStore";
 
-
-import { ADMIN_MODULE_ROUTES } from "../../../common/utils/moduleConfig";
+import {
+    ADMIN_MODULE_ROUTES,
+    OPERATION_MODULE_ROUTES,
+} from "../../../common/utils/moduleConfig";
 
 import { buildMenuTree } from "../../../common/utils/menuMapper";
 
 import "./ModuleNav.css";
 
-/* =========================================================
-   USER MODULE NAVIGATION
-   KEEP EXISTING USER NAVIGATION
-========================================================= */
+// =====================================================
+// HARDCODED USER MODULE NAVIGATION
+// =====================================================
 
 const userModuleNavigation = {
     "/preboarding": [
@@ -24,23 +25,25 @@ const userModuleNavigation = {
         { label: "OFFER LETTER", path: "/preboarding/offer-letter" },
     ],
 
-    "/onboarding": [
-        { label: "WELCOME BOARD", path: "/onboarding" },
-        { label: "BLOCK OR SUSPEND", path: "/onboarding/block-suspend" },
-        { label: "REASSIGN LEADS", path: "/onboarding/reassign-leads" },
-        { label: "IN-ACTIVE EMPLOYEES", path: "/onboarding/inactive-employees" },
-    ],
-
     "/me": [
-        { label: "ATTENDANCE", path: "/me" },
-        { label: "LEAVE", path: "/me/leave" },
+        { label: "Attendance", path: "/me" },
+        { label: "Leave", path: "/me/leave" },
     ],
 
     "/executive-overview": [
         { label: "EXECUTIVE OVERVIEW", path: "/executive-overview" },
-        { label: "EMPLOYEE ANALYTICS", path: "/executive-overview/employee-analytics" },
-        { label: "PAYROLL ANALYTICS", path: "/executive-overview/payroll-analytics" },
-        { label: "ATTENDANCE ANALYTICS", path: "/executive-overview/attendance-analytics" },
+        {
+            label: "EMPLOYEE ANALYTICS",
+            path: "/executive-overview/employee-analytics",
+        },
+        {
+            label: "PAYROLL ANALYTICS",
+            path: "/executive-overview/payroll-analytics",
+        },
+        {
+            label: "ATTENDANCE ANALYTICS",
+            path: "/executive-overview/attendance-analytics",
+        },
     ],
 
     "/payroll": [
@@ -51,29 +54,38 @@ const userModuleNavigation = {
     ],
 };
 
-/* =========================================================
-   ADMIN MODULE NAVIGATION
-   GENERATED FROM API RESPONSE
-========================================================= */
+// =====================================================
+// RECURSIVE API MENU ITEMS
+// =====================================================
 
-function AdminMenuItems({ items }) {
+function ModuleMenuItems({ items }) {
+    const location = useLocation();
+
     return items.map((item) => {
         const hasChildren =
-            item.isSideMenu === true &&
             Array.isArray(item.children) &&
             item.children.length > 0;
 
+        const isActive =
+            Boolean(item.path) &&
+            (
+                location.pathname === item.path ||
+                location.pathname.startsWith(
+                    `${item.path}/`
+                )
+            );
+
         return (
-            <div key={item.id} className="admin-module-nav-item">
+            <div
+                key={`${item.id}-${item.subMenuId}`}
+                className="admin-module-nav-item"
+            >
                 {item.path ? (
                     <NavLink
                         to={item.path}
-                        end
-                        className={({ isActive }) =>
-                            `module-nav-link ${
-                                isActive ? "active" : ""
-                            }`
-                        }
+                        className={`module-nav-link ${
+                            isActive ? "active" : ""
+                        }`}
                     >
                         {item.label}
                     </NavLink>
@@ -85,7 +97,9 @@ function AdminMenuItems({ items }) {
 
                 {hasChildren && (
                     <div className="admin-module-nav-children">
-                        <AdminMenuItems items={item.children} />
+                        <ModuleMenuItems
+                            items={item.children}
+                        />
                     </div>
                 )}
             </div>
@@ -93,29 +107,58 @@ function AdminMenuItems({ items }) {
     });
 }
 
-/* =========================================================
-   MODULE NAV COMPONENT
-========================================================= */
+// =====================================================
+// HARDCODED USER MENU ITEMS
+// =====================================================
+
+function UserModuleMenuItems({ items }) {
+    return items.map((item) => (
+        <NavLink
+            key={item.path}
+            to={item.path}
+            end={item.path === getBasePath(item.path)}
+            className={({ isActive }) =>
+                `module-nav-link ${isActive ? "active" : ""}`
+            }
+        >
+            {item.label}
+        </NavLink>
+    ));
+}
+
+function getBasePath(path) {
+    const knownPaths = Object.keys(userModuleNavigation);
+
+    return (
+        knownPaths.find(
+            (basePath) =>
+                path === basePath ||
+                path.startsWith(`${basePath}/`)
+        ) || path
+    );
+}
+
+// =====================================================
+// MODULE NAV
+// =====================================================
 
 function ModuleNav({ mode = "user" }) {
     const location = useLocation();
-    
-    /* ---------------------------------------------------------
-       AUTH STORE
-    --------------------------------------------------------- */
 
-    const roleId = useAuthStore(
-        (state) => state.roleId
+    // AUTH STORE
+    const employeeId = useAuthStore(
+        (state) => state.employeeId
     );
 
-    const menus = useAuthStore(
+    const userMenus = useAuthStore(
         (state) => state.menus
     );
 
-    /* ---------------------------------------------------------
-       MENU STORE
-    --------------------------------------------------------- */
+    const adminMenus = useAuthStore(
+        (state) => state.adminMenus
+    );
 
+    // MENU STORE
     const moduleMenus = useMenuStore(
         (state) => state.moduleMenus
     );
@@ -128,70 +171,95 @@ function ModuleNav({ mode = "user" }) {
         (state) => state.fetchModuleMenu
     );
 
-    /* ---------------------------------------------------------
-       GLOBAL DASHBOARD PAGES
-    --------------------------------------------------------- */
+    // GLOBAL DASHBOARD
+    const isGlobalDashboard =
+        mode === "user" &&
+        location.pathname === "/dashboard";
 
-  const isGlobalDashboard =
-    mode === "user" && location.pathname === "/dashboard";
+    // =================================================
+    // USER HARDCODED NAVIGATION
+    // =================================================
 
-    /* ---------------------------------------------------------
-       IDENTIFY CURRENT ADMIN MODULE
-    --------------------------------------------------------- */
+    const isHardcodedUserModule =
+        mode === "user" &&
+        Object.keys(userModuleNavigation).some(
+            (basePath) =>
+                location.pathname === basePath ||
+                location.pathname.startsWith(`${basePath}/`)
+        );
 
-const currentModule =
-    mode === "admin" && Array.isArray(menus)
-        ? menus.find((menu) => {
-              const moduleId = Number(menu.ID);
-
-              // Admin landing page opens Core Settings Dashboard
-              if (location.pathname === "/admin") {
-                  return moduleId === 1;
-              }
-
-              const moduleRoute = ADMIN_MODULE_ROUTES[moduleId];
-
-              return (
-                  moduleRoute &&
-                  (
-                      location.pathname === moduleRoute ||
-                      location.pathname.startsWith(`${moduleRoute}/`)
-                  )
-              );
-          })
-        : null;
-
-    /* ---------------------------------------------------------
-       ADMIN MENU CACHE KEY
-    --------------------------------------------------------- */
-
-    const cacheKey =
-        currentModule && roleId
-            ? `${roleId}_${currentModule.ID}`
+    const currentUserBasePath =
+        mode === "user"
+            ? Object.keys(userModuleNavigation).find(
+                (basePath) =>
+                    location.pathname === basePath ||
+                    location.pathname.startsWith(`${basePath}/`)
+            )
             : null;
 
-    /* ---------------------------------------------------------
-       FETCH ADMIN MENU ON REFRESH / PAGE LOAD
+    const userItems = currentUserBasePath
+        ? userModuleNavigation[currentUserBasePath]
+        : [];
 
-       If the user refreshes a module page, Zustand's in-memory
-       menu cache is empty. Fetch the menu automatically.
-    --------------------------------------------------------- */
+    // =================================================
+    // DYNAMIC ADMIN / OPERATION NAVIGATION
+    // =================================================
+
+    const screenType =
+        mode === "admin" ? "Admin" : "Operation";
+
+    const availableMenus =
+        mode === "admin" ? adminMenus : userMenus;
+
+    const moduleRoutes =
+        mode === "admin"
+            ? ADMIN_MODULE_ROUTES
+            : OPERATION_MODULE_ROUTES;
+
+    const currentModule =
+        mode === "user" && isHardcodedUserModule
+            ? null
+            : Array.isArray(availableMenus)
+                ? availableMenus.find((menu) => {
+                    const moduleRoute =
+                        moduleRoutes[Number(menu.ID)];
+
+                    if (!moduleRoute) return false;
+
+                    return (
+                        location.pathname === moduleRoute ||
+                        location.pathname.startsWith(
+                            `${moduleRoute}/`
+                        )
+                    );
+                })
+                : null;
+
+    // CACHE KEY
+    const cacheKey =
+        currentModule && employeeId
+            ? `${employeeId}_${currentModule.ID}_${screenType}`
+            : null;
+
+    // =================================================
+    // FETCH DYNAMIC SUBMENUS
+    // =================================================
 
     useEffect(() => {
         if (
-            mode !== "admin" ||
             !currentModule?.ID ||
-            !roleId ||
+            !employeeId ||
             !cacheKey ||
             isGlobalDashboard
         ) {
             return;
         }
 
-        const hasCachedMenu = Object.prototype.hasOwnProperty.call(
-            moduleMenus,
-            cacheKey
-        );
+        const hasCachedMenu =
+            Object.prototype.hasOwnProperty.call(
+                moduleMenus,
+                cacheKey
+            );
 
         const isLoading = Boolean(
             loadingModules[cacheKey]
@@ -200,99 +268,64 @@ const currentModule =
         if (!hasCachedMenu && !isLoading) {
             fetchModuleMenu(
                 currentModule.ID,
-                roleId
+                employeeId,
+                screenType
             );
         }
     }, [
-        mode,
         currentModule?.ID,
-        roleId,
+        employeeId,
         cacheKey,
+        screenType,
         isGlobalDashboard,
         moduleMenus,
         loadingModules,
         fetchModuleMenu,
     ]);
 
-    /* ---------------------------------------------------------
-       GLOBAL DASHBOARD RENDER
-    --------------------------------------------------------- */
+    // =================================================
+    // RENDER
+    // =================================================
 
-    if (isGlobalDashboard) {
-        return null;
-    }
+    if (isGlobalDashboard) return null;
 
-    /* ---------------------------------------------------------
-       USER MODULE NAVIGATION
-       EXISTING BEHAVIOUR UNCHANGED
-    --------------------------------------------------------- */
-
-    if (mode === "user") {
-        const currentPath = Object.keys(
-            userModuleNavigation
-        ).find(
-            (path) =>
-                location.pathname === path ||
-                location.pathname.startsWith(`${path}/`)
-        );
-
-        const items = currentPath
-            ? userModuleNavigation[currentPath]
-            : [];
-
-        if (!items.length) {
-            return null;
-        }
-
+    // USER HARDCODED MODULES
+    if (mode === "user" && isHardcodedUserModule) {
         return (
             <nav className="module-nav">
                 <div className="module-nav-scroll">
-                    {items.map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            end={item.path === currentPath}
-                            className={({ isActive }) =>
-                                `module-nav-link ${
-                                    isActive ? "active" : ""
-                                }`
-                            }
-                        >
-                            {item.label}
-                        </NavLink>
-                    ))}
+                    <UserModuleMenuItems items={userItems} />
                 </div>
             </nav>
         );
     }
 
-    /* ---------------------------------------------------------
-       ADMIN MODULE NAVIGATION
-    --------------------------------------------------------- */
+    // ADMIN / OPERATION DYNAMIC MODULES
+    if (!currentModule || !cacheKey) return null;
 
-    if (!currentModule || !cacheKey) {
-        return null;
-    }
-
-    const rawMenuData = moduleMenus[cacheKey] || [];
+    const rawMenuData =
+        moduleMenus[cacheKey] || [];
 
     const menuTree = buildMenuTree(rawMenuData);
 
-    // Hide the root menu and display its children as submenus.
-    const visibleMenus = menuTree.flatMap((item) =>
-        Number(item.parentId) === 0
-            ? item.children
-            : [item]
+    const isLoading = Boolean(
+        loadingModules[cacheKey]
     );
 
-    if (!visibleMenus.length) {
+    if (!menuTree.length && !isLoading) {
         return null;
     }
 
     return (
         <nav className="module-nav">
             <div className="module-nav-scroll">
-                <AdminMenuItems items={visibleMenus} />
+                {isLoading && !menuTree.length ? (
+                    <div className="module-nav-loading">
+                        Loading menus...
+                    </div>
+                ) : (
+                    <ModuleMenuItems items={menuTree} />
+                )}
             </div>
         </nav>
     );

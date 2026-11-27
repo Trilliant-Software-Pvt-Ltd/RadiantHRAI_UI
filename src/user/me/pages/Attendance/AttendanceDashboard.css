@@ -954,150 +954,920 @@
   color: #98a2b3;
 }
 
-/* =========================================
-   3. LOGS & REQUESTS
-========================================= */
+/* =========================================================
+   3. ATTENDANCE LOG COMPONENT
+   Typography aligned with Attendance page
+========================================================= */
 
-.attendance-records-heading {
-  align-items: center;
+.attendance-log-component {
+  width: 100%;
+  min-width: 0;
+  position: relative;
+
+  color: #344054;
+  font-family: inherit;
+  font-size: 12px;
 }
 
-.attendance-tabs {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding-bottom: 10px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid #eeece8;
-  overflow-x: auto;
+.attendance-log-component *,
+.attendance-log-component *::before,
+.attendance-log-component *::after {
+  box-sizing: border-box;
 }
 
-.attendance-tabs button {
-  min-height: 32px;
-  padding: 0 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  color: #8994a3;
-  cursor: pointer;
-  font-size: 11px;
-  white-space: nowrap;
+.attendance-log-component button,
+.attendance-log-component input,
+.attendance-log-component select {
+  font: inherit;
 }
 
-.attendance-tabs button.active {
-  border-bottom-color: #2f80ed;
-  color: #2f80ed;
-  font-weight: 600;
-}
+/* =========================================================
+   DATE RANGE HEADER
+========================================================= */
 
-.attendance-request-count {
-  min-width: 17px;
-  height: 17px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #2f80ed;
-  color: #fff;
-  font-size: 9px;
-}
+.attendance-log-period {
+  min-height: 72px;
+  padding: 12px 16px;
+  margin-bottom: 0;
 
-.attendance-log-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-  color: #475467;
-  font-size: 11px;
-  font-weight: 600;
+  gap: 14px;
+
+  border: 1px solid #e6e8ec;
+  border-radius: 2px;
+  background: #fff;
 }
 
-/* TABLE */
+.attendance-log-period h4 {
+  margin: 0;
 
-.attendance-table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-}
+  color: #234a75;
+  font-size: 15px;
+  font-weight: 650;
 
-.attendance-table {
-  width: 100%;
-  min-width: 650px;
-  border-collapse: collapse;
-}
-
-.attendance-table th {
-  padding: 11px;
-  background: #f8fafc;
-  color: #8994a3;
-  text-align: left;
-  font-size: 10px;
-  font-weight: 600;
   white-space: nowrap;
 }
 
-.attendance-table td {
-  padding: 12px 11px;
-  border-bottom: 1px solid #f0efed;
-  color: #475467;
-  font-size: 11px;
-  white-space: nowrap;
+.attendance-log-period-tabs {
+  max-width: 100%;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+
+  border: 1px solid #e6e8ec;
+  border-radius: 5px;
+
+  overflow: hidden;
 }
 
-.attendance-table tbody tr:hover {
-  background: #fafcff;
-}
+.attendance-log-period-tabs button {
+  min-width: 65px;
+  height: 34px;
+  padding: 0 12px;
 
-.attendance-no-records {
-  padding: 25px !important;
-  color: #98a2b3 !important;
-  text-align: center;
-  font-size: 11px;
-}
-
-/* STATUS BADGES */
-
-.attendance-status-badge {
-  width: fit-content;
   display: inline-flex;
   align-items: center;
-  padding: 5px 9px;
-  border-radius: 20px;
+  justify-content: center;
+
+  border: 0;
+  border-right: 1px solid #e6e8ec;
+
+  background: #fff;
+  color: #0565ce;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.attendance-log-period-tabs button:last-child {
+  border-right: 0;
+}
+
+.attendance-log-period-tabs button:hover {
+  background: #f3f8ff;
+}
+
+.attendance-log-period-tabs button.active {
+  background: #0565ce;
+  color: #fff;
+}
+
+/* =========================================================
+   ATTENDANCE TABLE WRAPPER
+========================================================= */
+
+.attendance-log-table-wrapper {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  background: #fff;
+  border-left: 1px solid #e6e8ec;
+  border-right: 1px solid #e6e8ec;
+
+}
+
+/* =========================================================
+   ATTENDANCE TABLE
+========================================================= */
+
+.attendance-log-table {
+  width: 100%;
+  min-width: 1000px;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  background: #fff;
+  table-layout: auto;
+}
+
+/* =========================================================
+   TABLE HEADER
+========================================================= */
+
+.attendance-log-table thead th {
+  height: 40px;
+  padding: 0 16px;
+
+  background: #f2f3f5;
+  color: #475467;
+
+  text-align: left;
+  vertical-align: middle;
+
   font-size: 10px;
   font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+
   white-space: nowrap;
 }
 
-.attendance-status-badge.present {
+/* =========================================================
+   TABLE ROWS
+========================================================= */
+
+.attendance-log-row {
+  position: relative;
+  height: 60px;
+
+  background: #fff;
+  cursor: pointer;
+
+  transition: background 0.15s ease;
+}
+
+.attendance-log-row td {
+  height: 60px;
+  padding: 10px 16px;
+
+  border-bottom: 1px solid #e6e8ec;
+
+  color: #344054;
+
+  text-align: left;
+  vertical-align: middle;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  white-space: nowrap;
+}
+
+/* Hover */
+
+.attendance-log-row:hover {
+  background: #f8fbff;
+}
+
+/* Selected row */
+
+.attendance-log-row.selected {
+  background: #ebe7f5;
+}
+
+/* Leave */
+
+.attendance-log-row.leave {
+  background: #ebe7f5;
+}
+
+/* Weekly off */
+
+.attendance-log-row.week-off {
+  background: #f3f1eb;
+}
+
+/* No attendance entries */
+
+.attendance-log-row.absent,
+.attendance-log-row.holiday {
+  background: #fff;
+}
+
+/* Selected row takes priority */
+
+.attendance-log-row.selected:hover {
+  background: #ebe7f5;
+}
+
+/* =========================================================
+   EMPTY RECORDS
+========================================================= */
+
+.attendance-log-empty {
+  height: 80px;
+  padding: 20px !important;
+
+  color: #98a2b3 !important;
+
+  text-align: center !important;
+  font-size: 11px !important;
+}
+
+/* =========================================================
+   DATE + STATUS
+========================================================= */
+
+.attendance-log-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #344054;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.attendance-log-date > span:first-child {
+  white-space: nowrap;
+}
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
+
+.attendance-log-status {
+  min-height: 20px;
+  padding: 3px 7px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 4px;
+
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+
+  white-space: nowrap;
+}
+
+/* Present */
+
+.attendance-log-status.present {
   background: #eaf7ef;
   color: #219653;
 }
 
-.attendance-status-badge.late {
+/* Late */
+
+.attendance-log-status.late {
   background: #fff5e9;
   color: #c77918;
 }
 
-.attendance-status-badge.absent {
+/* Absent */
+
+.attendance-log-status.absent {
   background: #fff0ef;
   color: #d64545;
 }
 
-.attendance-status-badge.half-day {
+/* Half day */
+
+.attendance-log-status.half-day {
   background: #f2edff;
   color: #7955c8;
 }
 
-.attendance-status-badge.leave {
-  background: #f3eaff;
-  color: #7040a5;
+/* Leave */
+
+.attendance-log-status.leave {
+  background: #9680c4;
+  color: #fff;
 }
 
-.attendance-status-badge.pending {
-  background: #fff5e9;
-  color: #c77918;
+/* Week off */
+
+.attendance-log-status.week-off {
+  background: #c1b69a;
+  color: #fff;
+}
+
+/* WFH */
+
+.attendance-log-status.wfh {
+  background: #5cbac5;
+  color: #fff;
+}
+
+/* Holiday */
+
+.attendance-log-status.holiday {
+  background: #16877d;
+  color: #fff;
+}
+
+/* =========================================================
+   ATTENDANCE VISUAL
+========================================================= */
+
+.attendance-log-visual {
+  min-height: 25px;
+  display: flex;
+  align-items: center;
+}
+
+/* No entries text */
+
+.attendance-log-visual > span.attendance-visual-empty {
+  color: #667085;
+  font-size: 11px;
+
+  white-space: nowrap;
+}
+
+/* Visual bar */
+
+.attendance-visual-bar {
+  position: relative;
+
+  max-width: 280px;
+  height: 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Timeline */
+
+.attendance-visual-timeline {
+  width: 100%;
+  height: 13px;
+
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  overflow: hidden;
+}
+
+/* First timeline mark */
+
+.attendance-visual-timeline > span {
+  width: 3px;
+  height: 13px;
+
+  flex: 0 0 3px;
+
+  border-radius: 2px;
+  background: #61c7d8;
+}
+
+/* Timeline ticks */
+
+.attendance-visual-timeline i {
+  width: 1px;
+  height: 11px;
+
+  flex: 0 0 1px;
+
+  background: #e5e9ee;
+}
+
+/* Location icon */
+
+.attendance-visual-location {
+  position: absolute;
+
+  top: 50%;
+  right: -35px;
+
+  width: 17px;
+  height: 17px;
+
+  color: #0565ce;
+  stroke-width: 1.7;
+
+  transform: translateY(-50%);
+}
+
+/* =========================================================
+   EFFECTIVE HOURS
+========================================================= */
+
+.attendance-log-effective {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+
+  color: #344054;
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   ARRIVAL
+========================================================= */
+
+.attendance-log-arrival {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+
+  color: #475467;
+  font-size: 11px;
+}
+
+.attendance-log-arrival svg {
+  width: 15px;
+  height: 15px;
+
+  stroke-width: 1.5;
+}
+
+.attendance-log-arrival svg.ontime {
+  color: #80c64d;
+}
+
+.attendance-log-arrival svg.late {
+  color: #dc8a24;
+}
+
+/* =========================================================
+   LOG ACTIONS
+========================================================= */
+
+.attendance-log-actions {
+  min-width: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Three dots */
+
+.attendance-log-more {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+  color: #7b8794;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.attendance-log-more svg {
+  width: 17px;
+  height: 17px;
+
+  stroke-width: 1.8;
+}
+
+.attendance-log-more:hover {
+  background: #edf4ff;
+  color: #0565ce;
+}
+
+.attendance-log-more:focus-visible {
+  outline: 2px solid #2f80ed;
+  outline-offset: 2px;
+}
+
+/* Present icon */
+
+.attendance-log-present-icon {
+  width: 17px;
+  height: 17px;
+
+  color: #80c64d;
+  stroke-width: 1.6;
+}
+
+/* =========================================================
+   POPUP BACKDROP
+========================================================= */
+
+.attendance-log-popup-backdrop {
+  position: fixed;
+  inset: 0;
+
+  z-index: 9998;
+
+  background: transparent;
+}
+
+/* =========================================================
+   ATTENDANCE DETAIL POPUP
+========================================================= */
+
+.attendance-log-popup {
+  position: absolute;
+
+  z-index: 9999;
+
+  width: 320px;
+  max-width: calc(100vw - 30px);
+
+  padding: 0;
+
+  overflow: hidden;
+
+  border: 1px solid #d9d9e2;
+  border-radius: 5px;
+
+  background: #fff;
+
+  box-shadow: 0 3px 8px rgba(16, 24, 40, 0.15);
+
+  color: #344054;
+  text-align: left;
+
+  font-size: 12px;
+}
+
+/* =========================================================
+   POPUP HEADER
+========================================================= */
+
+.attendance-log-popup-header {
+  min-height: 75px;
+  padding: 15px 16px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+
+  border-bottom: 1px solid #e6e8ec;
+
+  background: #fcfcfd;
+}
+
+.attendance-log-popup-header > div {
+  min-width: 0;
+}
+
+.attendance-log-popup-header strong {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #234a75;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.attendance-log-popup-header span {
+  display: block;
+
+  color: #667085;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* Popup close */
+
+.attendance-log-popup-close {
+  width: 24px;
+  height: 24px;
+
+  flex: 0 0 24px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 4px;
+
+  background: transparent;
+  color: #98a2b3;
+
+  cursor: pointer;
+}
+
+.attendance-log-popup-close svg {
+  width: 15px;
+  height: 15px;
+}
+
+.attendance-log-popup-close:hover {
+  background: #f2f4f7;
+  color: #344054;
+}
+
+/* =========================================================
+   REGULARIZE
+========================================================= */
+
+.attendance-log-regularize {
+  width: 100%;
+  min-height: 45px;
+
+  padding: 12px 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  border: 0;
+  background: #fff;
+
+  color: #0565ce;
+
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.attendance-log-regularize svg {
+  width: 16px;
+  height: 16px;
+
+  stroke-width: 1.5;
+}
+
+.attendance-log-regularize:hover {
+  background: #f8fbff;
+  color: #034b99;
+}
+
+/* =========================================================
+   POPUP DETAILS
+========================================================= */
+
+.attendance-log-popup-details {
+  padding: 0 16px 16px;
+}
+
+.attendance-log-popup-details > strong {
+  display: block;
+
+  margin-bottom: 13px;
+
+  color: #344054;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   PUNCH DETAILS
+========================================================= */
+
+.attendance-log-punches {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  color: #344054;
+  font-size: 11px;
+}
+
+.attendance-log-punches > div {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* Punch in */
+
+.attendance-log-punches .punch-in {
+  width: 15px;
+  height: 15px;
+
+  color: #80c64d;
+  stroke-width: 1.8;
+}
+
+/* Punch out */
+
+.attendance-log-punches .punch-out {
+  width: 15px;
+  height: 15px;
+
+  color: #ff5757;
+  stroke-width: 1.8;
+}
+
+/* Message icon */
+
+.attendance-log-punches .punch-message {
+  width: 13px;
+  height: 13px;
+
+  color: #98a2b3;
+  stroke-width: 1.5;
+}
+
+/* Popup reason */
+
+.attendance-log-popup-reason {
+  margin: 12px 0 0;
+
+  color: #667085;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   RESPONSIVE: 1200px
+========================================================= */
+
+@media (max-width: 1200px) {
+  .attendance-log-period {
+    min-height: 65px;
+    padding: 12px 14px;
+  }
+
+  .attendance-log-period h4 {
+    font-size: 14px;
+  }
+
+  .attendance-log-period-tabs button {
+    min-width: 60px;
+    height: 32px;
+    padding: 0 10px;
+
+    font-size: 10px;
+  }
+
+  .attendance-log-table {
+    min-width: 950px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE: 850px
+========================================================= */
+
+@media (max-width: 850px) {
+  .attendance-log-period {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .attendance-log-period-tabs {
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: auto;
+  }
+
+  .attendance-log-period-tabs button {
+    flex: 1;
+    min-width: 65px;
+  }
+
+  .attendance-log-table {
+    min-width: 900px;
+  }
+
+  .attendance-log-table thead th {
+    padding: 0 12px;
+    font-size: 10px;
+  }
+
+  .attendance-log-row td {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+
+  .attendance-log-date {
+    gap: 7px;
+    font-size: 11px;
+  }
+
+  .attendance-log-status {
+    min-height: 19px;
+    padding: 3px 6px;
+    font-size: 9px;
+  }
+
+  .attendance-log-popup {
+    width: 300px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE: 600px
+========================================================= */
+
+@media (max-width: 600px) {
+  .attendance-log-period {
+    padding: 12px;
+  }
+
+  .attendance-log-period h4 {
+    font-size: 13px;
+  }
+
+  .attendance-log-period-tabs button {
+    min-width: 55px;
+    height: 30px;
+    padding: 0 7px;
+
+    font-size: 9px;
+  }
+
+  .attendance-log-table {
+    min-width: 850px;
+  }
+
+  .attendance-log-table thead th {
+    font-size: 9px;
+  }
+
+  .attendance-log-row td {
+    font-size: 11px;
+  }
+
+  .attendance-log-date {
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .attendance-log-status {
+    min-height: 18px;
+    padding: 3px 5px;
+    font-size: 8px;
+  }
+
+  .attendance-log-popup {
+    position: fixed;
+
+    top: 50% !important;
+    right: auto !important;
+    left: 50%;
+
+    width: calc(100vw - 30px);
+    max-width: 350px;
+
+    transform: translate(-50%, -50%);
+  }
+
+  .attendance-log-popup-header {
+    padding: 14px;
+  }
+
+  .attendance-log-popup-details {
+    padding: 0 14px 16px;
+  }
+
+  .attendance-log-regularize {
+    padding: 12px 16px;
+  }
+
+  .attendance-log-punches {
+    gap: 10px;
+    font-size: 10px;
+  }
 }
 
 /* =========================================
@@ -1113,6 +1883,9 @@
 
 .attendance-calendar-main {
   min-width: 0;
+  border: 1px solid #e6e8ec;
+  border-radius: 2px;
+  padding: 10px;
 }
 
 .attendance-calendar-toolbar {
@@ -1308,7 +2081,7 @@
   min-width: 0;
   padding: 14px;
   border: 1px solid #e6e2dc;
-  border-radius: 7px;
+  border-radius: 2px;
   background: #fcfcfb;
 }
 
@@ -1696,14 +2469,7 @@
     width: 100%;
   }
 
-  .attendance-tabs {
-    gap: 2px;
-  }
-
-  .attendance-tabs button {
-    padding: 0 8px;
-    font-size: 10px;
-  }
+  
 
   .attendance-calendar-toolbar {
     align-items: flex-start;
@@ -1811,4 +2577,191 @@
 .attendance-week-day.status-normal {
   background: #ffffff;
   border-color: #e5eaf0;
+}
+
+/* =========================================================
+   ATTENDANCE TABS
+========================================================= */
+
+.attendance-tabs {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: 46px;
+
+  background: #ffffff;
+  border: 1px solid #dfe5ec;
+  border-radius: 4px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  margin-bottom: 15px;
+}
+
+/* Tab Buttons */
+.attendance-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  min-height: 46px;
+  padding: 0 22px;
+
+  border: none;
+  border-radius: 0;
+  background: transparent;
+
+  color: #5E6978;
+  font-family: inherit;
+  font-size: 12px;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover */
+.attendance-tabs button:hover {
+  background: #f5f9fd;
+  color: #0F1824;
+}
+
+/* Active Tab */
+.attendance-tabs button.active {
+  background: #edf5ff;
+  color: #0F1824;
+}
+
+/* Request Count */
+.attendance-request-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+
+  border-radius: 50%;
+  background: #e51014;
+  color: #ffffff;
+
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .attendance-tabs {
+    min-height: 42px;
+  }
+
+  .attendance-tabs button {
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .attendance-tabs button {
+    padding: 0 12px;
+    font-size: 10px;
+  }
+}
+
+/* =========================================================
+   ATTENDANCE THREE DOT ACTION MENU
+   MATCH PRESENT DETAILS POPUP
+========================================================= */
+
+.attendance-action-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 1000;
+}
+
+.attendance-action-menu {
+  position: absolute;
+  width: 250px;
+  padding: 7px 0;
+
+  background: #ffffff;
+  border: 1px solid #dfe3eb;
+  border-radius: 7px;
+
+  box-shadow: 0 5px 16px rgba(35, 50, 75, 0.16);
+
+  z-index: 1001;
+  overflow: hidden;
+
+  animation: attendanceMenuOpen 0.15s ease;
+}
+
+/* MENU ITEMS */
+
+.attendance-action-menu button {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-height: 42px;
+  padding: 0 16px;
+
+  border: none;
+  border-radius: 0;
+  background: #ffffff;
+
+  color: #0F1824;
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+/* HOVER */
+
+.attendance-action-menu button:hover {
+  background: #f3f7fc;
+  color: #0565ce;
+}
+
+/* FOCUS */
+
+.attendance-action-menu button:focus-visible {
+  outline: 2px solid #2f80ed;
+  outline-offset: -2px;
+}
+
+/* OPEN ANIMATION */
+
+@keyframes attendanceMenuOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 576px) {
+  .attendance-action-menu {
+    width: 220px;
+  }
+
+  .attendance-action-menu button {
+    min-height: 40px;
+    padding: 0 13px;
+    font-size: 12px;
+  }
 }

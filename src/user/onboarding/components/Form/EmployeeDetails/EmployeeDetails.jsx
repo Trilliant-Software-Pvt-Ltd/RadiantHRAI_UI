@@ -122,153 +122,139 @@ function EmployeeDetails({ onBackToList }) {
     setToast(null);
   }, []);
 
-  
-const [errors, setErrors] = useState({});
-const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
 
-// ========================================
-// VALIDATE FIELD
-// ========================================
-const validateField = (name, value, updatedFormData = formData) => {
-  // Employee Left Date is required only when Left Employee is checked
-  if (name === "employeeLeftDate") {
-    if (!updatedFormData.leftEmployee) {
-      setErrors((previous) => ({
-        ...previous,
-        employeeLeftDate: "",
-      }));
-      return;
+  // ========================================
+  // VALIDATE FIELD
+  // ========================================
+  const validateField = (name, value, updatedFormData = formData) => {
+    // Employee Left Date is required only when Left Employee is checked
+    if (name === "employeeLeftDate") {
+      if (!updatedFormData.leftEmployee) {
+        setErrors((previous) => ({
+          ...previous,
+          employeeLeftDate: "",
+        }));
+        return;
+      }
+
+      if (!value) {
+        setErrors((previous) => ({
+          ...previous,
+          employeeLeftDate: "Employee left date is required",
+        }));
+        return;
+      }
     }
 
-    if (!value) {
-      setErrors((previous) => ({
-        ...previous,
-        employeeLeftDate: "Employee left date is required",
-      }));
-      return;
+    const fieldSchema = employeeDetailsBaseSchema.shape[name];
+
+    if (!fieldSchema) return;
+
+    // Step 1: Run normal Zod field validation
+    const result = fieldSchema.safeParse(value);
+
+    let errorMessage = result.success
+      ? ""
+      : result.error.issues[0]?.message || "Invalid value";
+
+    // Step 2: Check employment dates against Joining Date
+    // ADDITION: This is where validateEmploymentDate is used.
+    const dateError = validateEmploymentDate(name, value, updatedFormData);
+
+    if (dateError) {
+      errorMessage = dateError;
     }
-  }
 
-  const fieldSchema = employeeDetailsBaseSchema.shape[name];
-
-  if (!fieldSchema) return;
-
-  // Step 1: Run normal Zod field validation
-  const result = fieldSchema.safeParse(value);
-
-  let errorMessage = result.success
-    ? ""
-    : result.error.issues[0]?.message || "Invalid value";
-
-  // Step 2: Check employment dates against Joining Date
-  // ADDITION: This is where validateEmploymentDate is used.
-  const dateError = validateEmploymentDate(
-    name,
-    value,
-    updatedFormData
-  );
-
-  if (dateError) {
-    errorMessage = dateError;
-  }
-
-  // Step 3: Update the field's error message
-  setErrors((previous) => ({
-    ...previous,
-    [name]: errorMessage,
-  }));
-};
-
-// ========================================
-// HANDLE CHANGE
-// ========================================
-const handleChange = (event) => {
-  const { name, value, type, checked, files } = event.target;
-
-  let fieldValue =
-    type === "checkbox"
-      ? checked
-      : type === "file"
-        ? files?.[0] || null
-        : value;
-
-  // Name fields: allow only alphabets and spaces
-  const nameFields = [
-    "employeeName",
-    "nameAsPerAadhaar",
-    "nameAsPerPan",
-  ];
-
-  if (nameFields.includes(name)) {
-    fieldValue = value.replace(/[^A-Za-z ]/g, "");
-  }
-
-  // PAN: automatically convert to uppercase
-  if (name === "pan") {
-    fieldValue = value.toUpperCase();
-  }
-
-  // Mobile number fields: allow only digits, maximum 10
-  const mobileFields = [
-    "organizationMobileNo",
-    "primaryMobileNo",
-    "emergencyNo",
-    "whatsAppNo",
-  ];
-
-  if (mobileFields.includes(name)) {
-    fieldValue = value.replace(/\D/g, "").slice(0, 10);
-  }
-
-  // Aadhaar number: only digits, maximum 12
-  if (name === "aadhaarNo") {
-    fieldValue = value.replace(/\D/g, "").slice(0, 12);
-  }
-
-  // Create updated form data
-  const updatedFormData = {
-    ...formData,
-    [name]: fieldValue,
+    // Step 3: Update the field's error message
+    setErrors((previous) => ({
+      ...previous,
+      [name]: errorMessage,
+    }));
   };
 
-  setFormData(updatedFormData);
+  // ========================================
+  // HANDLE CHANGE
+  // ========================================
+  const handleChange = (event) => {
+    const { name, value, type, checked, files } = event.target;
 
-  // Validate the changed field immediately
-  validateField(name, fieldValue, updatedFormData);
+    let fieldValue =
+      type === "checkbox"
+        ? checked
+        : type === "file"
+          ? files?.[0] || null
+          : value;
 
-  // When Joining Date changes, revalidate all dependent dates
-  if (name === "joiningDate") {
-  [
-    "probationEndDate",
-    "traineeEndDate",
-    "confirmationDate",
-    "employeeLeftDate", 
-  ].forEach((fieldName) => {
-    validateField(
-      fieldName,
-      updatedFormData[fieldName],
-      updatedFormData
-    );
-  });
-}
+    // Name fields: allow only alphabets and spaces
+    const nameFields = ["employeeName", "nameAsPerAadhaar", "nameAsPerPan"];
 
-  // Handle Left Employee checkbox
-  if (name === "leftEmployee") {
-    if (fieldValue) {
-      validateField(
-        "employeeLeftDate",
-        updatedFormData.employeeLeftDate,
-        updatedFormData
-      );
-    } else {
-      setErrors((previous) => ({
-        ...previous,
-        employeeLeftDate: "",
-      }));
+    if (nameFields.includes(name)) {
+      fieldValue = value.replace(/[^A-Za-z ]/g, "");
     }
-  }
-};
 
+    // PAN: automatically convert to uppercase
+    if (name === "pan") {
+      fieldValue = value.toUpperCase();
+    }
+
+    // Mobile number fields: allow only digits, maximum 10
+    const mobileFields = [
+      "organizationMobileNo",
+      "primaryMobileNo",
+      "emergencyNo",
+      "whatsAppNo",
+    ];
+
+    if (mobileFields.includes(name)) {
+      fieldValue = value.replace(/\D/g, "").slice(0, 10);
+    }
+
+    // Aadhaar number: only digits, maximum 12
+    if (name === "aadhaarNo") {
+      fieldValue = value.replace(/\D/g, "").slice(0, 12);
+    }
+
+    // Create updated form data
+    const updatedFormData = {
+      ...formData,
+      [name]: fieldValue,
+    };
+
+    setFormData(updatedFormData);
+
+    // Validate the changed field immediately
+    validateField(name, fieldValue, updatedFormData);
+
+    // When Joining Date changes, revalidate all dependent dates
+    if (name === "joiningDate") {
+      [
+        "probationEndDate",
+        "traineeEndDate",
+        "confirmationDate",
+        "employeeLeftDate",
+      ].forEach((fieldName) => {
+        validateField(fieldName, updatedFormData[fieldName], updatedFormData);
+      });
+    }
+
+    // Handle Left Employee checkbox
+    if (name === "leftEmployee") {
+      if (fieldValue) {
+        validateField(
+          "employeeLeftDate",
+          updatedFormData.employeeLeftDate,
+          updatedFormData,
+        );
+      } else {
+        setErrors((previous) => ({
+          ...previous,
+          employeeLeftDate: "",
+        }));
+      }
+    }
+  };
 
   const handleUpload = (event) => {
     const { name, value, files } = event.target;
@@ -389,15 +375,15 @@ const handleChange = (event) => {
 
   return (
     <>
-    {toast && (
-  <Toast
-    key={toast.id}
-    message={toast.message}
-    type={toast.type}
-    duration={toast.duration}
-    onClose={handleToastClose}
-  />
-)}
+      {toast && (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          onClose={handleToastClose}
+        />
+      )}
       <div className="hrms-form-container employee-details-page">
         <form
           className="employee-details-form"
@@ -407,29 +393,38 @@ const handleChange = (event) => {
           {/* 1. ORGANIZATION & EMPLOYMENT DETAILS */}
           <section className="hrms-form-section-card employee-employment-section">
             <div className="hrms-form-section-header">
-              <div className="hrms-section-heading-group">
-                <div className="hrms-form-section-icon">
-                  <FiBriefcase size={19} />
-                </div>
+  <div className="hrms-section-heading-group">
+    <div className="hrms-form-section-icon">
+      <FiBriefcase size={19} />
+    </div>
 
-                <div className="hrms-form-section-heading">
-                  <h3 className="hrms-form-section-title">
-                    1. Organization &amp; Employment Details
-                  </h3>
+    <div className="hrms-form-section-heading">
+      <h3 className="hrms-form-section-title">
+        1. Organization &amp; Employment Details
+      </h3>
 
-                  <div className="employee-information">
-                    {/* <FiUser size={15} /> */}
+      <div className="employee-information">
+        <span>Mr.Krishna - TS012 (Software developer - UI/UX)</span>
+      </div>
+    </div>
+  </div>
 
-                    <span>Mr.Krishna - TS012 (Software developer - UI/UX)</span>
-                  </div>
-                </div>
-              </div>
+  <div className="hrms-form-header-actions">
+    <FormButton
+      type="button"
+      variant="secondary"
+      onClick={onBackToList}
+    >
+      <FiArrowLeft />
+      Back
+    </FormButton>
 
-              <FormToggleBtn
-                isOpen={isEmpDetailsOpen}
-                onClick={() => setIsEmpDetailsOpen((prev) => !prev)}
-              />
-            </div>
+    <FormToggleBtn
+      isOpen={isEmpDetailsOpen}
+      onClick={() => setIsEmpDetailsOpen((prev) => !prev)}
+    />
+  </div>
+</div>
 
             <div
               ref={empDetailsBodyRef}
@@ -1095,15 +1090,6 @@ const handleChange = (event) => {
                 ====================================================== */}
 
           <div className="hrms-form-section-footer">
-            <FormButton
-              type="button"
-              variant="secondary"
-              onClick={onBackToList}
-              aria-label="Back to Employee List"
-            >
-              List
-            </FormButton>
-
             <FormButton type="submit" variant="primary">
               Save
             </FormButton>

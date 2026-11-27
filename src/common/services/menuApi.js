@@ -1,5 +1,5 @@
-
 import axios from "axios";
+import useAuthStore from "../../auth/store/authStore";
 
 // =====================================================
 // MENU API CLIENT
@@ -16,7 +16,7 @@ const menuClient = axios.create({
 
 menuClient.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("token");
+        const token = useAuthStore.getState().token;
 
         if (token) {
             config.headers = config.headers || {};
@@ -29,15 +29,21 @@ menuClient.interceptors.request.use(
 );
 
 // =====================================================
-// GET MENU BY MODULE ID
+// GET SUB MENU
 // =====================================================
 
-export const getMenuByModuleId = async (moduleId, roleId) => {
+export const getSubMenu = async (
+    employeeId,
+    screenType,
+    moduleId
+) => {
     const response = await menuClient.get(
-        `/Menu/GetMenuByID/${moduleId}`,
+        "/ScreenAccess/GetSubMenu",
         {
             params: {
-                RoleId: roleId,
+                EmployeeId: employeeId,
+                Screentype: screenType,
+                ModuleId: moduleId,
             },
         }
     );

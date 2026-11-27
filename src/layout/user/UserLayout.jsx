@@ -1,55 +1,94 @@
+
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
 
 import PageTransition from "../../common/components/Animations/OverallPageTransition";
 import Sidebar from "../../common/components/Sidebar/Sidebar";
 import Header from "../../common/components/Header/Header";
 import ModuleNav from "../../common/components/ModuleNav/ModuleNav";
 
-import "../../layout/RadiantHRLayout.css";
+import "../../layout/user/RadiantHRLayout.css";
 import "../../common/components/Sidebar/Sidebar.css";
 import "../../common/components/Header/Header.css";
 import "../../common/components/ModuleNav/ModuleNav.css";
 
+/* =========================================================
+   DASHBOARD PATHS
+========================================================= */
+
+// Pages that should use dashboard-content styling
+const DASHBOARD_PATHS = [
+  "/dashboard",
+  "/ess-onboarding",
+];
+
+/* =========================================================
+   USER LAYOUT
+========================================================= */
+
 function UserLayout() {
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-    return (
-        <div className="hrms-layout">
+  const location = useLocation();
 
-            <Sidebar
-                mobileOpen={mobileOpen}
-                setMobileOpen={setMobileOpen}
-            />
+  /* =========================================================
+     CHECK DASHBOARD PAGE
+  ========================================================= */
 
-            <div className="hrms-main">
+  const isDashboardPage = DASHBOARD_PATHS.includes(
+    location.pathname
+  );
 
-                <Header
-                    setMobileOpen={setMobileOpen}
-                />
+  return (
+    <div className="hrms-layout">
 
-                <ModuleNav />
+      {/* =====================================================
+          SIDEBAR
+      ====================================================== */}
 
-                <main
-                    className={`hrms-content ${
-                        location.pathname === "/dashboard"
-                            ? "dashboard-content"
-                            : ""
-                    }`}
-                >
-                    <AnimatePresence mode="wait">
-    <PageTransition key={location.pathname}>
-        <Outlet />
-    </PageTransition>
-</AnimatePresence>
-                </main>
+      <Sidebar
+        mobileOpen={mobileOpen}
+        setMobileOpen={setMobileOpen}
+      />
 
-            </div>
+      {/* =====================================================
+          MAIN
+      ====================================================== */}
 
-        </div>
-    );
+      <div className="hrms-main">
+
+        {/* =================================================
+            HEADER
+        ================================================== */}
+
+        <Header
+          setMobileOpen={setMobileOpen}
+        />
+
+        {/* =================================================
+            MODULE NAV
+        ================================================== */}
+
+        <ModuleNav />
+
+        {/* =================================================
+            PAGE CONTENT WITH SMOOTH ANIMATION
+        ================================================== */}
+
+        <main
+          className={`hrms-content ${
+            isDashboardPage ? "dashboard-content" : ""
+          }`}
+        >
+          <PageTransition key={location.pathname}>
+            <Outlet />
+          </PageTransition>
+        </main>
+
+      </div>
+
+    </div>
+  );
 }
 
 export default UserLayout;
