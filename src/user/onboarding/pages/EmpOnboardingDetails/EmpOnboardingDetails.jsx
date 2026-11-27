@@ -369,12 +369,12 @@ function EmpOnboardingDetails({ employee, onBack, onOpenForm }) {
             <div className="eod-quick-actions">
               <button type="button">
                 <FiPlus />
-                <span>Create Task</span>
+                <span>Create New Onboarding</span>
                 <FiChevronRight />
               </button>
               <button type="button">
                 <FiCheckCircle />
-                <span>View Pending Tasks</span>
+                <span>View Pending Approvals</span>
                 <FiChevronRight />
               </button>
               <button type="button">

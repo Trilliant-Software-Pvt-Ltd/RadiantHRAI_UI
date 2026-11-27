@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -15,12 +14,7 @@ import PageLoader from "../Loader/PageLoader";
 
 import "./SettingsPanel.css";
 
-const SettingsPanel = ({
-  show,
-  onClose,
-  onAdminPanel,
-  isAdmin = false,
-}) => {
+const SettingsPanel = ({ show, onClose, onAdminPanel, isAdmin = false }) => {
   const panelRef = useRef(null);
 
   const [isSwitching, setIsSwitching] = useState(false);
@@ -54,11 +48,7 @@ const SettingsPanel = ({
 
   useEffect(() => {
     const handleEscape = (event) => {
-      if (
-        event.key === "Escape" &&
-        show &&
-        !isSwitching
-      ) {
+      if (event.key === "Escape" && show && !isSwitching) {
         onClose();
       }
     };
@@ -101,7 +91,6 @@ const SettingsPanel = ({
   return (
     <>
       {/* REUSABLE PAGE LOADER */}
-
       {isSwitching && (
         <PageLoader
           fullScreen
@@ -114,22 +103,15 @@ const SettingsPanel = ({
       )}
 
       {/* SETTINGS BACKDROP */}
-
       <div
         className="settings-backdrop"
         onClick={isSwitching ? undefined : onClose}
       />
 
       {/* SETTINGS PANEL */}
-
       {show && (
-        <div
-          className="settings-panel"
-          ref={panelRef}
-          aria-busy={isSwitching}
-        >
+        <div className="settings-panel" ref={panelRef} aria-busy={isSwitching}>
           {/* HEADER */}
-
           <div className="settings-header">
             <h3>Settings</h3>
 
@@ -144,98 +126,9 @@ const SettingsPanel = ({
             </button>
           </div>
 
-          {/* SWITCH PANEL */}
-
-          <button
-            type="button"
-            className="settings-workspace"
-            onClick={handleSwitchWorkspace}
-            disabled={isSwitching}
-          >
-            <div className="settings-item-icon">
-              <FiShield size={18} />
-            </div>
-
-            <div className="settings-item-content">
-              <span className="settings-item-title">
-                {isAdmin
-                  ? "Switch to User Panel"
-                  : "Switch to Admin Panel"}
-              </span>
-
-              <span className="settings-item-subtitle">
-                {isSwitching
-                  ? "Preparing workspace..."
-                  : "Switch workspace"}
-              </span>
-            </div>
-
-            <FiChevronRight
-              className="settings-item-arrow"
-              size={17}
-            />
-          </button>
-
-          <div className="settings-divider" />
-
-          {/* THEME */}
-
-          <div className="settings-section">
-            <div className="settings-section-title">
-              Theme
-            </div>
-
-            <div className="settings-section-subtitle">
-              Choose your appearance
-            </div>
-
-            <div className="settings-theme-options">
-
-              {/* LIGHT */}
-
-              <button
-                type="button"
-                className="settings-theme-option active"
-                disabled={isSwitching}
-              >
-                <div className="settings-theme-icon">
-                  <FiSun size={17} />
-                </div>
-
-                <span>Light</span>
-
-                <FiCheck
-                  className="settings-theme-check"
-                  size={15}
-                />
-              </button>
-
-              {/* DARK */}
-
-              <button
-                type="button"
-                className="settings-theme-option"
-                disabled={isSwitching}
-              >
-                <div className="settings-theme-icon">
-                  <FiMoon size={17} />
-                </div>
-
-                <span>Dark</span>
-              </button>
-
-            </div>
-          </div>
-
-          <div className="settings-divider" />
-
-          {/* LANGUAGE */}
-
+          {/* LANGUAGE - TOP */}
           <div className="settings-section settings-language-section">
-
-            <div className="settings-section-title">
-              Language
-            </div>
+            <div className="settings-section-title">Language</div>
 
             <div className="settings-section-subtitle">
               Choose your language
@@ -256,8 +149,74 @@ const SettingsPanel = ({
 
               <FiChevronRight size={17} />
             </button>
-
           </div>
+
+          <div className="settings-divider" />
+
+          {/* THEME */}
+          <div className="settings-section">
+            <div className="settings-section-title">Theme</div>
+
+            <div className="settings-section-subtitle">
+              Choose your appearance
+            </div>
+
+            <div className="settings-theme-options">
+              {/* LIGHT */}
+              <button
+                type="button"
+                className="settings-theme-option active"
+                disabled={isSwitching}
+              >
+                <div className="settings-theme-icon">
+                  <FiSun size={17} />
+                </div>
+
+                <span>Light</span>
+
+                <FiCheck className="settings-theme-check" size={15} />
+              </button>
+
+              {/* DARK */}
+              <button
+                type="button"
+                className="settings-theme-option"
+                disabled={isSwitching}
+              >
+                <div className="settings-theme-icon">
+                  <FiMoon size={17} />
+                </div>
+
+                <span>Dark</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="settings-divider" />
+
+          {/* SWITCH PANEL - BOTTOM */}
+          <button
+            type="button"
+            className="settings-workspace"
+            onClick={handleSwitchWorkspace}
+            disabled={isSwitching}
+          >
+            <div className="settings-item-icon">
+              <FiShield size={18} />
+            </div>
+
+            <div className="settings-item-content">
+              <span className="settings-item-title">
+                {isAdmin ? "Switch to User Panel" : "Switch to Admin Panel"}
+              </span>
+
+              <span className="settings-item-subtitle">
+                {isSwitching ? "Preparing workspace..." : "Switch workspace"}
+              </span>
+            </div>
+
+            <FiChevronRight className="settings-item-arrow" size={17} />
+          </button>
         </div>
       )}
     </>

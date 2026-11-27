@@ -22,7 +22,7 @@ import {
 import WFHRequest from "../../components/Forms/Attendance/WFHRequest";
 import LeaveRequestForm from "../../components/Forms/Leave/LeaveRequestForm";
 import PunchMissingRequest from "../../components/Forms/Attendance/PunchMissingRequest";
-import AttendanceRegularizationForm from "../../components/Forms/Attendance/AttendanceRegularization"
+import AttendanceRegularizationForm from "../../components/Forms/Attendance/AttendanceRegularization";
 
 import AttendanceLog from "../../components/AttendanceDashboard/AttendanceLog";
 import AttendanceCalendar from "../../components/AttendanceDashboard/AttendanceCalendar";
@@ -388,8 +388,6 @@ function Attendance() {
     makeDateKey(new Date()),
   );
 
-  const [calendarMode, setCalendarMode] = useState("calendar");
-
   /* TABS STATE */
 
   const [activeTab, setActiveTab] = useState("log");
@@ -412,7 +410,8 @@ function Attendance() {
   const [showLeaveForm, setShowLeaveForm] = useState(false);
   const [showPunchMissing, setShowPunchMissing] = useState(false);
   const [showRegularizeForm, setShowRegularizeForm] = useState(false);
-const [selectedRegularizeRecord, setSelectedRegularizeRecord] = useState(null);
+  const [selectedRegularizeRecord, setSelectedRegularizeRecord] =
+    useState(null);
 
   /* FILTERS */
 
@@ -471,9 +470,9 @@ const [selectedRegularizeRecord, setSelectedRegularizeRecord] = useState(null);
   };
 
   const handleOpenRegularizeForm = (record) => {
-  setSelectedRegularizeRecord(record);
-  setShowRegularizeForm(true);
-};
+    setSelectedRegularizeRecord(record);
+    setShowRegularizeForm(true);
+  };
   /* =========================================================
      CLOCK OUT
   ========================================================= */
@@ -855,17 +854,17 @@ const [selectedRegularizeRecord, setSelectedRegularizeRecord] = useState(null);
 
         {activeTab === "log" && (
           <AttendanceLog
-  records={records}
-  filterStatus={filterStatus}
-  setFilterStatus={setFilterStatus}
-  formatDate={formatDate}
-  formatTime={formatTime}
-  getStatusClass={getStatusClass}
-  onOpenWfhForm={() => setShowWfhForm(true)}
-  onOpenPunchMissingForm={() => setShowPunchMissing(true)}
-  onOpenLeaveForm={() => setShowLeaveForm(true)}
-  onOpenRegularizeForm={handleOpenRegularizeForm}
-/>
+            records={records}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+            formatDate={formatDate}
+            formatTime={formatTime}
+            getStatusClass={getStatusClass}
+            onOpenWfhForm={() => setShowWfhForm(true)}
+            onOpenPunchMissingForm={() => setShowPunchMissing(true)}
+            onOpenLeaveForm={() => setShowLeaveForm(true)}
+            onOpenRegularizeForm={handleOpenRegularizeForm}
+          />
         )}
 
         {/* ATTENDANCE CALENDAR COMPONENT */}
@@ -877,8 +876,6 @@ const [selectedRegularizeRecord, setSelectedRegularizeRecord] = useState(null);
             setCurrentDate={setCurrentDate}
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
-            calendarMode={calendarMode}
-            setCalendarMode={setCalendarMode}
             formatDate={formatDate}
             formatTime={formatTime}
             getStatusClass={getStatusClass}
@@ -916,32 +913,32 @@ const [selectedRegularizeRecord, setSelectedRegularizeRecord] = useState(null);
 
       {/* LEAVE REQUEST FORM */}
 
-<LeaveRequestForm
-  show={showLeaveForm}
-  onClose={() => setShowLeaveForm(false)}
-  onSubmit={(request) => {
-    setRequests((previous) => [request, ...previous]);
-    setShowLeaveForm(false);
-    setActiveTab("requests");
-  }}
-/>
+      <LeaveRequestForm
+        show={showLeaveForm}
+        onClose={() => setShowLeaveForm(false)}
+        onSubmit={(request) => {
+          setRequests((previous) => [request, ...previous]);
+          setShowLeaveForm(false);
+          setActiveTab("requests");
+        }}
+      />
 
-{/* ATTENDANCE REGULARIZATION FORM */}
+      {/* ATTENDANCE REGULARIZATION FORM */}
 
-<AttendanceRegularizationForm
-  show={showRegularizeForm}
-  onClose={() => {
-    setShowRegularizeForm(false);
-    setSelectedRegularizeRecord(null);
-  }}
-  record={selectedRegularizeRecord}
-  onSubmit={(request) => {
-    setRequests((previous) => [request, ...previous]);
-    setShowRegularizeForm(false);
-    setSelectedRegularizeRecord(null);
-    setActiveTab("requests");
-  }}
-/>
+      <AttendanceRegularizationForm
+        show={showRegularizeForm}
+        onClose={() => {
+          setShowRegularizeForm(false);
+          setSelectedRegularizeRecord(null);
+        }}
+        record={selectedRegularizeRecord}
+        onSubmit={(request) => {
+          setRequests((previous) => [request, ...previous]);
+          setShowRegularizeForm(false);
+          setSelectedRegularizeRecord(null);
+          setActiveTab("requests");
+        }}
+      />
     </div>
   );
 }
