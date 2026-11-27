@@ -2067,3 +2067,527 @@
   }
 
 }
+
+/* =========================================================
+   WEEK OFF DAYS SECTION
+========================================================= */
+
+.sc-weekoff-section {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 16px 0;
+  padding: 0 14px 14px;
+  border: 1px solid #d5e0f2;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #f5f8fd 100%
+  );
+}
+
+/* =========================================================
+   WEEK OFF HEADER
+========================================================= */
+
+.sc-weekoff-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0 -14px 14px;
+  padding: 12px 16px;
+  border-radius: 11px 11px 0 0;
+  background: linear-gradient(
+    110deg,
+    #edf2fc 0%,
+    #e1eafa 100%
+  );
+}
+
+.sc-weekoff-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #172b4d;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sc-weekoff-header h3 svg {
+  width: 20px;
+  height: 20px;
+  color: #245bb5;
+  flex-shrink: 0;
+}
+
+.sc-weekoff-header > span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   WEEK OFF ROWS
+========================================================= */
+
+.sc-weekoff-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sc-weekoff-row {
+  display: grid;
+  grid-template-columns:
+    minmax(115px, 1fr)
+    minmax(145px, 1.15fr)
+    minmax(150px, 1.2fr)
+    minmax(155px, 1.2fr)
+    32px;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #dce5f3;
+  border-radius: 9px;
+  background: #ffffff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.sc-weekoff-row:hover {
+  border-color: #b7ccef;
+  box-shadow: 0 2px 8px rgba(40, 77, 135, 0.05);
+}
+
+/* Keep duration and delete button aligned
+   even when Alternate is not selected */
+
+.sc-weekoff-day {
+  grid-column: 1;
+}
+
+.sc-weekoff-pattern {
+  grid-column: 2;
+}
+
+.sc-weekoff-occurrences {
+  grid-column: 3;
+}
+
+.sc-weekoff-duration {
+  grid-column: 4;
+}
+
+.sc-weekoff-delete {
+  grid-column: 5;
+}
+
+/* =========================================================
+   WEEK OFF DAY DROPDOWN
+========================================================= */
+
+.sc-weekoff-day {
+  min-width: 0;
+}
+
+.sc-weekoff-day .hrms-form-group,
+.sc-weekoff-day .sc-field {
+  margin: 0;
+  gap: 5px;
+  min-width: 0;
+}
+
+.sc-weekoff-day .sc-field-label {
+  display: block;
+  margin-bottom: 5px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sc-weekoff-day .sc-select-control {
+  width: 100%;
+  min-width: 0;
+}
+
+.sc-weekoff-day select {
+  width: 100%;
+  min-height: 35px;
+  padding: 6px 10px;
+  border: 1px solid #cbd9ef;
+  border-radius: 7px;
+  background-color: #eef3fc;
+  color: #193761;
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+}
+
+.sc-weekoff-day select:focus {
+  border-color: #6394ed;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+/* =========================================================
+   PATTERN AND DURATION
+========================================================= */
+
+.sc-weekoff-pattern,
+.sc-weekoff-duration {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.sc-weekoff-pattern legend,
+.sc-weekoff-duration legend {
+  margin: 0 0 6px;
+  padding: 0;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sc-weekoff-pattern label,
+.sc-weekoff-duration label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid #dce4f0;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.sc-weekoff-pattern label:hover,
+.sc-weekoff-duration label:hover {
+  border-color: #a9c3ef;
+  background: #edf3fd;
+}
+
+/* Selected radio option */
+
+.sc-weekoff-pattern label.selected,
+.sc-weekoff-duration label.selected {
+  border-color: #c7d9f8;
+  background: #e4edfd;
+  color: #174bb2;
+  font-weight: 600;
+}
+
+/* Radio inputs */
+
+.sc-weekoff-pattern input[type="radio"],
+.sc-weekoff-duration input[type="radio"] {
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
+  margin: 0;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+/* =========================================================
+   ALTERNATE WEEK NUMBERS
+========================================================= */
+
+.sc-weekoff-occurrences {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sc-weekoff-occurrences > span {
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Override existing Working Days styles
+   only inside the Week Off section */
+
+.sc-weekoff-occurrences .sc-days {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(24px, 1fr));
+  gap: 5px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.sc-weekoff-occurrences .sc-days button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #ccd7e8;
+  border-radius: 6px;
+  background: #f5f7fb;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.sc-weekoff-occurrences .sc-days button:hover {
+  border-color: #7da5ec;
+  background: #e8f0ff;
+  color: #1d4ed8;
+}
+
+.sc-weekoff-occurrences .sc-days button.selected {
+  border-color: #2563eb;
+  background: linear-gradient(
+    135deg,
+    #3478f6,
+    #1d5bd7
+  );
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
+}
+
+/* Remove inherited working day indicators */
+
+.sc-weekoff-occurrences .sc-days button::before,
+.sc-weekoff-occurrences .sc-days button::after {
+  display: none;
+  content: none;
+}
+
+/* =========================================================
+   DELETE WEEK OFF BUTTON
+========================================================= */
+
+.sc-weekoff-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: end;
+  width: 32px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: #fff1f2;
+  color: #dc3545;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sc-weekoff-delete svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+.sc-weekoff-delete:hover {
+  border-color: #fecaca;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.sc-weekoff-delete:active {
+  transform: scale(0.95);
+}
+
+/* =========================================================
+   ADD WEEK OFF DAY BUTTON
+========================================================= */
+
+.sc-weekoff-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  margin-top: 14px;
+  padding: 8px 16px;
+  border: 1px solid #a9c5f7;
+  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    #f0f5ff,
+    #e4edff
+  );
+  color: #1d5bd7;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sc-weekoff-add svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+.sc-weekoff-add:hover:not(:disabled) {
+  border-color: #6394ed;
+  background: #dce9ff;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
+}
+
+.sc-weekoff-add:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.sc-weekoff-add:disabled {
+  border-color: #dbe2ec;
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* =========================================================
+   MAXIMUM WEEK OFF LIMIT MESSAGE
+========================================================= */
+
+.sc-weekoff-section > small {
+  display: inline-block;
+  margin: 8px 0 0 12px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* =========================================================
+   KEYBOARD ACCESSIBILITY
+========================================================= */
+
+.sc-weekoff-section button:focus-visible,
+.sc-weekoff-section input:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   RESPONSIVE CONTAINER
+========================================================= */
+
+.sc-weekoff-section {
+  container-type: inline-size;
+  container-name: weekoff;
+}
+
+/* Medium available content width */
+
+@container weekoff (max-width: 760px) {
+  .sc-weekoff-row {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, 1fr)
+      32px;
+    gap: 12px;
+  }
+
+  .sc-weekoff-day {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .sc-weekoff-pattern {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .sc-weekoff-occurrences {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .sc-weekoff-duration {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .sc-weekoff-delete {
+    grid-column: 3;
+    grid-row: 1;
+  }
+}
+
+/* Small available content width */
+
+@container weekoff (max-width: 420px) {
+  .sc-weekoff-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sc-weekoff-row {
+    grid-template-columns: minmax(0, 1fr) 32px;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .sc-weekoff-day {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .sc-weekoff-delete {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .sc-weekoff-pattern,
+  .sc-weekoff-occurrences,
+  .sc-weekoff-duration {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .sc-weekoff-pattern label,
+  .sc-weekoff-duration label {
+    min-height: 38px;
+  }
+
+  .sc-weekoff-occurrences .sc-days button {
+    height: 38px;
+  }
+
+  .sc-weekoff-add {
+    width: 100%;
+  }
+
+  .sc-weekoff-section > small {
+    display: block;
+    margin: 8px 0 0;
+    text-align: center;
+  }
+}
