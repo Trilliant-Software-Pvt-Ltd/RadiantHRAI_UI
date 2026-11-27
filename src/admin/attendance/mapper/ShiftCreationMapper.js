@@ -39,8 +39,8 @@ export const extractShiftCreationById = (response) => {
   if (
     record &&
     typeof record === "object" &&
-    (record.rdhR0000LXXXIID != null ||
-      record.rdhR0000LXXXIID_Encrypted)
+    (record.RDHR0000LXXXIID != null ||
+      record.RDHR0000LXXXIID_Encrypted)
   ) {
     return record;
   }
@@ -136,17 +136,17 @@ export const mapShiftCreation = (
     id: item?.rdhR0000LXXXIID ?? null,
 
     encryptedId:
-      item?.rdhR0000LXXXIID_Encrypted ?? null,
+      item?.RDHR0000LXXXIID_Encrypted ?? null,
 
     /* =====================================================
        ORGANIZATION / ENTITY / COUNTRY
     ===================================================== */
 
-    organizationId: item?.rdhR0000IID ?? null,
+    organizationId: item?.RDHR0000IID ?? null,
 
     entityId,
 
-    countryId: item?.rdhR0000XID ?? null,
+    countryId: item?.RDHR0000XID ?? null,
 
     /* =====================================================
        TABLE DISPLAY FIELDS

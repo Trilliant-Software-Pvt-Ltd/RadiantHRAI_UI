@@ -740,8 +740,8 @@ const mapEditForm = (record) => {
   const hasRunaway = Number(record.runawayDurationMin) > 0;
   return {
     ...f,
-    shiftName: record.shiftName ?? "", shiftCode: record.shiftCode ?? "",
-    workMode: record.workMode ?? "", shiftType: record.shiftType ?? "",
+    shiftName: record.ShiftName ?? "", shiftCode: record.ShiftCode ?? "",
+    workMode: record.WorkMode ?? "", ShiftType: record.ShiftType ?? "",
     timeZone: record.shiftTimeZone ?? f.timeZone,
     startTime: toInputTime(record.beginTime), endTime: toInputTime(record.endTime),
     breakDuration: `${Number(record.lunchTimeMin ?? 0)} min`,
