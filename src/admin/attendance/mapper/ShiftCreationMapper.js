@@ -121,7 +121,7 @@ export const mapShiftCreation = (
   item,
   entityMap = new Map()
 ) => {
-  const entityId = item?.rdhR0000IIID ?? null;
+  const entityId = item?.RDHR0000IIID ?? null;
 
   const entityName =
     item?.rdhR0000IIName ??
@@ -152,9 +152,9 @@ export const mapShiftCreation = (
        TABLE DISPLAY FIELDS
     ===================================================== */
 
-    shiftName: item?.shiftName ?? "-",
+    shiftName: item?.ShiftName ?? "-",
 
-    shiftCode: item?.shiftCode ?? "-",
+    shiftCode: item?.ShiftCode ?? "-",
 
     entity:
       entityName ||
@@ -163,20 +163,20 @@ export const mapShiftCreation = (
         : "-"),
 
     startTime: formatShiftTime(
-      item?.beginTime
+      item?.BeginTime
     ),
 
     endTime: formatShiftTime(
-      item?.endTime
+      item?.EndTime
     ),
 
     /* =====================================================
        ORIGINAL TIME VALUES
     ===================================================== */
 
-    beginTime: item?.beginTime ?? "",
+    beginTime: item?.BeginTime ?? "",
 
-    originalEndTime: item?.endTime ?? "",
+    originalEndTime: item?.EndTime ?? "",
 
     /* =====================================================
        ADDITIONAL DETAILS
