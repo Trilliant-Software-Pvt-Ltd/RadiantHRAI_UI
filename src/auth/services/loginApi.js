@@ -1,7 +1,7 @@
 import axiosClient from "../../api/axiosClient";
 
 export const loginApi = async ({ clientId, id, pass, sourceID }) => {
-    const response = await axiosClient.post("/Login/login", {
+    const response = await axiosClient.post("/auth/login", {
         clientId,
         id,
         pass,
