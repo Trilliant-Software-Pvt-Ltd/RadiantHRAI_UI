@@ -14,9 +14,7 @@ dist-ssr
 
 # SVN metadata and local environment files
 .svn/
-.env
-.env.*
-!.env.example
+
 
 # Editor directories and files
 .vscode/*

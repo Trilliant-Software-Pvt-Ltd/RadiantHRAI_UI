@@ -69,10 +69,6 @@ export const deleteShiftCreation = (encryptedId) => {
 };
 
 /* =========================================================
-   GET ASSIGNED EMPLOYEES
-========================================================= */
-
-/* =========================================================
    GET ALL ASSIGNED EMPLOYEES BY SHIFT ID
 ========================================================= */
 
@@ -87,6 +83,7 @@ export const getAllAssigned = (id) => {
     }
   );
 };
+
 /* =========================================================
    GET ORGANIZATION LIST
 ========================================================= */
@@ -120,7 +117,6 @@ export const getCountryList = () => {
   );
 };
 
-
 /* =========================================================
    GET SHIFT CREATION BY ENCRYPTED ID
 ========================================================= */
@@ -133,6 +129,7 @@ export const getShiftCreationById = (encryptedId) => {
     ATTENDANCE_CONFIG
   );
 };
+
 /* =========================================================
    COMMON RESPONSE EXTRACTOR
 ========================================================= */
@@ -363,6 +360,114 @@ const dayLabels = [
 ];
 
 /* =========================================================
+   WEEK OFF CONFIGURATION
+========================================================= */
+
+const MAX_WEEK_OFF_DAYS = 3;
+
+const ALL_WEEK_NUMBERS = [1, 2, 3, 4, 5];
+
+/* =========================================================
+   NORMALIZE WEEK OFF NUMBERS
+========================================================= */
+
+const normalizeWeekNumbers = (weeks) => {
+  if (weeks == null || weeks === "") {
+    return [];
+  }
+
+  const values = Array.isArray(weeks)
+    ? weeks
+    : String(weeks).split(",");
+
+  return [
+    ...new Set(
+      values
+        .map((week) => Number(week))
+        .filter(
+          (week) =>
+            Number.isInteger(week) &&
+            week >= 1 &&
+            week <= 5
+        )
+    ),
+  ].sort((a, b) => a - b);
+};
+
+/* =========================================================
+   MAP WEEK OFF DAYS PAYLOAD
+
+   WEEKOFF1
+   WEEKOFF1_pattern
+   WEEKOFF1_WeekDay
+   WEEKOFF1_DayType
+
+   Maximum 3 week off configurations.
+========================================================= */
+
+export const mapWeekOffPayload = (
+  weekOffDays = []
+) => {
+  const payload = {};
+
+  const rows = Array.isArray(weekOffDays)
+    ? weekOffDays
+    : [];
+
+  for (
+    let index = 1;
+    index <= MAX_WEEK_OFF_DAYS;
+    index++
+  ) {
+    const row = rows[index - 1];
+
+    const prefix = `WEEKOFF${index}`;
+
+    const day = String(
+      row?.day ?? ""
+    ).trim();
+
+    const hasDay = Boolean(day);
+
+    const pattern = hasDay
+      ? String(row?.pattern ?? "").trim()
+      : "";
+
+    const dayType = hasDay
+      ? String(row?.dayType ?? "").trim()
+      : "";
+
+    /* =====================================================
+       WEEK NUMBER MAPPING
+
+       All       -> 1,2,3,4,5
+       Alternate -> Selected week numbers
+       Empty     -> ""
+    ===================================================== */
+
+    const weeks = !hasDay
+      ? []
+      : pattern === "All"
+        ? [...ALL_WEEK_NUMBERS]
+        : normalizeWeekNumbers(row?.weeks);
+
+    /* =====================================================
+       MAP INDIVIDUAL WEEK OFF FIELDS
+    ===================================================== */
+
+    payload[prefix] = day;
+
+    payload[`${prefix}_pattern`] = pattern;
+
+    payload[`${prefix}_WeekDay`] = weeks.join(",");
+
+    payload[`${prefix}_DayType`] = dayType;
+  }
+
+  return payload;
+};
+
+/* =========================================================
    COMMON NUMBER CONVERTER
 ========================================================= */
 
@@ -376,10 +481,15 @@ const toNumber = (value) => {
    MAP SHIFT CREATION PAYLOAD
 ========================================================= */
 
-export const mapShiftPayload = (form, audit = {}) => {
-  const customSchedule = form.customSchedule ?? {};
+export const mapShiftPayload = (
+  form,
+  audit = {}
+) => {
+  const customSchedule =
+    form.customSchedule ?? {};
 
-  const otSchedule = form.otSchedule ?? {};
+  const otSchedule =
+    form.otSchedule ?? {};
 
   const payload = {
     /* =====================================================
@@ -401,9 +511,13 @@ export const mapShiftPayload = (form, audit = {}) => {
        ADVANCED OPTIONS
     ===================================================== */
 
-    rdhR0000IID: toNumber(form.organizationId),
+    rdhR0000IID: toNumber(
+      form.organizationId
+    ),
 
-    rdhR0000IIID: toNumber(form.entityId),
+    rdhR0000IIID: toNumber(
+      form.entityId
+    ),
 
     rdhR0000XID: form.applicableToAllCountries
       ? 0
@@ -433,9 +547,13 @@ export const mapShiftPayload = (form, audit = {}) => {
        REGULAR SCHEDULE
     ===================================================== */
 
-    beginTime: apiTime(form.startTime),
+    beginTime: apiTime(
+      form.startTime
+    ),
 
-    endTime: apiTime(form.endTime),
+    endTime: apiTime(
+      form.endTime
+    ),
 
     shiftFlag: true,
 
@@ -451,11 +569,16 @@ export const mapShiftPayload = (form, audit = {}) => {
     ===================================================== */
 
     lunchTime: apiTime(
-      form.lunchBreak ? form.lunchStart : ""
+      form.lunchBreak
+        ? form.lunchStart
+        : ""
     ),
 
     lunchTimeMin:
-      parseInt(form.breakDuration || 0, 10) || 0,
+      parseInt(
+        form.breakDuration || 0,
+        10
+      ) || 0,
 
     lunchTimePunchBegin: 0,
 
@@ -467,12 +590,16 @@ export const mapShiftPayload = (form, audit = {}) => {
 
     graceTimeForLateComming:
       customSchedule.lateMark
-        ? toNumber(customSchedule.lateMarkGraceTime)
+        ? toNumber(
+            customSchedule.lateMarkGraceTime
+          )
         : null,
 
     graceTimeForEarlyGoing:
       customSchedule.earlyExit
-        ? toNumber(customSchedule.earlyExitGraceTime)
+        ? toNumber(
+            customSchedule.earlyExitGraceTime
+          )
         : null,
 
     shiftDurationForHD: Math.round(
@@ -546,6 +673,23 @@ export const mapShiftPayload = (form, audit = {}) => {
   });
 
   /* =======================================================
+     MAP WEEK OFF DAYS
+
+     Supports maximum 3 configurations.
+
+     All 12 fields are always included in the payload,
+     even when no week off days are configured.
+
+     This also supports clearing removed configurations
+     during shift updation.
+  ======================================================= */
+
+  Object.assign(
+    payload,
+    mapWeekOffPayload(form.weekOffDays)
+  );
+
+  /* =======================================================
      MAP COFF SCHEDULE
 
      REGULAR DAY - 4 ROWS
@@ -558,7 +702,9 @@ export const mapShiftPayload = (form, audit = {}) => {
         const row =
           form.coffSchedule?.[section]?.[index] ?? {};
 
-        const enabled = Boolean(row.enabled);
+        const enabled = Boolean(
+          row.enabled
+        );
 
         payload[`${prefix}_Applicable`] = enabled;
 
@@ -583,7 +729,10 @@ export const mapShiftPayload = (form, audit = {}) => {
 export const getApiErrorMessage = (error) => {
   const data = error?.response?.data;
 
-  if (typeof data === "string" && data.trim()) {
+  if (
+    typeof data === "string" &&
+    data.trim()
+  ) {
     return data;
   }
 

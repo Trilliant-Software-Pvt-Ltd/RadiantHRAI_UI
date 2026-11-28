@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import useAuthStore from "../../../../auth/store/authStore";
-import { createShiftCreation, updateShiftCreation, coffPrefixes, getAllAssigned, getOrganisationList, getEntityList, getCountryList, extractArray, mapOptions, mapShiftPayload, getApiErrorMessage, durationMinutes, lunchEnd } from "../../services/ShiftCreationApi";
+import { createShiftCreation, updateShiftCreation, getShiftCreationById, coffPrefixes, getAllAssigned, getOrganisationList, getEntityList, getCountryList, extractArray, mapOptions, mapShiftPayload, getApiErrorMessage, durationMinutes, lunchEnd } from "../../services/ShiftCreationApi";
 import { shiftCreationSchema } from "../../validations/shiftCreationSchema";
 import remote_job from "../../../../assets/remote_job.jpg";
 import PageLoader from "../../../../common/components/Loader/PageLoader";
-import { FiCalendar, FiClock, FiInfo, FiSettings, FiBriefcase, FiArrowRight, FiCheck, FiCoffee, FiEye, FiGlobe, FiHome, FiMapPin, FiMonitor, FiMoreVertical, FiRefreshCw, FiSave, FiSearch, FiX, FiMinus, FiPlus, FiAward, FiLogOut, FiCheckCircle, FiList } from "react-icons/fi";
+import { FiCalendar, FiClock, FiInfo, FiSettings, FiBriefcase, FiArrowRight, FiCheck, FiCoffee, FiEye, FiGlobe, FiHome, FiMapPin, FiMonitor, FiMoreVertical, FiRefreshCw, FiSave, FiSearch, FiX, FiMinus, FiPlus, FiAward, FiLogOut, FiCheckCircle, FiList, FiUmbrella, FiTrash2 } from "react-icons/fi";
 
 import FormInput from "../../../../../src/common/components/Form/FormInput";
 import FormSelect from "../../../../../src/common/components/Form/FormSelect";
@@ -37,6 +37,7 @@ const initialShift = {
   
 
   workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+  weekOffDays: [],
 
   otSchedule: {
     calculationDuration: "",
@@ -93,6 +94,77 @@ const initialShift = {
 ========================================================= */
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const fullDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const weekNumbers = [1, 2, 3, 4, 5];
+const getRecordValue = (record, field, fallback = null) => {
+  const key = Object.keys(record ?? {}).find(key => key.toLowerCase() === field.toLowerCase());
+  return key === undefined ? fallback : record[key] ?? fallback;
+};
+const toBoolean = value => value === true || value === 1 || String(value).toLowerCase() === "true" || value === "1";
+const readWeekOffDays = (record) => [1, 2, 3].flatMap((n) => {
+  const read = (suffix = "") => getRecordValue(record, `WEEKOFF${n}${suffix}`, "");
+  const day = fullDays.find(d => d.toLowerCase() === String(read()).trim().toLowerCase() || d.slice(0, 3).toLowerCase() === String(read()).trim().toLowerCase());
+  if (!day) return [];
+  const pattern = String(read("_pattern")).toLowerCase() === "alternate" ? "Alternate" : "All";
+  const weeks = [...new Set(String(read("_WeekDay")).split(",").map(Number).filter(n => weekNumbers.includes(n)))];
+  return [{ day, pattern, weeks: pattern === "Alternate" ? weeks : [1, 2, 3, 4, 5], dayType: /^half/i.test(read("_DayType")) ? "Half Day" : "Full Day" }];
+});
+
+function WeekOffSection({ rows, onAdd, onRemove, onChange }) {
+  return (
+    <section className="sc-weekoff-section">
+      <div className="sc-weekoff-header">
+        <h3><FiUmbrella /> Week Off Days</h3>
+        <span>Configure week off pattern and duration for non-working days.</span>
+      </div>
+      <div className="sc-weekoff-rows">
+        {rows.map((row, index) => (
+          <div className="sc-weekoff-row" key={index}>
+            <div className="sc-weekoff-day">
+              <ShiftSelect label="Day" name={`weekOffDay-${index}`} value={row.day}
+                options={fullDays.filter(day => day === row.day || !rows.some(r => r.day === day)).map(day => ({ label: day, value: day }))}
+                onChange={value => onChange(index, "day", value)} required />
+            </div>
+            <fieldset className="sc-weekoff-pattern">
+              <legend>Pattern</legend>
+              {["All", "Alternate"].map(pattern => (
+                <label key={pattern} className={row.pattern === pattern ? "selected" : ""}>
+                  <input type="radio" name={`weekOffPattern-${index}`} checked={row.pattern === pattern}
+                    onChange={() => onChange(index, "pattern", pattern)} /> {pattern}
+                </label>
+              ))}
+            </fieldset>
+            {row.pattern === "Alternate" && (
+              <div className="sc-weekoff-occurrences">
+                <span>Week No.</span>
+                <div className="sc-days">
+                  {weekNumbers.map(week => (
+                    <button type="button" key={week} aria-pressed={row.weeks.includes(week)}
+                      className={row.weeks.includes(week) ? "selected" : ""}
+                      onClick={() => onChange(index, "weeks", row.weeks.includes(week) ? row.weeks.filter(n => n !== week) : [...row.weeks, week].sort((a,b) => a-b))}>{week}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <fieldset className="sc-weekoff-duration">
+              <legend>Duration</legend>
+              {["Full Day", "Half Day"].map(dayType => (
+                <label key={dayType} className={row.dayType === dayType ? "selected" : ""}>
+                  <input type="radio" name={`weekOffDuration-${index}`} checked={row.dayType === dayType}
+                    onChange={() => onChange(index, "dayType", dayType)} /> {dayType}
+                </label>
+              ))}
+            </fieldset>
+            <button type="button" className="sc-weekoff-delete" aria-label={`Remove ${row.day} week off`} onClick={() => onRemove(index)}><FiTrash2 /></button>
+          </div>
+        ))}
+      </div>
+      <button type="button" className="sc-weekoff-add" onClick={onAdd} disabled={rows.length >= 3}><FiPlus /> Add Week Off Day</button>
+      {rows.length >= 3 && <small>Maximum 3 week off days allowed.</small>}
+    </section>
+  );
+}
+
 
 
 
@@ -733,43 +805,83 @@ const withCurrentOption = (options, value) => value && !options.some(o => o.valu
 const mapEditForm = (record) => {
   const f = freshForm();
   if (!record) return f;
-  const legacyHours = Number(record.duration) > 0 && Number(record.duration) * 60 === durationMinutes(record.beginTime, record.endTime);
+  const get = (field, fallback = null) => getRecordValue(record, field, fallback);
+  const legacyHours = Number(get("duration")) > 0 && Number(get("duration")) * 60 === durationMinutes(get("beginTime"), get("endTime"));
   const minutes = value => Number(value ?? 0) * (legacyHours ? 60 : 1);
-  const minOT = String(record.minOT ?? 0);
-  const lunchBreak = Number(record.lunchFlag) === 1;
-  const hasRunaway = Number(record.runawayDurationMin) > 0;
+  const minOT = String(get("minOT") ?? 0);
+  const lunchBreak = toBoolean(get("lunchFlag"));
+  const hasRunaway = Number(get("runawayDurationMin")) > 0;
   return {
     ...f,
-    shiftName: record.shiftName ?? "", shiftCode: record.shiftCode ?? "",
-    workMode: record.workMode ?? "", shiftType: record.shiftType ?? "",
-    timeZone: record.shiftTimeZone ?? f.timeZone,
-    startTime: toInputTime(record.beginTime), endTime: toInputTime(record.endTime),
-    breakDuration: `${Number(record.lunchTimeMin ?? 0)} min`,
-    lunchBreak, lunchStart: lunchBreak ? toInputTime(record.lunchTime) : "",
-    workingDays: days.filter((_, i) => record[["monday","tuesday","wednesday","thursday","friday","saturday","sunday"][i]] === true),
-    organizationId: String(record.rdhR0000IID ?? ""), entityId: String(record.rdhR0000IIID ?? ""),
-    countryId: Number(record.rdhR0000XID) > 0 ? String(record.rdhR0000XID) : "",
-    applicableToAllCountries: !Number(record.rdhR0000XID),
+    shiftName: get("ShiftName") ?? "", shiftCode: get("ShiftCode") ?? "",
+    workMode: get("WorkMode") ?? "", shiftType: get("ShiftType") ?? "",
+    timeZone: get("shiftTimeZone") ?? f.timeZone,
+    startTime: toInputTime(get("beginTime")), endTime: toInputTime(get("endTime")),
+    breakDuration: `${Number(get("lunchTimeMin") ?? 0)} min`,
+    lunchBreak, lunchStart: lunchBreak ? toInputTime(get("lunchTime")) : "",
+    weekOffDays: readWeekOffDays(record),
+    workingDays: days.filter((_, i) => toBoolean(get(fullDays[i]))),
+    organizationId: String(get("rdhR0000IID") ?? ""), entityId: String(get("rdhR0000IIID") ?? ""),
+    countryId: Number(get("rdhR0000XID")) > 0 ? String(get("rdhR0000XID")) : "",
+    applicableToAllCountries: !Number(get("rdhR0000XID")),
     customSchedule: {...f.customSchedule,
-      lateMark: record.graceTimeForLateComming != null, earlyExit: record.graceTimeForEarlyGoing != null,
-      lateMarkGraceTime: record.graceTimeForLateComming ?? 0, earlyExitGraceTime: record.graceTimeForEarlyGoing ?? 0,
-      minimumWorkingHours: minutes(record.shiftDurationForHD)/60, maximumWorkingHours: minutes(record.shiftDurationForPP)/60,
-      runawayStartTime: hasRunaway ? toInputTime(record.runawayStartTime) : "", runAwayEndTime: hasRunaway ? toInputTime(record.runAwayEndTime) : "",
+      lateMark: get("graceTimeForLateComming") != null, earlyExit: get("graceTimeForEarlyGoing") != null,
+      lateMarkGraceTime: get("graceTimeForLateComming") ?? 0, earlyExitGraceTime: get("graceTimeForEarlyGoing") ?? 0,
+      minimumWorkingHours: minutes(get("shiftDurationForHD"))/60, maximumWorkingHours: minutes(get("shiftDurationForPP"))/60,
+      runawayStartTime: hasRunaway ? toInputTime(get("runawayStartTime")) : "", runAwayEndTime: hasRunaway ? toInputTime(get("runAwayEndTime")) : "",
     },
-    otSchedule: {calculationDuration: minutes(record.shiftDurationForOTCalculation), minimumOT: minOT.includes(":") ? Number(minOT.split(":")[0])*60+Number(minOT.split(":")[1]) : Number(minOT), maximumOT: minutes(record.maxOT), allowance: Number(record.shiftAllowances ?? 0)},
-    coffSchedule: Object.fromEntries(Object.entries(coffPrefixes).map(([section, prefixes]) => [section, prefixes.map((prefix,i) => ({...f.coffSchedule[section][i], enabled: Boolean(record[`${prefix}_Applicable`]), from: String(minutes(record[`${prefix}_From`])), to: String(minutes(record[`${prefix}_To`]))}))])),
+    otSchedule: {calculationDuration: minutes(get("shiftDurationForOTCalculation")), minimumOT: minOT.includes(":") ? Number(minOT.split(":")[0])*60+Number(minOT.split(":")[1]) : Number(minOT), maximumOT: minutes(get("maxOT")), allowance: Number(get("shiftAllowances") ?? 0)},
+    coffSchedule: Object.fromEntries(Object.entries(coffPrefixes).map(([section, prefixes]) => [section, prefixes.map((prefix,i) => ({...f.coffSchedule[section][i], enabled: toBoolean(get(`${prefix}_Applicable`)), from: String(minutes(get(`${prefix}_From`))), to: String(minutes(get(`${prefix}_To`)))}))])),
   };
 };
 export default function ShiftCreation({ listPath = "/admin/attendance/shiftCreation", shiftId: suppliedShiftId, onBrowseTemplates }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const editRecord = location.state?.shift ?? null;
+  const navigationRecord = location.state?.shift?.rawData ?? location.state?.shift ?? null;
   const isEdit = location.state?.isEdit === true || location.state?.mode === "edit";
-  const encryptedId = location.state?.encryptedId ?? editRecord?.rdhR0000LXXXIID_Encrypted;
-  const shiftId = location.state?.id ?? editRecord?.rdhR0000LXXXIID ?? suppliedShiftId;
+  const encryptedId = location.state?.encryptedId ?? getRecordValue(navigationRecord, "RDHR0000LXXXIID_Encrypted");
   const auth = useAuthStore();
-  const [form,setForm] = useState(() => isEdit ? mapEditForm(editRecord) : freshForm());
-  useEffect(() => { setForm(isEdit ? mapEditForm(editRecord) : freshForm()); }, [location.key, isEdit, editRecord]);
+  const [editRecord, setEditRecord] = useState(navigationRecord);
+  const [form, setForm] = useState(() => isEdit ? mapEditForm(navigationRecord) : freshForm());
+  const [loadingEdit, setLoadingEdit] = useState(isEdit);
+  const [editError, setEditError] = useState("");
+  const shiftId = getRecordValue(editRecord, "RDHR0000LXXXIID") ?? location.state?.id ?? suppliedShiftId;
+
+  useEffect(() => {
+    let active = true;
+    setEditError("");
+    setEditRecord(navigationRecord);
+    setForm(isEdit ? mapEditForm(navigationRecord) : freshForm());
+    if (!isEdit) {
+      setLoadingEdit(false);
+      return () => { active = false; };
+    }
+    if (!encryptedId) {
+      setEditError("Encrypted shift ID missing. Reopen the shift from the list.");
+      setLoadingEdit(false);
+      return () => { active = false; };
+    }
+    setLoadingEdit(true);
+    getShiftCreationById(encryptedId)
+      .then(response => {
+        if (!active) return;
+        let record = response?.data ?? response;
+        record = record?.data ?? record?.Data ?? record?.result ?? record?.Result ?? record;
+        if (Array.isArray(record)) record = record[0];
+        if (!record || typeof record !== "object" || getRecordValue(record, "ShiftName") == null) {
+          throw new Error("Shift details were not returned by the API.");
+        }
+        setEditRecord(record);
+        setForm(mapEditForm(record));
+      })
+      .catch(error => {
+        if (active) setEditError(getApiErrorMessage(error));
+      })
+      .finally(() => {
+        if (active) setLoadingEdit(false);
+      });
+    return () => { active = false; };
+  }, [location.key, isEdit, encryptedId, navigationRecord]);
   const [employees,setEmployees]=useState([]);
   const [masters,setMasters]=useState({organizations:[],entities:[],countries:[]});
   const [loadingMasters,setLoadingMasters]=useState(true);
@@ -998,14 +1110,36 @@ const workModeOverview = useMemo(() => {
 
   /* REGULAR WORKING DAYS */
 
-  const toggleDay = (day) => {
-    setForm((current) => ({
-      ...current,
-      workingDays: current.workingDays.includes(day)
-        ? current.workingDays.filter((item) => item !== day)
-        : [...current.workingDays, day],
-    }));
+  const syncWeekOffDays = (current, rows) => {
+    const working = new Set(current.workingDays);
+    current.weekOffDays.forEach(row => working.add(row.day.slice(0, 3)));
+    rows.forEach(row => {
+      const day = row.day.slice(0, 3);
+      if (row.pattern === "All" && row.dayType === "Full Day") working.delete(day);
+      else working.add(day);
+    });
+    return { ...current, weekOffDays: rows, workingDays: days.filter(day => working.has(day)) };
   };
+  const addWeekOffDay = () => setForm(current => {
+    if (current.weekOffDays.length >= 3) return current;
+    const available = fullDays.filter(day => !current.weekOffDays.some(row => row.day === day));
+    const day = available.find(day => !current.workingDays.includes(day.slice(0, 3))) ?? available[0];
+    if (!day) return current;
+    return syncWeekOffDays(current, [...current.weekOffDays, { day, pattern: "All", weeks: [...weekNumbers], dayType: "Full Day" }]);
+  });
+  const removeWeekOffDay = index => setForm(current => syncWeekOffDays(current, current.weekOffDays.filter((_, i) => i !== index)));
+  const updateWeekOffDay = (index, key, value) => setForm(current => {
+    if (key === "day" && (!fullDays.includes(value) || current.weekOffDays.some((row, i) => i !== index && row.day === value))) return current;
+    const rows = current.weekOffDays.map((row, i) => i !== index ? row : {
+      ...row, [key]: value,
+      ...(key === "pattern" ? { weeks: value === "Alternate" ? [1, 3] : [...weekNumbers] } : {})
+    });
+    return syncWeekOffDays(current, rows);
+  });
+  const toggleDay = day => setForm(current => {
+    if (current.weekOffDays.some(row => row.day.slice(0, 3) === day)) return current;
+    return { ...current, workingDays: current.workingDays.includes(day) ? current.workingDays.filter(item => item !== day) : [...current.workingDays, day] };
+  });
 
   /* TOAST */
 
@@ -1013,8 +1147,14 @@ const workModeOverview = useMemo(() => {
   const handleReset = () => { if (saving) return; setForm(isEdit ? mapEditForm(editRecord) : freshForm()); setScheduleTab("Regular Schedule"); setEmployeeSearch(""); };
   const handleList = () => { if (!saving) navigate(listPath); };
   const handlePublish = async () => {
-    if (saveLock.current) return;
+    if (saveLock.current || loadingEdit) return;
+    if (isEdit && editError) { notify(editError); return; }
     if (isEdit && (!encryptedId || !editRecord)) { notify("Shift details or encrypted ID missing. Reopen the shift from the list."); return; }
+    if (form.weekOffDays.some(row => row.pattern === "Alternate" && !row.weeks.length)) {
+      setScheduleTab("Regular Schedule");
+      notify("Select at least one week number for each alternate week off.");
+      return;
+    }
     const result = shiftCreationSchema.safeParse(form);
     if (!result.success) {
       const issue = result.error.issues[0];
@@ -1042,7 +1182,8 @@ const workModeOverview = useMemo(() => {
       if (isEdit) {
         // Preserve backend fields that have no editable control in this form.
         for (const key of ["isDeactivated", "shiftFlag", "punchBeginDuration", "lunchTimePunchBegin", "coffValidDays", "allowShortLeaveWithoutLunchDinner", "isMaxOT"]) {
-          if (editRecord[key] != null) payload[key] = editRecord[key];
+          const value = getRecordValue(editRecord, key);
+          if (value != null) payload[key] = value;
         }
         await updateShiftCreation(encryptedId, payload);
       } else { await createShiftCreation(payload); }
@@ -1063,13 +1204,15 @@ const workModeOverview = useMemo(() => {
     );
 
   /* RENDER */
-const pageLoading = loadingMasters || loadingEmployees;
+const pageLoading = loadingEdit || loadingMasters || loadingEmployees;
 
 if (pageLoading) {
   return (
     <PageLoader
       message={
-        loadingMasters
+        loadingEdit
+          ? "Loading saved shift details..."
+          : loadingMasters
           ? "Loading shift configuration..."
           : "Loading assigned employees..."
       }
@@ -1078,6 +1221,7 @@ if (pageLoading) {
 }
   return (
     <div className="shift-creation-page">
+      {editError && <p role="alert">{editError} Reopen the shift from the list before updating.</p>}
       {toast && (
         <Toast key={toast.id} message={toast.message} type={toast.type} duration={5000} onClose={() => setToast(null)} />
       )}
@@ -1261,7 +1405,7 @@ if (pageLoading) {
               <div className="sc-regular-schedule-wrapper">
                 <ScheduleHeader
                   title="Regular Schedule Settings"
-                  description="Configure working hours, working days and break duration."
+                  description="Configure working hours, working days, week off and break duration."
                   icon={FiCalendar}
                 />
 
@@ -1314,6 +1458,9 @@ if (pageLoading) {
                                   : ""
                               }
                               onClick={() => toggleDay(day)}
+                              disabled={form.weekOffDays.some(row => row.day.slice(0, 3) === day)}
+                              aria-pressed={form.workingDays.includes(day)}
+                              title={form.weekOffDays.some(row => row.day.slice(0, 3) === day) ? "Managed in Week Off Days" : undefined}
                             >
                               {day}
                             </button>
@@ -1321,6 +1468,8 @@ if (pageLoading) {
                         </div>
                       </Field>
                     </div>
+
+                    <WeekOffSection rows={form.weekOffDays} onAdd={addWeekOffDay} onRemove={removeWeekOffDay} onChange={updateWeekOffDay} />
 
                     <div className="sc-break-row">
                       <ShiftSelect
@@ -1659,7 +1808,7 @@ if (pageLoading) {
             type="button"
             variant="primary"
             onClick={handlePublish}
-            disabled={saving}
+            disabled={saving || loadingEdit || Boolean(editError)}
           >
             <FiSave />
             {saving ? "Saving..." : isEdit ? "Update" : "Save"}
