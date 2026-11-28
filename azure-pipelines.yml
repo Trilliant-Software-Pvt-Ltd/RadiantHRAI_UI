@@ -35,7 +35,7 @@ stages:
     - script: npm run build
       displayName: Build React Application
       env:
-        VITE_API_BASE_URL_LOGIN: 'http://192.168.3.2:8183/api/'
+        VITE_API_BASE_URL_LOGIN: 'https://aiapi.radianthr.in/api'
         VITE_API_BASE_URL_MODULES: 'http://192.168.3.2:8185/api'
         VITE_API_BASE_URL_ONBOARDING: 'http://192.168.3.2:8187/api'
         VITE_API_BASE_URL: 'http://192.168.3.2:8189/api'
